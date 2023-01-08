@@ -81,11 +81,7 @@ class MainActivity : AppCompatActivity() {
         Log.v("AAA", "FOO")
         Log.v("ZZZ", extraUri.toString())
         Log.v("ZZZ", extraUri.toString())
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-            putExtra(DocumentsContract.EXTRA_INITIAL_URI, extraUri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-        }
+
 
 
         val list = contentResolver.persistedUriPermissions
@@ -117,18 +113,24 @@ class MainActivity : AppCompatActivity() {
                 Log.v("ZZ3", "docId: " + docId + ", name: " + name + ", mime: " + mime)
             }
         } catch(e: Exception) {
-            launcher.launch(intent)
+            //launcher.launch(intent)
         }
 
 
-//
+
+        var ok: Boolean = false
         try {
             Log.v("ZZZ", "attempt1")
             val files = DocumentFile.fromTreeUri(this, extraUri)
             for (file in files!!.listFiles()) {
-                Log.v("ZZZ", file.name.toString())
+                Log.v("OOO", file.name.toString())
+                ok = true
             }
         } catch(e: Exception) {
+
+        }
+
+        if (!ok) {
             val intent2 = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
                 // Optionally, specify a URI for the directory that should be opened in
                 // the system file picker when it loads.
@@ -137,6 +139,14 @@ class MainActivity : AppCompatActivity() {
                 addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
             }
             startActivityForResult(intent2, 1)
+
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                putExtra(DocumentsContract.EXTRA_INITIAL_URI, extraUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            }
+
+            launcher.launch(intent)
         }
 
 //        try {
