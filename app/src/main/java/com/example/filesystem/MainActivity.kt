@@ -1,13 +1,14 @@
 package com.example.filesystem
 
+import android.Manifest
 import android.app.Activity
-import android.content.ContentResolver
+import android.content.ContentProvider
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.os.Process.myPid
-import android.os.Process.myUid
+import android.os.Environment
 import android.provider.DocumentsContract
 import android.util.Log
 import android.view.Menu
@@ -16,7 +17,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import androidx.documentfile.provider.DocumentFile
@@ -41,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         MyFilesListViewModelFactory(this)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
@@ -69,34 +73,19 @@ class MainActivity : AppCompatActivity() {
             fabOnClick()
         }
 
-        /* allow the user to pick a directory subtree for storage */
-        // https://commonsware.com/community/t/is-simple-case-of-creating-multiple-files-and-giving-the-user-an-easy-access-to-them-is-impossible-with-stored-access-framework/630
-        // http://android-er.blogspot.com/2015/09/example-of-using-intentactionopendocume.html
-        val extraInitialUri: Uri = "content://com.android.externalstorage.documents/tree/primary:Documents/FileSystem".toUri()
+        //val extraUri = "Documents/MyFiles"
+        //val extraUri: Uri = "content://com.android.externalstorage.documents/tree/primary:Documents/MyFiles".toUri()
+        val extraUri: Uri = "content://com.android.externalstorage.documents/tree/home:MyFiles".toUri()
+        //val extraUri = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/primary:Documents/MyFiles").toUri()
 
-        // https://developer.android.com/topic/security/risks/content-resolver
-        // https://stackoverflow.com/questions/6307793/how-do-i-check-the-permission-of-an-uri-that-has-been-send-with-an-intent
-
-
+        Log.v("AAA", "FOO")
+        Log.v("ZZZ", extraUri.toString())
+        Log.v("ZZZ", extraUri.toString())
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-            putExtra(DocumentsContract.EXTRA_INITIAL_URI, extraInitialUri)
-            // https://stackoverflow.com/questions/55669688/storage-access-framework-keep-file-permissions-after-revoke-tree-permissions
-            addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, extraUri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            //type = "*/*"
+            addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
         }
-
-        Log.v("ZZZ", "1")
-        //intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, extraInitialUri)
-        Log.v("ZZZ", "2")
-
-        //val pkg = "com.example.filesystem"
-        //grantUriPermission(pkg, extraInitialUri, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-        //grantUriPermission(pkg, extraInitialUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        //grantUriPermission(pkg, extraInitialUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-
-        resultLauncher.launch(intent)
 
 
         val list = contentResolver.persistedUriPermissions
@@ -105,123 +94,157 @@ class MainActivity : AppCompatActivity() {
             Log.v("w",p.uri.toString())
             Log.v("w",p.isReadPermission.toString())
             Log.v("w",p.isWritePermission.toString())
+
         }
 
-        val fs: Uri = "content://com.android.externalstorage.documents/tree/primary:Documents/FileSystem".toUri()
-        val pkg = "com.android.externalstorage.documents/tree/primary:Documents/FileSystem"
-        grantUriPermission(pkg, fs, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-        grantUriPermission(pkg, fs, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        //grantUriPermission(pkg, fs, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        val pkg = "com.android.externalstorage"
+        grantUriPermission(pkg, extraUri, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+        grantUriPermission(pkg, extraUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
 
-        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-            fs,
-            DocumentsContract.getTreeDocumentId(fs)
-        )
-
-        // https://stackoverflow.com/questions/64271446/securityexception-on-android-q-for-acessing-externalstorage-with-action-open-doc
-        // CommonsWare suggests "Call DocumentFile.fromTreeUri()"
-
-        val docfile = DocumentFile.fromTreeUri(this, childrenUri)
-        for (file in docfile!!.listFiles()) {
-            Log.v("ZZZ", file.name!!)
-        }
-
-
-        var fields = arrayOf<String>(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE)
-        var cursor = contentResolver.query(childrenUri, fields, null, null, null)
-//
-        // directions to get all files recursively
-        // add folder, e.g. Documents/FileSystem, or allow user to
-        // https://stackoverflow.com/questions/64408944/documentscontracts-buildchilddocumentsuriusingtreeuri-documentscontract-gettr
-        while (cursor!!.moveToNext()) {
-            var docId = cursor.getString(0)
-            var name = cursor.getString(1)
-            var mime = cursor.getString(2)
-            Log.v("ZZZ", "docId: " + docId + ", name: " + name + ", mime: " + mime)
-            // docId: primary:Documents/bar.txt, name: bar.txt, mime: text/plain
-            //if (isDirectory(mime)) {
-            //    final Uri newNode = DocumentsContract.buildChildDocumentsUriUsingTree(rootUri, docId);
-            //    dirNodes.add(newNode);
-            //}
-        }
-
-        //2023-01-08 03:02:09.005 6624-6624/com.example.filesystem V/w: UriPermission {uri=content://com.android.externalstorage.documents/tree/primary%3ADocuments%2FFileSystem, modeFlags=3, persistedTime=1673157389384}
-        //    2023-01-08 03:02:09.006 6624-6624/com.example.filesystem V/w: content://com.android.externalstorage.documents/tree/primary%3ADocuments%2FFileSystem
-        //    2023-01-08 03:02:09.006 6624-6624/com.example.filesystem V/w: true
-        //    2023-01-08 03:02:09.006 6624-6624/com.example.filesystem V/w: true
-
-//        val perm = checkUriPermission(
-//            extraInitialUri,
-//            myPid(),
-//            myUid(),
-//            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-//        )
-//        if (perm == PackageManager.PERMISSION_DENIED) {
-//            Toast.makeText(
-//                applicationContext,
-//                "No permissions", Toast.LENGTH_LONG
-//            ).show()
-//            finish()
-//        }
-//        if (perm == PackageManager.PERMISSION_GRANTED) {
-//            Toast.makeText(
-//                applicationContext,
-//                "Have permissions", Toast.LENGTH_LONG
-//            ).show()
-//            finish()
-//        }
-
-        Log.v("ZZZ", "zzz")
-    }
-
-    /* ActivityResult class for pick directory subtree */
-    // https://stackoverflow.com/questions/72246437/how-to-use-action-open-document-tree-without-startactivityforresult
-    // Suggests to use ActivityResultContracts.OpenDocumentTree
-    // https://stackoverflow.com/questions/70869063/android-open-document-tree-with-activity-result-contract
-    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        Log.v("ZZZ", "3")
-        // this is the activity callback
-        // https://developer.android.com/training/basics/intents/result#kotlin
-
-        val data: Intent? = result.data
-        val uri: Uri? = data?.data
-        Log.v("ZZZ", "permissions taken")
-
-
-
-        if (result.resultCode == Activity.RESULT_OK) {
-            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-                uri,
-                DocumentsContract.getTreeDocumentId(uri)
+                    Log.v("ZZZ", "attempt2")
+        try {
+            var fields = arrayOf<String>(
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_MIME_TYPE
             )
-
-            //val pkg = "com.example.filesystem"
-            //grantUriPermission(pkg, uri, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-            //grantUriPermission(pkg, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            //grantUriPermission(pkg, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-
-            contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-
-            var fields = arrayOf<String>(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE)
-            var cursor = contentResolver.query(childrenUri, fields, null, null, null)
-
-            // directions to get all files recursively
-            // add folder, e.g. Documents/FileSystem, or allow user to
-            // https://stackoverflow.com/questions/64408944/documentscontracts-buildchilddocumentsuriusingtreeuri-documentscontract-gettr
+            var cursor = contentResolver.query(extraUri, fields, null, null, null)
             while (cursor!!.moveToNext()) {
                 var docId = cursor.getString(0)
                 var name = cursor.getString(1)
                 var mime = cursor.getString(2)
-                Log.v("ZZZ", "docId: " + docId + ", name: " + name + ", mime: " + mime)
-                // docId: primary:Documents/bar.txt, name: bar.txt, mime: text/plain
-                //if (isDirectory(mime)) {
-                //    final Uri newNode = DocumentsContract.buildChildDocumentsUriUsingTree(rootUri, docId);
-                //    dirNodes.add(newNode);
-                //}
+                Log.v("ZZ3", "docId: " + docId + ", name: " + name + ", mime: " + mime)
+            }
+        } catch(e: Exception) {
+            launcher.launch(intent)
+        }
+
+
+//
+        try {
+            Log.v("ZZZ", "attempt1")
+            val files = DocumentFile.fromTreeUri(this, extraUri)
+            for (file in files!!.listFiles()) {
+                Log.v("ZZZ", file.name.toString())
+            }
+        } catch(e: Exception) {
+            val intent2 = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                // Optionally, specify a URI for the directory that should be opened in
+                // the system file picker when it loads.
+                putExtra(DocumentsContract.EXTRA_INITIAL_URI, extraUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            }
+            startActivityForResult(intent2, 1)
+        }
+
+//        try {
+//            Log.v("ZZZ", "attempt2")
+//            var fields = arrayOf<String>(
+//                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+//                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+//                DocumentsContract.Document.COLUMN_MIME_TYPE
+//            )
+//            var cursor = contentResolver.query(extraUri, fields, null, null, null)
+//            while (cursor!!.moveToNext()) {
+//                var docId = cursor.getString(0)
+//                var name = cursor.getString(1)
+//                var mime = cursor.getString(2)
+//                Log.v("ZZ3", "docId: " + docId + ", name: " + name + ", mime: " + mime)
+//            }
+//        } catch (e: Exception) {
+//
+//            // Choose a directory using the system's file picker.
+//            val intent2 = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+//                // Optionally, specify a URI for the directory that should be opened in
+//                // the system file picker when it loads.
+//                putExtra(DocumentsContract.EXTRA_INITIAL_URI, extraUri)
+//                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+//                addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+//
+//
+//            }
+//
+//            startActivityForResult(intent2, 1)
+//        }
+
+
+
+
+
+
+
+
+
+
+
+    }
+
+
+
+    override fun onActivityResult(
+        requestCode: Int, resultCode: Int, resultData: Intent?) {
+        super.onActivityResult(requestCode, resultCode, resultData)
+        Log.v("ZZZ", "attempting")
+        if (requestCode == 1
+            && resultCode == Activity.RESULT_OK) {
+
+            Log.v("ZZZ", "onactivityresult")
+            // The result data contains a URI for the document or directory that
+            // the user selected.
+            resultData?.data?.also { uri ->
+                // Perform operations on the document using its URI.
+
+                val contentResolver = applicationContext.contentResolver
+
+                Log.v("ZZZ", "taken")
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+// Check for the freshest data.
+                contentResolver.takePersistableUriPermission(uri, takeFlags)
+
+//                var fields = arrayOf<String>(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE)
+//                var cursor = contentResolver.query(uri, fields, null, null, null)
+//                while (cursor!!.moveToNext()) {
+//                    var docId = cursor.getString(0)
+//                    var name = cursor.getString(1)
+//                    var mime = cursor.getString(2)
+//                    Log.v("ZZ5", "docId: " + docId + ", name: " + name + ", mime: " + mime)
+//                }
             }
 
+
+        }
+    }
+
+
+
+
+
+    var launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data: Intent? = result.data
+        val uri: Uri? = data?.data
+
+        Log.v("ZZZ","attempting2")
+
+        if (result.resultCode == Activity.RESULT_OK) {
+
+            contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
+            val files = DocumentFile.fromTreeUri(this, uri)
+            for (file in files!!.listFiles()) {
+                Log.v("ZZ1", file.name.toString())
+            }
+//            var fields = arrayOf<String>(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE)
+//            var cursor = contentResolver.query(uri, fields, null, null, null)
+//            while (cursor!!.moveToNext()) {
+//                var docId = cursor.getString(0)
+//                var name = cursor.getString(1)
+//                var mime = cursor.getString(2)
+//                Log.v("ZZZ", "docId: " + docId + ", name: " + name + ", mime: " + mime)
+//            }
         }
     }
 
