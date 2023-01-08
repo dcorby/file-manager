@@ -20,7 +20,7 @@ echo ".schema tablename"
 echo "lsof -n -i:5037"
 echo "lsof -i:5554"
 
-dmc7z@dmc7z-Yoga-6-13ALC6:~/AndroidStudioProjects/FileSystem$ kill -9 125114
-dmc7z@dmc7z-Yoga-6-13ALC6:~/AndroidStudioProjects/FileSystem$ adb kill-server
-dmc7z@dmc7z-Yoga-6-13ALC6:~/AndroidStudioProjects/FileSystem$ adb start-server
+echo "kill -9 125114"
+echo "adb kill-server"
+echo "adb start-server"
 

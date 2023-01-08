@@ -1,10 +1,13 @@
 package com.example.filesystem
 
 import android.app.Activity
+import android.content.ContentResolver
 import android.content.Intent
-import android.database.Cursor
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Process.myPid
+import android.os.Process.myUid
 import android.provider.DocumentsContract
 import android.util.Log
 import android.view.Menu
@@ -16,6 +19,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
+import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -65,63 +69,140 @@ class MainActivity : AppCompatActivity() {
             fabOnClick()
         }
 
-        /* get full permissions for external storage from user */
-        // https://developer.android.com/reference/android/provider/Settings#ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION
-//        val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
-//        startActivity(
-//            Intent(
-//                Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-//                uri
-//            )
-//        )
-
-//        var canAccessExternalStorage: Boolean = false
-//        if (android.os.Build.VERSION.SDK_INT >= 30) {
-//            if (Environment.isExternalStorageManager()) {
-//                canAccessExternalStorage = true
-//            }
-//        } else {
-//            canAccessExternalStorage = true
-//        }
-//
-//        if (canAccessExternalStorage) {
-//
-//        }
-
         /* allow the user to pick a directory subtree for storage */
         // https://commonsware.com/community/t/is-simple-case-of-creating-multiple-files-and-giving-the-user-an-easy-access-to-them-is-impossible-with-stored-access-framework/630
         // http://android-er.blogspot.com/2015/09/example-of-using-intentactionopendocume.html
-        //val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        // content://com.android.externalstorage.documents/tree/primary%3ADocuments
+        val extraInitialUri: Uri = "content://com.android.externalstorage.documents/tree/primary:Documents/FileSystem".toUri()
+
+        // https://developer.android.com/topic/security/risks/content-resolver
+        // https://stackoverflow.com/questions/6307793/how-do-i-check-the-permission-of-an-uri-that-has-been-send-with-an-intent
+
+
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-            // Optionally, specify a URI for the directory that should be opened in
-            // the system file picker when it loads.
-            // "You can only use an uri that you obtained before with ACTION_OPEN_DOCUMENT"
-            val pickerInitialUri: Uri = "/Documents".toUri()
-            putExtra(DocumentsContract.EXTRA_INITIAL_URI, "content://com.android.externalstorage.documents/tree/primary:Documents")
-            //putExtra(DocumentsContract.EXTRA_INITIAL_URI, "Documents")
+            putExtra(DocumentsContract.EXTRA_INITIAL_URI, extraInitialUri)
+            // https://stackoverflow.com/questions/55669688/storage-access-framework-keep-file-permissions-after-revoke-tree-permissions
+            addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            //type = "*/*"
         }
-        val pickerInitialUri: Uri = "/Documents".toUri()
-        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, "content://com.android.externalstorage.documents/tree/primary:Documents")
-        //intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, "Documents")
+
+        Log.v("ZZZ", "1")
+        //intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, extraInitialUri)
+        Log.v("ZZZ", "2")
+
+        //val pkg = "com.example.filesystem"
+        //grantUriPermission(pkg, extraInitialUri, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+        //grantUriPermission(pkg, extraInitialUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        //grantUriPermission(pkg, extraInitialUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
         resultLauncher.launch(intent)
+
+
+        val list = contentResolver.persistedUriPermissions
+        for (p in list) {
+            Log.v("w",p.toString())
+            Log.v("w",p.uri.toString())
+            Log.v("w",p.isReadPermission.toString())
+            Log.v("w",p.isWritePermission.toString())
+        }
+
+        val fs: Uri = "content://com.android.externalstorage.documents/tree/primary:Documents/FileSystem".toUri()
+        val pkg = "com.android.externalstorage.documents/tree/primary:Documents/FileSystem"
+        grantUriPermission(pkg, fs, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+        grantUriPermission(pkg, fs, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        //grantUriPermission(pkg, fs, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
+
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
+            fs,
+            DocumentsContract.getTreeDocumentId(fs)
+        )
+
+        // https://stackoverflow.com/questions/64271446/securityexception-on-android-q-for-acessing-externalstorage-with-action-open-doc
+        // CommonsWare suggests "Call DocumentFile.fromTreeUri()"
+
+        val docfile = DocumentFile.fromTreeUri(this, childrenUri)
+        for (file in docfile!!.listFiles()) {
+            Log.v("ZZZ", file.name!!)
+        }
+
+
+        var fields = arrayOf<String>(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE)
+        var cursor = contentResolver.query(childrenUri, fields, null, null, null)
+//
+        // directions to get all files recursively
+        // add folder, e.g. Documents/FileSystem, or allow user to
+        // https://stackoverflow.com/questions/64408944/documentscontracts-buildchilddocumentsuriusingtreeuri-documentscontract-gettr
+        while (cursor!!.moveToNext()) {
+            var docId = cursor.getString(0)
+            var name = cursor.getString(1)
+            var mime = cursor.getString(2)
+            Log.v("ZZZ", "docId: " + docId + ", name: " + name + ", mime: " + mime)
+            // docId: primary:Documents/bar.txt, name: bar.txt, mime: text/plain
+            //if (isDirectory(mime)) {
+            //    final Uri newNode = DocumentsContract.buildChildDocumentsUriUsingTree(rootUri, docId);
+            //    dirNodes.add(newNode);
+            //}
+        }
+
+        //2023-01-08 03:02:09.005 6624-6624/com.example.filesystem V/w: UriPermission {uri=content://com.android.externalstorage.documents/tree/primary%3ADocuments%2FFileSystem, modeFlags=3, persistedTime=1673157389384}
+        //    2023-01-08 03:02:09.006 6624-6624/com.example.filesystem V/w: content://com.android.externalstorage.documents/tree/primary%3ADocuments%2FFileSystem
+        //    2023-01-08 03:02:09.006 6624-6624/com.example.filesystem V/w: true
+        //    2023-01-08 03:02:09.006 6624-6624/com.example.filesystem V/w: true
+
+//        val perm = checkUriPermission(
+//            extraInitialUri,
+//            myPid(),
+//            myUid(),
+//            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+//        )
+//        if (perm == PackageManager.PERMISSION_DENIED) {
+//            Toast.makeText(
+//                applicationContext,
+//                "No permissions", Toast.LENGTH_LONG
+//            ).show()
+//            finish()
+//        }
+//        if (perm == PackageManager.PERMISSION_GRANTED) {
+//            Toast.makeText(
+//                applicationContext,
+//                "Have permissions", Toast.LENGTH_LONG
+//            ).show()
+//            finish()
+//        }
+
+        Log.v("ZZZ", "zzz")
     }
 
-    // "Persist Permissions" - so user doesn't have to select everytime
-    // "To preserve access to files across device restarts and create a better user experience, your app can "take" the persistable URI permission grant that the system offers, as shown in the following code snippet:"
-    // https://developer.android.com/training/data-storage/shared/documents-files#persist-permissions
-
     /* ActivityResult class for pick directory subtree */
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    // https://stackoverflow.com/questions/72246437/how-to-use-action-open-document-tree-without-startactivityforresult
+    // Suggests to use ActivityResultContracts.OpenDocumentTree
+    // https://stackoverflow.com/questions/70869063/android-open-document-tree-with-activity-result-contract
+    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.v("ZZZ", "3")
+        // this is the activity callback
+        // https://developer.android.com/training/basics/intents/result#kotlin
+
+        val data: Intent? = result.data
+        val uri: Uri? = data?.data
+        Log.v("ZZZ", "permissions taken")
+
+
+
         if (result.resultCode == Activity.RESULT_OK) {
-            // this works and prompts user to select a folder
-            val data: Intent? = result.data
-            val uri: Uri? = data?.data
-            Log.v("ZZZ", uri.toString())
             val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
                 uri,
                 DocumentsContract.getTreeDocumentId(uri)
             )
+
+            //val pkg = "com.example.filesystem"
+            //grantUriPermission(pkg, uri, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+            //grantUriPermission(pkg, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            //grantUriPermission(pkg, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
+            contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
 
             var fields = arrayOf<String>(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE)
             var cursor = contentResolver.query(childrenUri, fields, null, null, null)
