@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
         //val extraUri = "Documents/MyFiles"
         //val extraUri: Uri = "content://com.android.externalstorage.documents/tree/primary:Documents/MyFiles".toUri()
-        val extraUri: Uri = "content://com.android.externalstorage.documents/tree/home:MyFiles".toUri()
+        val extraUri: Uri = "content://com.android.externalstorage.documents/tree/home:MyFiles/".toUri()
         //val extraUri = (Environment.getExternalStorageDirectory().getAbsolutePath() + "/primary:Documents/MyFiles").toUri()
 
         Log.v("AAA", "FOO")
