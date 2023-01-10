@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
-
+    android:id="@+id/nav_graph">
+    <!-- app:startDestination="@id/InitFragment" -->
+    <!-- xmlns:app="http://schemas.android.com/apk/res-auto" -->
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="com.example.filesystem.FirstFragment"
-        android:label="first fragment label"
-        tools:layout="@layout/fragment_first">
+        android:id="@+id/InitFragment"
+        android:name="com.example.filesystem.InitFragment"
+        android:label="init fragment label"
+        tools:layout="@layout/fragment_init">
     </fragment>
 
 </navigation>
