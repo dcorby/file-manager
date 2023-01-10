@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph">
-    <!-- app:startDestination="@id/InitFragment" -->
-    <!-- xmlns:app="http://schemas.android.com/apk/res-auto" -->
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/InitFragment">
+
     <fragment
         android:id="@+id/InitFragment"
         android:name="com.example.filesystem.InitFragment"
         android:label="init fragment label"
         tools:layout="@layout/fragment_init">
+    </fragment>
+
+    <fragment
+        android:id="@+id/RootFragment"
+        android:name="com.example.filesystem.RootFragment"
+        android:label="root fragment label"
+        tools:layout="@layout/fragment_root">
     </fragment>
 
 </navigation>

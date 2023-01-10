@@ -2,7 +2,7 @@ package com.example.filesystem.data
 
 import androidx.annotation.DrawableRes
 
-data class MyFile(
+data class SanFile(
     val id: Long,
     val name: String,
     @DrawableRes

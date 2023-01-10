@@ -4,49 +4,49 @@ import android.content.res.Resources
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 
-/* Handles operations on myFilesLiveData and holds details about it. */
+/* Handles operations on sanFilesLiveData and holds details about it. */
 class DataSource(resources: Resources) {
-    private val initialMyFilesList = myFilesList(resources)
-    private val myFilesLiveData = MutableLiveData(initialMyFilesList)
+    private val initialSanFilesList = sanFilesList(resources)
+    private val sanFilesLiveData = MutableLiveData(initialSanFilesList)
 
-    /* Adds myFile to liveData and posts value. */
-    fun addMyFile(myFile: MyFile) {
-        val currentList = myFilesLiveData.value
+    /* Adds sanFile to liveData and posts value. */
+    fun addSanFile(sanFile: SanFile) {
+        val currentList = sanFilesLiveData.value
         if (currentList == null) {
-            myFilesLiveData.postValue(listOf(myFile))
+            sanFilesLiveData.postValue(listOf(sanFile))
         } else {
             val updatedList = currentList.toMutableList()
-            updatedList.add(0, myFile)
-            myFilesLiveData.postValue(updatedList)
+            updatedList.add(0, sanFile)
+            sanFilesLiveData.postValue(updatedList)
         }
     }
 
-    /* Removes myFile from liveData and posts value. */
-    fun removeMyFile(myFile: MyFile) {
-        val currentList = myFilesLiveData.value
+    /* Removes sanFile from liveData and posts value. */
+    fun removeSanFile(sanFile: SanFile) {
+        val currentList = sanFilesLiveData.value
         if (currentList != null) {
             val updatedList = currentList.toMutableList()
-            updatedList.remove(myFile)
-            myFilesLiveData.postValue(updatedList)
+            updatedList.remove(sanFile)
+            sanFilesLiveData.postValue(updatedList)
         }
     }
 
-    /* Returns myFile given an ID. */
-    fun getMyFileForId(id: Long): MyFile? {
-        myFilesLiveData.value?.let { myFiles ->
-            return myFiles.firstOrNull{ it.id == id }
+    /* Returns sanFile given an ID */
+    fun getSanFileForId(id: Long): SanFile? {
+        sanFilesLiveData.value?.let { sanFiles ->
+            return sanFiles.firstOrNull{ it.id == id }
         }
         return null
     }
 
-    fun getMyFilesList(): LiveData<List<MyFile>> {
-        return myFilesLiveData
+    fun getSanFilesList(): LiveData<List<SanFile>> {
+        return sanFilesLiveData
     }
 
-    /* Returns a random myFile asset for myFiles that are added. */
-    fun getRandomMyFileImageAsset(): Int? {
-        val randomNumber = (initialMyFilesList.indices).random()
-        return initialMyFilesList[randomNumber].image
+    /* Returns a random sanFile asset for sanFiles that are added. */
+    fun getRandomSanFileImageAsset(): Int? {
+        val randomNumber = (initialSanFilesList.indices).random()
+        return initialSanFilesList[randomNumber].image
     }
 
     companion object {

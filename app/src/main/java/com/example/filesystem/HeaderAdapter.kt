@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.R
 
-/* A list always displaying one element: the number of myfiles. */
+/* A list always displaying one element: the number of sanfiles. */
 
 class HeaderAdapter: RecyclerView.Adapter<HeaderAdapter.HeaderViewHolder>() {
     private var myFileCount: Int = 0
