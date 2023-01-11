@@ -19,6 +19,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.R
 import com.example.filesystem.databinding.FragmentFolderBinding
 
 /**
@@ -39,7 +40,15 @@ class FolderFragment : Fragment() {
     // https://stackoverflow.com/questions/54313453/how-to-instantiate-viewmodel-in-androidx
     // Initialize VM as Class Instance Val
     private val sanFilesViewModel: SanFilesViewModel by viewModels()
+    // this is functionally equal to:
+    // private val sanFilesViewModel by lazy {
+    //     ViewModelProvider(this).get(SanFilesViewModel::class.java)
+    // }
+    // ... which internally will use ViewModelProvider and scope your ViewModel to your Activity
+
+    private var headerAdapter: HeaderAdapter? = null
     private var sanFilesAdapter: SanFilesAdapter? = null
+    private var destination: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,9 +62,9 @@ class FolderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val destination = "/" + (arguments?.getString("destination", "") ?: "")
+        destination = "/" + (arguments?.getString("destination", "") ?: "")
 
-        val headerAdapter = HeaderAdapter()
+        headerAdapter = HeaderAdapter()
         sanFilesAdapter = SanFilesAdapter { sanFile ->
             adapterOnClick(sanFile)
         }
@@ -86,11 +95,40 @@ class FolderFragment : Fragment() {
     }
 
     private fun observeCurrent() {
+
+
+        val mutableList:MutableList<SanFile> = ArrayList()
+        mutableList.add(
+            SanFile(
+                id = 1,
+                name = "SanFile1 (file)",
+                image = R.drawable.abc_btn_default_mtrl_shape,
+                description = "SanFile1 description"
+            )
+        )
+        mutableList.add(
+            SanFile(
+                id = 2,
+                name = "SanFile2 (file)",
+                image = R.drawable.abc_btn_default_mtrl_shape,
+                description = "SanFile2 description"
+            )
+        )
+        mutableList.add(
+            SanFile(
+                id = 3,
+                name = "SanFile3 (file)",
+                image = R.drawable.abc_btn_default_mtrl_shape,
+                description = "SanFile3 description"
+            )
+        )
+        
         // Observe the current directory
-        sanFilesViewModel.getSanFiles().observe(viewLifecycleOwner, Observer {
+        sanFilesViewModel.initSanFiles(mutableList).observe(viewLifecycleOwner, Observer {
             it?.let {
+                Log.v("File-San", "Observing")
                 sanFilesAdapter!!.submitList(it as MutableList<SanFile>)
-                //headerAdapter.updateHeader(...)
+                headerAdapter!!.updateSanFileDestination(destination!!)
             }
         })
     }
