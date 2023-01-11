@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -73,13 +74,14 @@ class FolderFragment : Fragment() {
         recyclerView.adapter = concatAdapter
 
         val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
-        val root: String? = settings.getString("root", null)
+        destination = settings.getString("root", null)
 
         val uriPermissions = requireActivity().contentResolver.persistedUriPermissions
         var havePermissions = false
+        // TODO - check that destination contains p.uri, not ==
         for (p in uriPermissions) {
             Log.v("File-San", "uriPermission=${p.uri.toString()} (r=${p.isReadPermission}/w=${p.isWritePermission})")
-            if (p.uri.toString() == root && p.isReadPermission && p.isWritePermission) {
+            if (p.uri.toString() == destination && p.isReadPermission && p.isWritePermission) {
                 havePermissions = true
             }
         }
@@ -96,37 +98,43 @@ class FolderFragment : Fragment() {
 
     private fun observeCurrent() {
 
+        // Difference between mutableList and arrayList:
+        // https://stackoverflow.com/questions/43114367/difference-between-arrayliststring-and-mutablelistofstring-in-kotlin
+        val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destination!!.toUri())
 
-        val mutableList:MutableList<SanFile> = ArrayList()
-        mutableList.add(
-            SanFile(
-                id = 1,
-                name = "SanFile1 (file)",
-                image = R.drawable.abc_btn_default_mtrl_shape,
-                description = "SanFile1 description"
-            )
-        )
-        mutableList.add(
-            SanFile(
-                id = 2,
-                name = "SanFile2 (file)",
-                image = R.drawable.abc_btn_default_mtrl_shape,
-                description = "SanFile2 description"
-            )
-        )
-        mutableList.add(
-            SanFile(
-                id = 3,
-                name = "SanFile3 (file)",
-                image = R.drawable.abc_btn_default_mtrl_shape,
-                description = "SanFile3 description"
-            )
-        )
-        
+//        val mutableList:MutableList<SanFile> = ArrayList()
+//        mutableList.add(
+//            SanFile(
+//                id = 1,
+//                name = "SanFile1 (file)",
+//                image = R.drawable.abc_btn_default_mtrl_shape,
+//                description = "SanFile1 description"
+//            )
+//        )
+//        mutableList.add(
+//            SanFile(
+//                id = 2,
+//                name = "SanFile2 (file)",
+//                image = R.drawable.abc_btn_default_mtrl_shape,
+//                description = "SanFile2 description"
+//            )
+//        )
+//        mutableList.add(
+//            SanFile(
+//                id = 3,
+//                name = "SanFile3 (file)",
+//                image = R.drawable.abc_btn_default_mtrl_shape,
+//                description = "SanFile3 description"
+//            )
+//        )
+
         // Observe the current directory
         sanFilesViewModel.initSanFiles(mutableList).observe(viewLifecycleOwner, Observer {
             it?.let {
                 Log.v("File-San", "Observing")
+
+
+
                 sanFilesAdapter!!.submitList(it as MutableList<SanFile>)
                 headerAdapter!!.updateSanFileDestination(destination!!)
             }
@@ -147,6 +155,7 @@ class FolderFragment : Fragment() {
 
         if (requestCode == OPEN_DOCUMENT_TREE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val uri: Uri? = data?.data
+            destination = uri.toString()
             val contentResolver = requireActivity().contentResolver
             contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
