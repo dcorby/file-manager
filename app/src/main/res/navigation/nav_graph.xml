@@ -11,6 +11,9 @@
         android:name="com.example.filesystem.InitFragment"
         android:label="init fragment label"
         tools:layout="@layout/fragment_init">
+        <action
+            android:id="@+id/action_InitFragment_to_FolderFragment"
+            app:destination="@id/FolderFragment" />
     </fragment>
 
     <fragment

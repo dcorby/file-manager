@@ -21,6 +21,16 @@ const val SANFILE_ID = "sanfile id"
 // https://www.digitalocean.com/community/tutorials/android-livedata
 // https://github.com/android/views-widgets-samples/blob/main/RecyclerViewKotlin/app/src/main/java/com/example/recyclersample/flowerList/FlowersListViewModel.kt
 
+/*
+TODO
+Print current directory in header adapter
+Make file selectable in listview (highlighted)
+Add a menu of operations at the bottom (delete, copy, move, rename, open (w/ select application), properties)
+Long-press will mimic doubleclick
+wire up events to listview items
+Implement mp3 handler first, and implement services
+ */
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -40,7 +50,6 @@ class MainActivity : AppCompatActivity() {
         val root = settings.getString("root", null)
         var startDestinationId : Int? = null
         startDestinationId = if (root == null) {
-            initData()
             R.id.InitFragment
         } else {
             R.id.FolderFragment
@@ -50,17 +59,6 @@ class MainActivity : AppCompatActivity() {
         val navGraph = navController.navInflater.inflate(R.navigation.nav_graph)
         navGraph.setStartDestination(startDestinationId)
         navController.setGraph(navGraph, null)
-    }
-
-    private fun initData() {
-        /* Instantiates headerAdapter and filesAdapter. Both adapters are added to concatAdapter,
-           which displays the contents sequentially.
-        */
-        val headerAdapter = HeaderAdapter()
-        val sanFilesAdapter = SanFilesAdapter { file -> adapterOnClick(file) }
-        val concatAdapter = ConcatAdapter(headerAdapter, sanFilesAdapter)
-        val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
-        recyclerView.adapter = concatAdapter
     }
 
     /* Opens SanFileDetailActivity when RecyclerView item is clicked. */

@@ -24,7 +24,7 @@
         android:layout_weight="1"
         android:gravity="bottom|center"
         android:textSize="24dp"
-        android:text="Select the location from your device's external storage to use as File-san's root folder:">
+        android:text="Select the location from your device's external storage to use as File-San's root folder:">
     </TextView>
 
     <RelativeLayout

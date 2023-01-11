@@ -6,11 +6,14 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.Navigation
 import com.example.filesystem.databinding.FragmentInitBinding
 
 
@@ -23,12 +26,8 @@ import com.example.filesystem.databinding.FragmentInitBinding
 class InitFragment : Fragment() {
 
     private var _binding: FragmentInitBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,7 +36,6 @@ class InitFragment : Fragment() {
 
         _binding = FragmentInitBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     /*
@@ -46,7 +44,7 @@ class InitFragment : Fragment() {
     that takes any Intent as an input and returns an ActivityResult, allowing you to extract the resultCode and Intent
     as part of your callback
      */
-    val getUri = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val getUri = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val uri: Uri? = result.data?.data
         val contentResolver = requireActivity().contentResolver
         if (result.resultCode == Activity.RESULT_OK) {
@@ -57,6 +55,10 @@ class InitFragment : Fragment() {
             val editor = settings.edit()
             editor.putString("root", uri.toString())
             editor.commit()
+
+            Log.v("File-San", "Navigate=action_InitFragment_to_FolderFragment")
+            val navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_content_main)
+            navController.navigate(R.id.action_InitFragment_to_FolderFragment)
         }
     }
 
@@ -65,7 +67,7 @@ class InitFragment : Fragment() {
         binding.buttonInit.setOnClickListener {
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 type = DocumentsContract.Document.MIME_TYPE_DIR
-                putExtra(Intent.EXTRA_TITLE, "File-san")
+                putExtra(Intent.EXTRA_TITLE, "File-San")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
