@@ -21,6 +21,10 @@
         android:name="com.example.filesystem.FolderFragment"
         android:label="root fragment label"
         tools:layout="@layout/fragment_folder">
+        <argument
+            android:name="destination"
+            app:argType="string"
+            android:defaultValue="" />
     </fragment>
 
 </navigation>

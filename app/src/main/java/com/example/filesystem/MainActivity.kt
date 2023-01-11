@@ -23,12 +23,13 @@ const val SANFILE_ID = "sanfile id"
 
 /*
 TODO
-Print current directory in header adapter
-Make file selectable in listview (highlighted)
-Add a menu of operations at the bottom (delete, copy, move, rename, open (w/ select application), properties)
-Long-press will mimic doubleclick
-wire up events to listview items
-Implement mp3 handler first, and implement services
+[ ] Print current directory in header adapter
+[ ] Make file selectable in listview (highlighted)
+[ ] Add a menu of operations at the bottom (delete, copy, move, rename, open (w/ select application), properties)
+[ ] Long-press will mimic doubleclick
+[ ] Wire up events to listview items
+[ ] Alow select multiple with holding-down-already tap
+[ ] Implement mp3 handler first, and implement services
  */
 
 class MainActivity : AppCompatActivity() {

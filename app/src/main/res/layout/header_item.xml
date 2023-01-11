@@ -1,30 +1,16 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
+    android:layout_height="wrap_content"
+    android:weightSum="1">
+    <!--android:layout_weight="0.8"-->
     <TextView
-        android:id="@+id/header_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:id="@+id/destination"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="20dp"
+        android:layout_gravity="left"
         android:text="@string/sanfile_finder"
-        android:textAppearance="?attr/textAppearanceHeadline3" />
-
-    <TextView
-        android:id="@+id/sanfile_number_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textAppearance="?attr/textAppearanceHeadline6" />
-
-    <TextView
-        android:id="@+id/sanfile_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/sanfile_string"
-        android:textAppearance="?attr/textAppearanceHeadline6" />
-
+        android:textAppearance="?attr/textAppearanceHeadline4" />
 </LinearLayout>

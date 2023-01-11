@@ -53,6 +53,8 @@ class FolderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val destination = "/" + (arguments?.getString("destination", "") ?: "")
+
         val headerAdapter = HeaderAdapter()
         sanFilesAdapter = SanFilesAdapter { sanFile ->
             adapterOnClick(sanFile)

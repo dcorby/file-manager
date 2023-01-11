@@ -5,32 +5,30 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.filesystem.R
 
-/* A list always displaying one element: the number of sanfiles. */
+/* A list always displaying one element: the destination. */
 
 class HeaderAdapter: RecyclerView.Adapter<HeaderAdapter.HeaderViewHolder>() {
-    private var sanFileCount: Int = 0
+    private var sanFileDestination: String = ""
 
     /* ViewHolder for displaying header. */
     class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view){
-        private val sanFileNumberTextView: TextView = itemView.findViewById(R.id.sanfile_number_text)
+        private val sanFileDestinationTextView: TextView = itemView.findViewById(R.id.destination)
 
-        fun bind(sanFileCount: Int) {
-            sanFileNumberTextView.text = sanFileCount.toString()
+        fun bind(sanFileDestination: String) {
+            sanFileDestinationTextView.text = sanFileDestination
         }
     }
 
     /* Inflates view and returns HeaderViewHolder. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HeaderViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.header_item, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.header_item, parent, false)
         return HeaderViewHolder(view)
     }
 
-    /* Binds number of sanfiles to the header. */
+    /* Binds destination to the header. */
     override fun onBindViewHolder(holder: HeaderViewHolder, position: Int) {
-        holder.bind(sanFileCount)
+        holder.bind(sanFileDestination)
     }
 
     /* Returns number of items, since there is only one item in the header return one  */
@@ -38,9 +36,9 @@ class HeaderAdapter: RecyclerView.Adapter<HeaderAdapter.HeaderViewHolder>() {
         return 1
     }
 
-    /* Updates header to display number of sanfiles when a sanfile is added or subtracted. */
-    fun updateSanFileCount(updatedSanFileCount: Int) {
-        sanFileCount = updatedSanFileCount
+    /* Updates header to display current destination. */
+    fun updateSanFileDestination(updatedSanFileDestination: String) {
+        sanFileDestination = updatedSanFileDestination
         notifyDataSetChanged()
     }
 }
