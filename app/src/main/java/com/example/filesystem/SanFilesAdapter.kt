@@ -8,8 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.filesystem.data.SanFile
-
 
 class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
     ListAdapter<SanFile, SanFilesAdapter.SanFileViewHolder>(SanFileDiffCallback) {
@@ -17,8 +15,8 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
     /* ViewHolder for SanFile, takes in the inflated view and the onClick behavior. */
     class SanFileViewHolder(itemView: View, val onClick: (SanFile) -> Unit) :
         RecyclerView.ViewHolder(itemView) {
-        private val sanFileTextView: TextView = itemView.findViewById(R.id.myfile_text)
-        private val sanFileImageView: ImageView = itemView.findViewById(R.id.myfile_image)
+        private val sanFileTextView: TextView = itemView.findViewById(R.id.sanfile_text)
+        private val sanFileImageView: ImageView = itemView.findViewById(R.id.sanfile_image)
         private var currentSanFile: SanFile? = null
 
         init {
@@ -29,7 +27,7 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
             }
         }
 
-        /* Bind myFile name and image. */
+        /* Bind sanFile name and image. */
         fun bind(sanFile: SanFile) {
             currentSanFile = sanFile
 
@@ -37,7 +35,7 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
             if (sanFile.image != null) {
                 sanFileImageView.setImageResource(sanFile.image)
             } else {
-                //myFileImageView.setImageResource(R.drawable.rose)
+                //sanFileImageView.setImageResource(R.drawable.rose)
             }
         }
     }
@@ -45,14 +43,14 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
     /* Creates and inflates view and return SanFileViewHolder. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SanFileViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.myfile_item, parent, false)
+            .inflate(R.layout.sanfile_item, parent, false)
         return SanFileViewHolder(view, onClick)
     }
 
-    /* Gets current myFile and uses it to bind view. */
+    /* Gets current sanFile and uses it to bind view. */
     override fun onBindViewHolder(holder: SanFileViewHolder, position: Int) {
-        val myFile = getItem(position)
-        holder.bind(myFile)
+        val sanFile = getItem(position)
+        holder.bind(sanFile)
     }
 }
 

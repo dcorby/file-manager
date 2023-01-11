@@ -6,25 +6,25 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/myfile_image"
+        android:id="@+id/sanfile_image"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_margin="8dp"
-        android:contentDescription="@string/myfile_image_content_description"
+        android:contentDescription="@string/sanfile_image_content_description"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/myfile_text"
+        app:layout_constraintEnd_toStartOf="@+id/sanfile_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/myfile_text"
+        android:id="@+id/sanfile_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:text="@string/myfile1_name"
+        android:text="@string/sanfile1_name"
         android:textAppearance="?attr/textAppearanceHeadline5"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/myfile_image"
+        app:layout_constraintStart_toEndOf="@+id/sanfile_image"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

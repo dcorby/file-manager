@@ -10,14 +10,14 @@ import com.example.filesystem.R
 /* A list always displaying one element: the number of sanfiles. */
 
 class HeaderAdapter: RecyclerView.Adapter<HeaderAdapter.HeaderViewHolder>() {
-    private var myFileCount: Int = 0
+    private var sanFileCount: Int = 0
 
     /* ViewHolder for displaying header. */
     class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view){
-        private val myFileNumberTextView: TextView = itemView.findViewById(R.id.myfile_number_text)
+        private val sanFileNumberTextView: TextView = itemView.findViewById(R.id.sanfile_number_text)
 
-        fun bind(myFileCount: Int) {
-            myFileNumberTextView.text = myFileCount.toString()
+        fun bind(sanFileCount: Int) {
+            sanFileNumberTextView.text = sanFileCount.toString()
         }
     }
 
@@ -28,9 +28,9 @@ class HeaderAdapter: RecyclerView.Adapter<HeaderAdapter.HeaderViewHolder>() {
         return HeaderViewHolder(view)
     }
 
-    /* Binds number of myfiles to the header. */
+    /* Binds number of sanfiles to the header. */
     override fun onBindViewHolder(holder: HeaderViewHolder, position: Int) {
-        holder.bind(myFileCount)
+        holder.bind(sanFileCount)
     }
 
     /* Returns number of items, since there is only one item in the header return one  */
@@ -38,9 +38,9 @@ class HeaderAdapter: RecyclerView.Adapter<HeaderAdapter.HeaderViewHolder>() {
         return 1
     }
 
-    /* Updates header to display number of myfiles when a myfile is added or subtracted. */
-    fun updateMyFileCount(updatedMyFileCount: Int) {
-        myFileCount = updatedMyFileCount
+    /* Updates header to display number of sanfiles when a sanfile is added or subtracted. */
+    fun updateSanFileCount(updatedSanFileCount: Int) {
+        sanFileCount = updatedSanFileCount
         notifyDataSetChanged()
     }
 }

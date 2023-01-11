@@ -9,22 +9,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/myfile_finder"
+        android:text="@string/sanfile_finder"
         android:textAppearance="?attr/textAppearanceHeadline3" />
 
     <TextView
-        android:id="@+id/myfile_number_text"
+        android:id="@+id/sanfile_number_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textAppearance="?attr/textAppearanceHeadline6" />
 
     <TextView
-        android:id="@+id/myfile_text"
+        android:id="@+id/sanfile_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/myfile_string"
+        android:text="@string/sanfile_string"
         android:textAppearance="?attr/textAppearanceHeadline6" />
 
 </LinearLayout>

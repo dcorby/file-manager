@@ -4,30 +4,27 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import com.example.filesystem.data.SanFile
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.databinding.ActivityMainBinding
 
-
 const val SANFILE_ID = "sanfile id"
+
+// https://stackoverflow.com/questions/65726850/how-to-work-with-livedata-on-recyclerview
+// https://www.digitalocean.com/community/tutorials/android-livedata
+// https://github.com/android/views-widgets-samples/blob/main/RecyclerViewKotlin/app/src/main/java/com/example/recyclersample/flowerList/FlowersListViewModel.kt
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-
-    private val newSanFileActivityRequestCode = 1
-    private val sanFilesListViewModel by viewModels<SanFilesListViewModel> {
-        SanFilesListViewModelFactory(this)
-    }
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,27 +40,34 @@ class MainActivity : AppCompatActivity() {
         val root = settings.getString("root", null)
         var startDestinationId : Int? = null
         startDestinationId = if (root == null) {
+            initData()
             R.id.InitFragment
         } else {
-            R.id.RootFragment
+            R.id.FolderFragment
         }
 
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         val navGraph = navController.navInflater.inflate(R.navigation.nav_graph)
         navGraph.setStartDestination(startDestinationId)
         navController.setGraph(navGraph, null)
-
-        val fab: View = findViewById(R.id.fab)
-        fab.setOnClickListener {
-            fabOnClick()
-        }
     }
 
-    /* Opens MyFileDetailActivity when RecyclerView item is clicked. */
+    private fun initData() {
+        /* Instantiates headerAdapter and filesAdapter. Both adapters are added to concatAdapter,
+           which displays the contents sequentially.
+        */
+        val headerAdapter = HeaderAdapter()
+        val sanFilesAdapter = SanFilesAdapter { file -> adapterOnClick(file) }
+        val concatAdapter = ConcatAdapter(headerAdapter, sanFilesAdapter)
+        val recyclerView: RecyclerView = findViewById(R.id.recycler_view)
+        recyclerView.adapter = concatAdapter
+    }
+
+    /* Opens SanFileDetailActivity when RecyclerView item is clicked. */
     private fun adapterOnClick(flower: SanFile) {
         Toast.makeText(applicationContext,"clicked!",Toast.LENGTH_SHORT).show()
-        //val intent = Intent(this, MyFileDetailActivity()::class.java)
-        //intent.putExtra(MYFILE_ID, flower.id)
+        //val intent = Intent(this, SanFileDetailActivity()::class.java)
+        //intent.putExtra(SANFILE_ID, flower.id)
         //startActivity(intent)
     }
 

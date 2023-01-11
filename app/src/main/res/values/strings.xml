@@ -16,46 +16,46 @@
 
 <resources>
     <string name="app_name">FileSystem</string>
-    <string name="add_myfile">Add myfile</string>
+    <string name="add_sanfile">Add sanfile</string>
 
-    <string name="myfile1_name">Rose</string>
-    <string name="myfile2_name">Freesia</string>
-    <string name="myfile3_name">Lily</string>
-    <string name="myfile4_name">Sunmyfile</string>
-    <string name="myfile5_name">Peony</string>
-    <string name="myfile6_name">Daisy</string>
-    <string name="myfile7_name">Lilac</string>
-    <string name="myfile8_name">Marigold</string>
-    <string name="myfile9_name">Poppy</string>
-    <string name="myfile10_name">Daffodil</string>
-    <string name="myfile11_name">Dahlia</string>
-    <string name="myfile12_name">Tulip</string>
+    <string name="sanfile1_name">Rose</string>
+    <string name="sanfile2_name">Freesia</string>
+    <string name="sanfile3_name">Lily</string>
+    <string name="sanfile4_name">Sunsanfile</string>
+    <string name="sanfile5_name">Peony</string>
+    <string name="sanfile6_name">Daisy</string>
+    <string name="sanfile7_name">Lilac</string>
+    <string name="sanfile8_name">Marigold</string>
+    <string name="sanfile9_name">Poppy</string>
+    <string name="sanfile10_name">Daffodil</string>
+    <string name="sanfile11_name">Dahlia</string>
+    <string name="sanfile12_name">Tulip</string>
 
-    <string name="myfile1_description">Rose comes from the Latin word Rosa. There are over 100
+    <string name="sanfile1_description">Rose comes from the Latin word Rosa. There are over 100
         species of the rose. </string>
-    <string name="myfile2_description">Freesias bloom during spring and are native to
+    <string name="sanfile2_description">Freesias bloom during spring and are native to
         Africa.</string>
-    <string name="myfile3_description">Lilies have the longest in vase lifespan of any cut
+    <string name="sanfile3_description">Lilies have the longest in vase lifespan of any cut
         bloom.</string>
-    <string name="myfile4_description">Mature Sunmyfiles face east and are native too the United
+    <string name="sanfile4_description">Mature Sunsanfiles face east and are native too the United
         States.</string>
-    <string name="myfile5_description">Peony plants can live to be 100 years old.</string>
-    <string name="myfile6_description">Daisies are cousins with Sunmyfiles.</string>
-    <string name="myfile7_description">Lilacs belong to the olive family.</string>
-    <string name="myfile8_description">Marigolds come in orange, reed, maroon and yellow.</string>
-    <string name="myfile9_description">Poppies can be over 3 feet tall.</string>
-    <string name="myfile10_description">Daffodils are referred to as Lent Lilies in England</string>
-    <string name="myfile11_description">Dahlia is named after the Swedish botanist Anders
+    <string name="sanfile5_description">Peony plants can live to be 100 years old.</string>
+    <string name="sanfile6_description">Daisies are cousins with Sunsanfiles.</string>
+    <string name="sanfile7_description">Lilacs belong to the olive family.</string>
+    <string name="sanfile8_description">Marigolds come in orange, reed, maroon and yellow.</string>
+    <string name="sanfile9_description">Poppies can be over 3 feet tall.</string>
+    <string name="sanfile10_description">Daffodils are referred to as Lent Lilies in England</string>
+    <string name="sanfile11_description">Dahlia is named after the Swedish botanist Anders
         Dahl</string>
-    <string name="myfile12_description">There are over 150 species of tulips.</string>
+    <string name="sanfile12_description">There are over 150 species of tulips.</string>
 
-    <string name="myfile_string">myfiles</string>
-    <string name="myfile_finder">myfile finder</string>
-    <string name="myfile_description_edit_text">myfile Description</string>
-    <string name="myfile_name_edit_text">myfile Name</string>
+    <string name="sanfile_string">sanfiles</string>
+    <string name="sanfile_finder">sanfile finder</string>
+    <string name="sanfile_description_edit_text">sanfile Description</string>
+    <string name="sanfile_name_edit_text">sanfile Name</string>
     <string name="done_button_text">Done</string>
     <string name="fab_content_description">fab</string>
-    <string name="myfile_image_content_description">Image of myfile</string>
-    <string name="remove_this_myfile">Remove this myfile</string>
+    <string name="sanfile_image_content_description">Image of sanfile</string>
+    <string name="remove_this_sanfile">Remove this sanfile</string>
 
 </resources>

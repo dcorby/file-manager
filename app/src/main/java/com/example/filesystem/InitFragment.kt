@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -59,7 +58,6 @@ class InitFragment : Fragment() {
             editor.putString("root", uri.toString())
             editor.commit()
         }
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,9 +66,9 @@ class InitFragment : Fragment() {
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 type = DocumentsContract.Document.MIME_TYPE_DIR
                 putExtra(Intent.EXTRA_TITLE, "File-san")
-                //addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                //addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                //addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
             }
             getUri.launch(intent)
         }
