@@ -4,16 +4,18 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.WindowInsets
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.databinding.ActivityMainBinding
+
 
 const val SANFILE_ID = "sanfile id"
 
@@ -39,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        //WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -60,6 +62,22 @@ class MainActivity : AppCompatActivity() {
         val navGraph = navController.navInflater.inflate(R.navigation.nav_graph)
         navGraph.setStartDestination(startDestinationId)
         navController.setGraph(navGraph, null)
+
+        // Hack for black device nav bar occluding layout
+        // https://stackoverflow.com/questions/20264268/how-do-i-get-the-height-and-width-of-the-android-navigation-bar-programmatically
+//        if (Build.VERSION.SDK_INT >= 30) {
+//            // https://stackoverflow.com/questions/36514167/how-to-really-get-the-navigation-bar-height-in-android/73984106#73984106
+//            val insets: WindowInsets = windowManager.currentWindowMetrics.windowInsets
+//            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+//            val navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+//        } else {
+//
+//        }
+
+
+
+
+
     }
 
     /* Opens SanFileDetailActivity when RecyclerView item is clicked. */
