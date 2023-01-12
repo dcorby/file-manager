@@ -1,5 +1,6 @@
 package com.example.filesystem;
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,9 +13,13 @@ import androidx.recyclerview.widget.RecyclerView
 class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
     ListAdapter<SanFile, SanFilesAdapter.SanFileViewHolder>(SanFileDiffCallback) {
 
+    //private val itemCount = getItem
+
     /* ViewHolder for SanFile, takes in the inflated view and the onClick behavior. */
-    class SanFileViewHolder(itemView: View, val onClick: (SanFile) -> Unit) :
-        RecyclerView.ViewHolder(itemView) {
+    // "inner": https://stackoverflow.com/questions/45418194/i-cant-reach-any-class-member-from-a-nested-class-in-kotlin
+    inner class SanFileViewHolder(itemView: View, val onClick: (SanFile) -> Unit) : RecyclerView.ViewHolder(itemView) {
+        // RecyclerView decoration instructions:
+        // https://stackoverflow.com/questions/24618829/how-to-add-dividers-and-spaces-between-items-in-recyclerview
         private val sanFileTextView: TextView = itemView.findViewById(R.id.sanfile_text)
         private val sanFileImageView: ImageView = itemView.findViewById(R.id.sanfile_image)
         private var currentSanFile: SanFile? = null
@@ -31,6 +36,10 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
         fun bind(sanFile: SanFile) {
             currentSanFile = sanFile
             sanFileTextView.text = sanFile.name
+            //absoluteAdapterPosition
+
+
+            
             //if (sanFile.image != null) {
             //    sanFileImageView.setImageResource(sanFile.image)
             //} else {
@@ -41,8 +50,7 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
 
     /* Creates and inflates view and return SanFileViewHolder. */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SanFileViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.sanfile_item, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.sanfile_item, parent, false)
         return SanFileViewHolder(view, onClick)
     }
 

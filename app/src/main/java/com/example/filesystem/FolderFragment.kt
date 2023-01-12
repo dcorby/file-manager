@@ -35,7 +35,6 @@ const val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
 class FolderFragment : Fragment() {
 
     private var _binding: FragmentFolderBinding? = null
-
     // this property is only valid between onCreateView and onDestroyView
     private val binding get() = _binding!!
 
@@ -51,6 +50,8 @@ class FolderFragment : Fragment() {
     private var headerAdapter: HeaderAdapter? = null
     private var sanFilesAdapter: SanFilesAdapter? = null
     private var destination: String? = null
+
+    private var curSanFile: SanFile? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -98,42 +99,15 @@ class FolderFragment : Fragment() {
     }
 
     private fun observeCurrent() {
-
         // Difference between mutableList and arrayList:
         // https://stackoverflow.com/questions/43114367/difference-between-arrayliststring-and-mutablelistofstring-in-kotlin
         val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destination!!.toUri())
-
-        Log.v("San-File", "MutableList length=${mutableList.size}")
-//        val mutableList:MutableList<SanFile> = ArrayList()
-//        mutableList.add(
-//            SanFile(
-//                id = 1,
-//                name = "SanFile1 (file)",
-//                image = R.drawable.abc_btn_default_mtrl_shape,
-//                description = "SanFile1 description"
-//            )
-//        )
-//        mutableList.add(
-//            SanFile(
-//                id = 2,
-//                name = "SanFile2 (file)",
-//                image = R.drawable.abc_btn_default_mtrl_shape,
-//                description = "SanFile2 description"
-//            )
-//        )
-//        mutableList.add(
-//            SanFile(
-//                id = 3,
-//                name = "SanFile3 (file)",
-//                image = R.drawable.abc_btn_default_mtrl_shape,
-//                description = "SanFile3 description"
-//            )
-//        )
+        Log.v("File-san", "MutableList length=${mutableList.size}")
 
         // Observe the current directory
         sanFilesViewModel.initSanFiles(mutableList).observe(viewLifecycleOwner, Observer {
             it?.let {
-                Log.v("File-San", "Observing")
+                Log.v("File-san", "Observing")
                 sanFilesAdapter!!.submitList(it as MutableList<SanFile>)
                 headerAdapter!!.updateSanFileDestination(destination!!)
             }
@@ -141,7 +115,11 @@ class FolderFragment : Fragment() {
     }
 
     private fun adapterOnClick(sanFile: SanFile) {
-        Toast.makeText(context,"clicked", Toast.LENGTH_SHORT)
+        //if (curSanFile != null) {
+
+        //}
+        //curSanFile.
+        //Toast.makeText(context,"clicked", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {

@@ -32,6 +32,7 @@ TODO
 [ ] Wire up events to listview items
 [ ] Alow select multiple with holding-down-already tap
 [ ] Implement mp3 handler first, and implement services
+[ ] Implement icons: https://github.com/dmhendricks/file-icon-vectors
  */
 
 class MainActivity : AppCompatActivity() {
