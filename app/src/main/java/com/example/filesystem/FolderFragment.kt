@@ -102,6 +102,7 @@ class FolderFragment : Fragment() {
         // https://stackoverflow.com/questions/43114367/difference-between-arrayliststring-and-mutablelistofstring-in-kotlin
         val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destination!!.toUri())
 
+        Log.v("San-File", "MutableList length=${mutableList.size}")
 //        val mutableList:MutableList<SanFile> = ArrayList()
 //        mutableList.add(
 //            SanFile(
@@ -132,9 +133,6 @@ class FolderFragment : Fragment() {
         sanFilesViewModel.initSanFiles(mutableList).observe(viewLifecycleOwner, Observer {
             it?.let {
                 Log.v("File-San", "Observing")
-
-
-
                 sanFilesAdapter!!.submitList(it as MutableList<SanFile>)
                 headerAdapter!!.updateSanFileDestination(destination!!)
             }

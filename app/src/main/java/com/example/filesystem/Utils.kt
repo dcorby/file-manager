@@ -25,7 +25,12 @@ class Utils {
         fun getChildren(activity: Activity, uri: Uri): MutableList<SanFile> {
             val children = ArrayList<SanFile>()
             val contentResolver: ContentResolver = activity.contentResolver
-            val childDocuments: Uri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri))
+
+            // A tree uri has /tree/ in it
+            // https://stackoverflow.com/questions/34927748/android-5-0-documentfile-from-tree-uri
+            val docId = DocumentsContract.getTreeDocumentId(uri)
+            Log.v("File-San", "getChildren() uri=$uri, docID=$docId")
+            val childDocuments: Uri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, docId)
             val dirNodes = LinkedList<Uri>()
             dirNodes.add(childDocuments)
             while (!dirNodes.isEmpty()) {
@@ -39,10 +44,9 @@ class Utils {
                             val mime = c.getString(2)
                             val isDir = isDirectory(mime)
                             Log.d("San-File", "docId: $docId, name: $name, mime: $mime, isDir: $isDir")
-                            val newNode = DocumentsContract.buildChildDocumentsUriUsingTree(uri, docId)
-
-                            // TODO
-                            //children.add(newNode) <-- GET A SAN FILE HERE
+                            //val newNode = DocumentsContract.buildChildDocumentsUriUsingTree(uri, docId)
+                            val sanFile: SanFile = SanFile(docId=docId, directory=uri.toString(), name=name, isDir=isDir)
+                            children.add(sanFile)
                         }
                     } finally {
                         closeQuietly(c)

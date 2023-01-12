@@ -30,13 +30,12 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
         /* Bind sanFile name and image. */
         fun bind(sanFile: SanFile) {
             currentSanFile = sanFile
-
             sanFileTextView.text = sanFile.name
-            if (sanFile.image != null) {
-                sanFileImageView.setImageResource(sanFile.image)
-            } else {
-                //sanFileImageView.setImageResource(R.drawable.rose)
-            }
+            //if (sanFile.image != null) {
+            //    sanFileImageView.setImageResource(sanFile.image)
+            //} else {
+            //    //sanFileImageView.setImageResource(R.drawable.rose)
+            //}
         }
     }
 
@@ -60,6 +59,6 @@ object SanFileDiffCallback : DiffUtil.ItemCallback<SanFile>() {
     }
 
     override fun areContentsTheSame(oldItem: SanFile, newItem: SanFile): Boolean {
-        return oldItem.id == newItem.id
+        return oldItem.docId == newItem.docId
     }
 }

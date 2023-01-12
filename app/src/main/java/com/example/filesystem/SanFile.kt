@@ -1,11 +1,8 @@
 package com.example.filesystem
 
-import androidx.annotation.DrawableRes
-
 data class SanFile(
-    val id: Long,
+    val docId: String,
+    val directory: String,
     val name: String,
-    @DrawableRes
-    val image: Int?,
-    val description: String
+    val isDir: Boolean
 )

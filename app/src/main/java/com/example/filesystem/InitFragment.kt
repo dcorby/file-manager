@@ -53,6 +53,7 @@ class InitFragment : Fragment() {
             // save the root folder
             val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
             val editor = settings.edit()
+            Log.v("File-San", "root folder=$uri")
             editor.putString("root", uri.toString())
             editor.commit()
 
@@ -65,9 +66,10 @@ class InitFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.buttonInit.setOnClickListener {
-            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                type = DocumentsContract.Document.MIME_TYPE_DIR
-                putExtra(Intent.EXTRA_TITLE, "File-San")
+            // Creating a file here with ACTION_CREATE_DOCUMENT will not create a tree uri
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                //type = DocumentsContract.Document.MIME_TYPE_DIR
+                //putExtra(Intent.EXTRA_TITLE, "File-San")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
