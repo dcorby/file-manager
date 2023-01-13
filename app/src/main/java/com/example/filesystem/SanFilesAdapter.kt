@@ -1,11 +1,13 @@
 package com.example.filesystem;
 
+import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -44,11 +46,17 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
             val count = itemCount
             // Log.v("File-san", "Binding pos=$pos of count=$count")
 
-            //if (sanFile.image != null) {
-            //    sanFileImageView.setImageResource(sanFile.image)
-            //} else {
-            //    //sanFileImageView.setImageResource(R.drawable.rose)
-            //}
+            // Get context from any view object:
+            // https://stackoverflow.com/questions/32136973/how-to-get-a-context-in-a-recycler-view-adapter
+            val context = itemView.context
+            // https://stackoverflow.com/questions/4539630/how-do-i-check-to-see-if-a-resource-exists-in-android
+            val identifier = context.resources.getIdentifier(sanFile.ext, "drawable", "com.example.filesystem")
+            if (sanFile.ext != null && identifier != 0) {
+                val icon: Drawable? = AppCompatResources.getDrawable(context, identifier)
+                sanFileImageView.setImageDrawable(icon)
+                // sanFileImageView.setImageResource(sanFile.image)
+                // sanFileImageView.setImageResource(R.drawable.rose)
+            }
         }
     }
 

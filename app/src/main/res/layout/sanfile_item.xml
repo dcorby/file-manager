@@ -8,7 +8,7 @@
     android:background="#FFFFFF">
 
     <LinearLayout
-        android:id="@+id/sanfile_frame"
+        android:id="@+id/sanfile_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <ImageView

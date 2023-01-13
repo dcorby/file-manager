@@ -68,7 +68,7 @@ class FolderFragment : Fragment() {
         destination = "/" + (arguments?.getString("destination", "") ?: "")
 
         headerAdapter = HeaderAdapter()
-        sanFilesAdapter = SanFilesAdapter { sanFile ->
+        sanFilesAdapter = SanFilesAdapter{ sanFile ->
             adapterOnClick(sanFile)
         }
         val concatAdapter = ConcatAdapter(headerAdapter, sanFilesAdapter)

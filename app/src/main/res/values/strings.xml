@@ -15,9 +15,8 @@
 -->
 
 <resources>
-    <string name="app_name">FileSystem</string>
+    <string name="app_name">File-san</string>
     <string name="add_sanfile">Add sanfile</string>
-
     <string name="sanfile1_name">Rose</string>
     <string name="sanfile2_name">Freesia</string>
     <string name="sanfile3_name">Lily</string>

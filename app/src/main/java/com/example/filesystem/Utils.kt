@@ -43,9 +43,13 @@ class Utils {
                             val name = c.getString(1)
                             val mime = c.getString(2)
                             val isDir = isDirectory(mime)
-                            Log.d("File-san", "docId: $docId, name: $name, mime: $mime, isDir: $isDir")
+                            var ext: String? = null
+                            if (name.contains(".")) {
+                                ext = name.substring(name.lastIndexOf(".") + 1)    
+                            }
+                            Log.d("File-san", "docId: $docId, name: $name, mime: $mime, isDir: $isDir, ext: $ext")
                             //val newNode = DocumentsContract.buildChildDocumentsUriUsingTree(uri, docId)
-                            val sanFile: SanFile = SanFile(docId=docId, directory=uri.toString(), name=name, isDir=isDir)
+                            val sanFile: SanFile = SanFile(docId=docId, directory=uri.toString(), name=name, isDir=isDir, ext=ext)
                             children.add(sanFile)
                         }
                     } finally {
