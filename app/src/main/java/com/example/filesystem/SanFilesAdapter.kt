@@ -36,10 +36,14 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
         fun bind(sanFile: SanFile) {
             currentSanFile = sanFile
             sanFileTextView.text = sanFile.name
-            //absoluteAdapterPosition
 
+            // getPosition() and getAdapterPosition() have been deprecated for
+            // getAbsoluteAdapterPosition() and getBindingAdapterPosition()
+            // e.g. if you wanted to identify last row and change its style
+            val pos = absoluteAdapterPosition
+            val count = itemCount
+            // Log.v("File-san", "Binding pos=$pos of count=$count")
 
-            
             //if (sanFile.image != null) {
             //    sanFileImageView.setImageResource(sanFile.image)
             //} else {
