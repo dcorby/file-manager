@@ -3,4 +3,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="pink">#FFC0CB</color>
+
+    <color name="maroon">#9A0000</color>
+    <color name="silver">#CDCDCD</color>
 </resources>

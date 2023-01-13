@@ -7,15 +7,29 @@ Generic file (file.svg) from https://upload.wikimedia.org/wikipedia/commons/9/9c
 Set of supported extensions from https://github.com/dmhendricks/file-icon-vectors
 """
 
-base = "/home/dmc7z/AndroidStudioProjects/FileSystem/icons"
+base  =  "/home/dmc7z/AndroidStudioProjects/FileSystem"
+icons = f"{base}/icons"
+res   = f"{base}/app/src/main/res"
 
-with zipfile.ZipFile(f"{base}/icons.zip", "r") as f:
-    f.extractall(f"{base}/svg")
+# https://developer.android.com/training/multiscreen/screendensities
+# Android suggests 36x36, 48x48, 72x72, 96x96, 144x144, and 192x192
+sizes = {
+    "-ldpi"   : 36,
+    "-mdpi"   : 48,
+    ""        : 48,
+    "-hdpi"   : 72,
+    "-xhdpi"  : 96,
+    "-xxhdpi" : 144,
+    "-xxxhdpi": 192
+}
+
+with zipfile.ZipFile(f"{icons}/icons.zip", "r") as f:
+    f.extractall(f"{icons}/svg")
 
 svg = {}
 supported = ["file", "classic/mp3", "classic/pdf", "classic/folder"]
 for x in supported:
-    files = list(Path(base).rglob(f"*/{x}.svg"))
+    files = list(Path(icons).rglob(f"*/{x}.svg"))
     if len(files) != 1:
         raise Exception(f"Zero or multiple files found for pattern={x}")
     pathname = str(files[0])
@@ -25,8 +39,13 @@ for x in supported:
     svg[name] = contents
     f.close()
 
-print(svg)
-# https://developer.android.com/training/multiscreen/screendensities
-# Android suggests 36x36, 48x48, 72x72, 96x96, 144x144, and 192x192
+# Create the folders
+for size in sizes:
+    pathname = f"{res}/drawable{size}"
+    Path(pathname).mkdir(parents=False, exist_ok=True)
+    
+# Create the files
 for name in svg:
-    svg2png(bytestring=svg, write_to=f"{name}.png")
+    for size in sizes:
+        pathname = f"{res}/drawable{size}/{name}.png"
+        svg2png(bytestring=svg[name], write_to=pathname, output_width=sizes[size], output_height=sizes[size])
