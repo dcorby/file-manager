@@ -23,7 +23,7 @@ const val SANFILE_ID = "sanfile id"
 // https://www.digitalocean.com/community/tutorials/android-livedata
 // https://github.com/android/views-widgets-samples/blob/main/RecyclerViewKotlin/app/src/main/java/com/example/recyclersample/flowerList/FlowersListViewModel.kt
 // https://www.kodeco.com/29024188-recyclerview-selection-library-tutorial-for-android-adding-new-actions
-// https://www.kodeco.com/29024188-recyclerview-selection-library-tutorial-for-android-adding-new-actions
+// https://medium.com/coding-blocks/implementing-selection-in-recyclerview-36a9739844e0
 // https://proandroiddev.com/a-guide-to-recyclerview-selection-3ed9f2381504
 
 /*
