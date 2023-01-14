@@ -22,6 +22,9 @@ const val SANFILE_ID = "sanfile id"
 // https://stackoverflow.com/questions/65726850/how-to-work-with-livedata-on-recyclerview
 // https://www.digitalocean.com/community/tutorials/android-livedata
 // https://github.com/android/views-widgets-samples/blob/main/RecyclerViewKotlin/app/src/main/java/com/example/recyclersample/flowerList/FlowersListViewModel.kt
+// https://www.kodeco.com/29024188-recyclerview-selection-library-tutorial-for-android-adding-new-actions
+// https://www.kodeco.com/29024188-recyclerview-selection-library-tutorial-for-android-adding-new-actions
+// https://proandroiddev.com/a-guide-to-recyclerview-selection-3ed9f2381504
 
 /*
 TODO
@@ -45,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         //WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
 
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -63,37 +67,6 @@ class MainActivity : AppCompatActivity() {
         val navGraph = navController.navInflater.inflate(R.navigation.nav_graph)
         navGraph.setStartDestination(startDestinationId)
         navController.setGraph(navGraph, null)
-
-        // Hack for black device nav bar occluding layout
-        // https://stackoverflow.com/questions/20264268/how-do-i-get-the-height-and-width-of-the-android-navigation-bar-programmatically
-//        if (Build.VERSION.SDK_INT >= 30) {
-//            // https://stackoverflow.com/questions/36514167/how-to-really-get-the-navigation-bar-height-in-android/73984106#73984106
-//            val insets: WindowInsets = windowManager.currentWindowMetrics.windowInsets
-//            val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-//            val navigationBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-//        } else {
-//
-//        }
-
-
-
-
-
-    }
-
-    /* Opens SanFileDetailActivity when RecyclerView item is clicked. */
-    private fun adapterOnClick(flower: SanFile) {
-        Toast.makeText(applicationContext,"clicked!",Toast.LENGTH_SHORT).show()
-        //val intent = Intent(this, SanFileDetailActivity()::class.java)
-        //intent.putExtra(SANFILE_ID, flower.id)
-        //startActivity(intent)
-    }
-
-    /* Adds flower to flowerList when FAB is clicked. */
-    private fun fabOnClick() {
-        Toast.makeText(applicationContext,"clicked!",Toast.LENGTH_SHORT).show()
-        //val intent = Intent(this, AddFlowerActivity::class.java)
-        //startActivityForResult(intent, newFlowerActivityRequestCode)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

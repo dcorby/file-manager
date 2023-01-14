@@ -19,6 +19,9 @@ import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.recyclerview.selection.SelectionPredicates
+import androidx.recyclerview.selection.SelectionTracker
+import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.R
@@ -52,6 +55,7 @@ class FolderFragment : Fragment() {
     private var destination: String? = null
 
     private var curSanFile: SanFile? = null
+    private lateinit var tracker: SelectionTracker<String>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -71,9 +75,10 @@ class FolderFragment : Fragment() {
         sanFilesAdapter = SanFilesAdapter{ sanFile ->
             adapterOnClick(sanFile)
         }
-        val concatAdapter = ConcatAdapter(headerAdapter, sanFilesAdapter)
+        //val concatAdapter = ConcatAdapter(headerAdapter, sanFilesAdapter)
         val recyclerView: RecyclerView = binding.recyclerView
-        recyclerView.adapter = concatAdapter
+        //recyclerView.adapter = concatAdapter
+        recyclerView.adapter = sanFilesAdapter
 
         val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
         destination = settings.getString("root", null)
@@ -96,6 +101,8 @@ class FolderFragment : Fragment() {
         } else {
             observeCurrent()
         }
+
+        setupUi()
     }
 
     private fun observeCurrent() {
@@ -119,7 +126,7 @@ class FolderFragment : Fragment() {
 
         //}
         //curSanFile.
-        //Toast.makeText(context,"clicked", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context,"clicked", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
@@ -144,5 +151,29 @@ class FolderFragment : Fragment() {
 
             observeCurrent()
         }
+    }
+
+    private fun setupUi() {
+
+        tracker = SelectionTracker.Builder<String>(
+            "selectionItem",
+            binding.recyclerView,
+            ItemsKeyProvider(sanFilesAdapter!!),
+            ItemsDetailsLookup(binding.recyclerView),
+            StorageStrategy.createStringStorage()
+            ).withSelectionPredicate(
+            SelectionPredicates.createSelectAnything()
+        ).build()
+
+        tracker.addObserver(
+        object : SelectionTracker.SelectionObserver<String>() {
+            override fun onSelectionChanged() {
+                super.onSelectionChanged()
+
+                // Good place to update livedata?
+            }
+        })
+
+        sanFilesAdapter?.tracker = tracker
     }
 }
