@@ -12,19 +12,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.selection.SelectionPredicates
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
-import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.R
 import com.example.filesystem.databinding.FragmentFolderBinding
 
 /**
@@ -38,24 +33,12 @@ const val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
 class FolderFragment : Fragment() {
 
     private var _binding: FragmentFolderBinding? = null
-    // this property is only valid between onCreateView and onDestroyView
     private val binding get() = _binding!!
-
-    // https://stackoverflow.com/questions/54313453/how-to-instantiate-viewmodel-in-androidx
-    // Initialize VM as Class Instance Val
     private val sanFilesViewModel: SanFilesViewModel by viewModels()
-    // this is functionally equal to:
-    // private val sanFilesViewModel by lazy {
-    //     ViewModelProvider(this).get(SanFilesViewModel::class.java)
-    // }
-    // ... which internally will use ViewModelProvider and scope your ViewModel to your Activity
-
     private var headerAdapter: HeaderAdapter? = null
     private var sanFilesAdapter: SanFilesAdapter? = null
     private var destination: String? = null
-
-    private var curSanFile: SanFile? = null
-    private lateinit var tracker: SelectionTracker<String>
+    private var tracker: SelectionTracker<String>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -70,15 +53,13 @@ class FolderFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         destination = "/" + (arguments?.getString("destination", "") ?: "")
-
         headerAdapter = HeaderAdapter()
-        sanFilesAdapter = SanFilesAdapter{ sanFile ->
-            adapterOnClick(sanFile)
-        }
+        sanFilesAdapter = SanFilesAdapter { sanFile -> adapterOnClick(sanFile) }
         //val concatAdapter = ConcatAdapter(headerAdapter, sanFilesAdapter)
         val recyclerView: RecyclerView = binding.recyclerView
         //recyclerView.adapter = concatAdapter
         recyclerView.adapter = sanFilesAdapter
+        //sanFilesAdapter!!.initTracker()
 
         val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
         destination = settings.getString("root", null)
@@ -102,12 +83,21 @@ class FolderFragment : Fragment() {
             observeCurrent()
         }
 
-        setupUi()
+        tracker = SelectionTracker.Builder<String>(
+            "selectionItem",
+            binding.recyclerView,
+            ItemsKeyProvider(sanFilesAdapter!!),
+            ItemsDetailsLookup(binding.recyclerView),
+            StorageStrategy.createStringStorage()
+        ).withSelectionPredicate(
+            SelectionPredicates.createSelectAnything()
+        ).build()
+
+        sanFilesAdapter!!.initTracker()
+        sanFilesAdapter!!.tracker = tracker
     }
 
     private fun observeCurrent() {
-        // Difference between mutableList and arrayList:
-        // https://stackoverflow.com/questions/43114367/difference-between-arrayliststring-and-mutablelistofstring-in-kotlin
         val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destination!!.toUri())
         Log.v("File-san", "MutableList length=${mutableList.size}")
 
@@ -121,12 +111,9 @@ class FolderFragment : Fragment() {
         })
     }
 
+    // Not currently used, but available from adapter
     private fun adapterOnClick(sanFile: SanFile) {
-        //if (curSanFile != null) {
-
-        //}
-        //curSanFile.
-        Toast.makeText(context,"clicked", Toast.LENGTH_SHORT).show()
+        // Toast.makeText(context,"clicked", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {
@@ -153,27 +140,36 @@ class FolderFragment : Fragment() {
         }
     }
 
-    private fun setupUi() {
-
-        tracker = SelectionTracker.Builder<String>(
-            "selectionItem",
-            binding.recyclerView,
-            ItemsKeyProvider(sanFilesAdapter!!),
-            ItemsDetailsLookup(binding.recyclerView),
-            StorageStrategy.createStringStorage()
-            ).withSelectionPredicate(
-            SelectionPredicates.createSelectAnything()
-        ).build()
-
-        tracker.addObserver(
-        object : SelectionTracker.SelectionObserver<String>() {
-            override fun onSelectionChanged() {
-                super.onSelectionChanged()
-
-                // Good place to update livedata?
-            }
-        })
-
-        sanFilesAdapter?.tracker = tracker
-    }
+//    private fun setupUi() {
+//
+//        tracker = SelectionTracker.Builder<String>(
+//            "selectionItem",
+//            binding.recyclerView,
+//            ItemsKeyProvider(sanFilesAdapter!!),
+//            ItemsDetailsLookup(binding.recyclerView),
+//            StorageStrategy.createStringStorage()
+//            ).withSelectionPredicate(
+//            SelectionPredicates.createSelectAnything()
+//        ).build()
+//
+//        tracker?.addObserver(
+//            object : SelectionTracker.SelectionObserver<String>() {
+//                override fun onSelectionChanged() {
+//                    super.onSelectionChanged()
+//
+//                    Log.v("File-san", "onSelectionChanged()")
+//                    // Good place to update livedata?
+//                }
+//
+//                override fun onItemStateChanged(key: String, selected: Boolean) {
+//                    //if (!tracker!!.hasSelection()) {
+//                    //    sanFilesAdapter!!.notifyDataSetChanged()
+//                    //}
+//                    Log.v("File-san", "onItemStateChanged()")
+//                    super.onItemStateChanged(key, !selected)
+//                }
+//            })
+//
+//        sanFilesAdapter?.tracker = tracker
+//    }
 }
