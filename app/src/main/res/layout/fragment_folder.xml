@@ -44,14 +44,17 @@
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0">
+                android:layout_weight="0"
+                app:singleSelection="true">
                 <Button
+                    android:id="@+id/action_create_file"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="File"
                     app:icon="@drawable/ic_add_24dp" />
                 <Button
+                    android:id="@+id/action_create_folder"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -77,17 +80,22 @@
             <!-- https://m3.material.io/components/buttons/overview -->
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:singleSelection="true">
                 <Button
+                    android:id="@+id/action_open"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="Open"
                     android:padding="0dp"
-                    android:textSize="12sp">
+                    android:textSize="12sp"
+                    app:backgroundTint="@color/button"
+                    >
                 </Button>
                 <Button
+                    android:id="@+id/action_rename"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -97,6 +105,7 @@
                     android:textSize="12sp">
                 </Button>
                 <Button
+                    android:id="@+id/action_copy"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -106,6 +115,7 @@
                     android:textSize="12sp">
                 </Button>
                 <Button
+                    android:id="@+id/action_move"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -115,6 +125,7 @@
                     android:textSize="12sp">
                 </Button>
                 <Button
+                    android:id="@+id/action_delete"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"

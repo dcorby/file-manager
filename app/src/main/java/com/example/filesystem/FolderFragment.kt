@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -55,11 +56,8 @@ class FolderFragment : Fragment() {
         destination = "/" + (arguments?.getString("destination", "") ?: "")
         headerAdapter = HeaderAdapter()
         sanFilesAdapter = SanFilesAdapter { sanFile -> adapterOnClick(sanFile) }
-        //val concatAdapter = ConcatAdapter(headerAdapter, sanFilesAdapter)
         val recyclerView: RecyclerView = binding.recyclerView
-        //recyclerView.adapter = concatAdapter
         recyclerView.adapter = sanFilesAdapter
-        //sanFilesAdapter!!.initTracker()
 
         val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
         destination = settings.getString("root", null)
@@ -98,6 +96,28 @@ class FolderFragment : Fragment() {
 
         if (savedInstanceState != null) {
             tracker?.onRestoreInstanceState(savedInstanceState)
+        }
+
+        binding.actionCopy.setOnClickListener {
+            Toast.makeText(context, "copy", Toast.LENGTH_SHORT).show()
+        }
+        binding.actionCreateFolder.setOnClickListener {
+            Toast.makeText(context, "create folder", Toast.LENGTH_SHORT).show()
+        }
+        binding.actionCreateFile.setOnClickListener {
+            Toast.makeText(context, "create file", Toast.LENGTH_SHORT).show()
+        }
+        binding.actionMove.setOnClickListener {
+            Toast.makeText(context, "move", Toast.LENGTH_SHORT).show()
+        }
+        binding.actionDelete.setOnClickListener {
+            Toast.makeText(context, "delete", Toast.LENGTH_SHORT).show()
+        }
+        binding.actionOpen.setOnClickListener {
+            Toast.makeText(context, "open", Toast.LENGTH_SHORT).show()
+        }
+        binding.actionRename.setOnClickListener {
+            Toast.makeText(context, "rename", Toast.LENGTH_SHORT).show()
         }
     }
 

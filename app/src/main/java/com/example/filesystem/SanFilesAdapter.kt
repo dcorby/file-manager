@@ -43,8 +43,16 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
             sanFileTextView.text = sanFile.name
 
             val context = itemView.context
-            val identifier = context.resources.getIdentifier(sanFile.ext, "drawable", "com.example.filesystem")
+            var identifier = context.resources.getIdentifier(sanFile.ext, "drawable", "com.example.filesystem")
             if (sanFile.ext != null && identifier != 0) {
+                val icon: Drawable? = AppCompatResources.getDrawable(context, identifier)
+                sanFileImageView.setImageDrawable(icon)
+            } else {
+                identifier = if (sanFile.isDir) {
+                    context.resources.getIdentifier("folder", "drawable", "com.example.filesystem")
+                } else {
+                    context.resources.getIdentifier("file", "drawable", "com.example.filesystem")
+                }
                 val icon: Drawable? = AppCompatResources.getDrawable(context, identifier)
                 sanFileImageView.setImageDrawable(icon)
             }
