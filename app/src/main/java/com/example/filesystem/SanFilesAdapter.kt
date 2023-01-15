@@ -78,7 +78,7 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
                         multiSelectAnchor = ""
                         multiSelectActivated = false
                     }
-                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.white))
+                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.primary_background))
                 }
             }
         }

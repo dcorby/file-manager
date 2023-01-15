@@ -21,14 +21,13 @@
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/maroon"
+            android:background="@color/gray"
             app:layoutManager="LinearLayoutManager">
         </androidx.recyclerview.widget.RecyclerView>
     </RelativeLayout>
     <LinearLayout
         android:id="@+id/controls"
         android:layout_width="0dp"
-        android:background="#FFFFFF"
         android:layout_height="wrap_content"
         app:layout_constraintWidth_percent="0.90"
         android:orientation="vertical"
@@ -52,14 +51,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="File"
-                    app:icon="@drawable/ic_add_24dp" />
+                    app:icon="@drawable/ic_add_24dp"
+                    app:iconTint="@color/button_text_color"
+                    android:textColor="@color/button_text_color"
+                    app:backgroundTint="@color/button_background_tint" />
                 <Button
                     android:id="@+id/action_create_folder"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Folder"
-                    app:icon="@drawable/ic_add_24dp" />
+                    app:icon="@drawable/ic_add_24dp"
+                    app:iconTint="@color/button_text_color"
+                    android:textColor="@color/button_text_color"
+                    app:backgroundTint="@color/button_background_tint" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <EditText
@@ -91,8 +96,8 @@
                     android:text="Open"
                     android:padding="0dp"
                     android:textSize="12sp"
-                    app:backgroundTint="@color/button"
-                    >
+                    android:textColor="@color/button_text_color"
+                    app:backgroundTint="@color/button_background_tint">
                 </Button>
                 <Button
                     android:id="@+id/action_rename"
@@ -102,7 +107,9 @@
                     android:layout_weight="1"
                     android:text="Rename"
                     android:padding="0dp"
-                    android:textSize="12sp">
+                    android:textSize="12sp"
+                    android:textColor="@color/button_text_color"
+                    app:backgroundTint="@color/button_background_tint" >
                 </Button>
                 <Button
                     android:id="@+id/action_copy"
@@ -112,7 +119,9 @@
                     android:layout_weight="1"
                     android:text="Copy"
                     android:padding="0dp"
-                    android:textSize="12sp">
+                    android:textSize="12sp"
+                    android:textColor="@color/button_text_color"
+                    app:backgroundTint="@color/button_background_tint" >
                 </Button>
                 <Button
                     android:id="@+id/action_move"
@@ -122,7 +131,9 @@
                     android:layout_weight="1"
                     android:text="Move"
                     android:padding="0dp"
-                    android:textSize="12sp">
+                    android:textSize="12sp"
+                    android:textColor="@color/button_text_color"
+                    app:backgroundTint="@color/button_background_tint" >
                 </Button>
                 <Button
                     android:id="@+id/action_delete"
@@ -132,7 +143,9 @@
                     android:layout_weight="1"
                     android:text="Delete"
                     android:padding="0dp"
-                    android:textSize="12sp">
+                    android:textSize="12sp"
+                    android:textColor="@color/button_text_color"
+                    app:backgroundTint="@color/button_background_tint" >
                 </Button>
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </LinearLayout>
