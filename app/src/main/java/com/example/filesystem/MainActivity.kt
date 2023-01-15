@@ -31,11 +31,11 @@ TODO
 [ ] Print current directory in header adapter
 [ ] Make file selectable in listview (highlighted)
 [ ] Add a menu of operations at the bottom (delete, copy, move, rename, open (w/ select application), properties)
-[ ] Long-press will mimic doubleclick
 [ ] Wire up events to listview items
-[ ] Alow select multiple with holding-down-already tap
+[x] Implement multiselect
 [ ] Implement mp3 handler first, and implement services
 [ ] Implement icons: https://github.com/dmhendricks/file-icon-vectors
+[ ] Fix bug for tap same file that's already activate (multi implemented=false)
  */
 
 class MainActivity : AppCompatActivity() {
@@ -66,6 +66,8 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         val navGraph = navController.navInflater.inflate(R.navigation.nav_graph)
         navGraph.setStartDestination(startDestinationId)
+        // https://stackoverflow.com/questions/64414301/why-onviewcreated-is-called-twice-in-android-app-using-navigation-components
+        // ^!!!!
         navController.setGraph(navGraph, null)
     }
 

@@ -95,6 +95,10 @@ class FolderFragment : Fragment() {
 
         sanFilesAdapter!!.initTracker()
         sanFilesAdapter!!.tracker = tracker
+
+        if (savedInstanceState != null) {
+            tracker?.onRestoreInstanceState(savedInstanceState)
+        }
     }
 
     private fun observeCurrent() {
@@ -140,36 +144,11 @@ class FolderFragment : Fragment() {
         }
     }
 
-//    private fun setupUi() {
-//
-//        tracker = SelectionTracker.Builder<String>(
-//            "selectionItem",
-//            binding.recyclerView,
-//            ItemsKeyProvider(sanFilesAdapter!!),
-//            ItemsDetailsLookup(binding.recyclerView),
-//            StorageStrategy.createStringStorage()
-//            ).withSelectionPredicate(
-//            SelectionPredicates.createSelectAnything()
-//        ).build()
-//
-//        tracker?.addObserver(
-//            object : SelectionTracker.SelectionObserver<String>() {
-//                override fun onSelectionChanged() {
-//                    super.onSelectionChanged()
-//
-//                    Log.v("File-san", "onSelectionChanged()")
-//                    // Good place to update livedata?
-//                }
-//
-//                override fun onItemStateChanged(key: String, selected: Boolean) {
-//                    //if (!tracker!!.hasSelection()) {
-//                    //    sanFilesAdapter!!.notifyDataSetChanged()
-//                    //}
-//                    Log.v("File-san", "onItemStateChanged()")
-//                    super.onItemStateChanged(key, !selected)
-//                }
-//            })
-//
-//        sanFilesAdapter?.tracker = tracker
-//    }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        tracker?.onSaveInstanceState(outState)
+    }
 }
+
+
+

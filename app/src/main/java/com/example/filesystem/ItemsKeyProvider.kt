@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class ItemsKeyProvider(private val sanFilesAdapter: SanFilesAdapter) : ItemKeyProvider<String>(SCOPE_CACHED) {
     override fun getKey(position: Int): String {
-        Log.v("File-san", "position=$position")
+        //Log.v("File-san", "position=$position")
         //return recyclerView.adapter.currentList[position].docId
         //return recyclerView.adapter!!.getItem(position)
         //recyclerView.
