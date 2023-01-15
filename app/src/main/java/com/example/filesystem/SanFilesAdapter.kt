@@ -60,7 +60,7 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
 
             tracker?.let {
                 if (it.isSelected(getItem(position).docId)) {
-                    if (!multiSelectActivated) {
+                    if (!multiSelectActivated && getItem(position).docId != prevDocId) {
                         tracker?.deselect(prevDocId)
                     }
                     itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.pink))
