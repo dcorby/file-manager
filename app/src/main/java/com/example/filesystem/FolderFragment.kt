@@ -10,7 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -21,6 +21,7 @@ import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.databinding.FragmentFolderBinding
 import com.example.filesystem.actions.Actions
+import com.example.filesystem.actions.CreateFile
 
 /**
  * If the user has already initialized the app, land on this fragment.
@@ -98,34 +99,32 @@ class FolderFragment : Fragment() {
         }
 
         // Actions
-        val actions: Actions = Actions(requireActivity() as MainActivity)
+        // Register these actions outside of the onclicks:
+        // https://stackoverflow.com/questions/64476827/how-to-resolve-the-error-lifecycleowners-must-call-register-before-they-are-sta
+        val actions: HashMap<String, Any> = Actions.get(requireActivity())
         // Copy
         binding.actionCopy.setOnClickListener {
-            val action = actions.getAction("Copy")
         }
         // Create Folder
         binding.actionCreateFolder.setOnClickListener {
-            val action = actions.getAction("CreateFolder")
         }
         // Create File
         binding.actionCreateFile.setOnClickListener {
-            val action = actions.getAction("CreateFile")
+            val action : CreateFile = actions.get("CreateFile") as CreateFile
+            val sanFile: SanFile = action.handle()
+            sanFilesViewModel.insertSanFile(sanFile)
         }
         // Move
         binding.actionMove.setOnClickListener {
-            val action = actions.getAction("Move")
         }
         // Delete
         binding.actionDelete.setOnClickListener {
-            val action = actions.getAction("Delete")
         }
         // Open
         binding.actionOpen.setOnClickListener {
-            val action = actions.getAction("Open")
         }
         // Rename
         binding.actionRename.setOnClickListener {
-            val action = actions.getAction("Rename")
         }
     }
 

@@ -1,26 +1,20 @@
 package com.example.filesystem.actions
 
-import com.example.filesystem.MainActivity
+import androidx.fragment.app.FragmentActivity
 
-open class Action {
-
-}
-
-class Actions constructor(mainActivity: MainActivity) {
-    private val activity = mainActivity
-
-    fun getAction(type: String): Action {
-        return when (type) {
-            "Copy" -> Copy(activity)
-            "CreateFile" -> CreateFile(activity)
-            "CreateFolder" -> CreateFolder(activity)
-            "Delete" -> Delete(activity)
-            "Move" -> Move(activity)
-            "Open" -> Open(activity)
-            "Rename" -> Rename(activity)
-            else -> {
-                throw Exception("Action not found")
-            }
+// https://stackoverflow.com/questions/64476827/how-to-resolve-the-error-lifecycleowners-must-call-register-before-they-are-sta
+class Actions() {
+    companion object {
+        fun get(fragmentActivity: FragmentActivity): HashMap<String, Any> {
+            var hashMap : HashMap<String, Any> = HashMap()
+            hashMap["Copy"] = Copy(fragmentActivity)
+            hashMap["CreateFile"] = CreateFile(fragmentActivity)
+            hashMap["CreateFolder"] = CreateFolder(fragmentActivity)
+            hashMap["Delete"] = Delete(fragmentActivity)
+            hashMap["Move"] = Move(fragmentActivity)
+            hashMap["Open"] = Open(fragmentActivity)
+            hashMap["Rename"] = Rename(fragmentActivity)
+            return hashMap
         }
     }
 }
