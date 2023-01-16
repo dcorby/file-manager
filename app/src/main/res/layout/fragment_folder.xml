@@ -38,46 +38,48 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:orientation="horizontal">
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0"
                 app:singleSelection="true">
                 <Button
                     android:id="@+id/action_create_file"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:text="File"
                     app:icon="@drawable/ic_add_24dp"
                     app:iconTint="@color/button_text_color"
                     android:textColor="@color/button_text_color"
-                    app:backgroundTint="@color/button_background_tint" />
+                    app:backgroundTint="@color/button_background_tint"
+                    app:rippleColor="@android:color/transparent" />
                 <Button
                     android:id="@+id/action_create_folder"
                     style="?attr/materialButtonOutlinedStyle"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:text="Folder"
                     app:icon="@drawable/ic_add_24dp"
                     app:iconTint="@color/button_text_color"
                     android:textColor="@color/button_text_color"
-                    app:backgroundTint="@color/button_background_tint" />
+                    app:backgroundTint="@color/button_background_tint"
+                    app:rippleColor="@android:color/transparent" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
 
             <EditText
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginLeft="10dp">
             </EditText>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="60dp"
             android:orientation="horizontal">
 
             <!-- delete, copy, move, rename, open (w/ select application) -->
@@ -85,7 +87,7 @@
             <!-- https://m3.material.io/components/buttons/overview -->
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 app:singleSelection="true">
                 <Button
                     android:id="@+id/action_open"
@@ -94,10 +96,10 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="Open"
-                    android:padding="0dp"
                     android:textSize="12sp"
                     android:textColor="@color/button_text_color"
-                    app:backgroundTint="@color/button_background_tint">
+                    app:backgroundTint="@color/button_background_tint"
+                    app:rippleColor="@android:color/transparent">
                 </Button>
                 <Button
                     android:id="@+id/action_rename"
@@ -106,10 +108,10 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="Rename"
-                    android:padding="0dp"
                     android:textSize="12sp"
                     android:textColor="@color/button_text_color"
-                    app:backgroundTint="@color/button_background_tint" >
+                    app:backgroundTint="@color/button_background_tint"
+                    app:rippleColor="@android:color/transparent">
                 </Button>
                 <Button
                     android:id="@+id/action_copy"
@@ -118,10 +120,10 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="Copy"
-                    android:padding="0dp"
                     android:textSize="12sp"
                     android:textColor="@color/button_text_color"
-                    app:backgroundTint="@color/button_background_tint" >
+                    app:backgroundTint="@color/button_background_tint"
+                    app:rippleColor="@android:color/transparent">
                 </Button>
                 <Button
                     android:id="@+id/action_move"
@@ -130,10 +132,10 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="Move"
-                    android:padding="0dp"
                     android:textSize="12sp"
                     android:textColor="@color/button_text_color"
-                    app:backgroundTint="@color/button_background_tint" >
+                    app:backgroundTint="@color/button_background_tint"
+                    app:rippleColor="@android:color/transparent">
                 </Button>
                 <Button
                     android:id="@+id/action_delete"
@@ -142,10 +144,10 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="Delete"
-                    android:padding="0dp"
                     android:textSize="12sp"
                     android:textColor="@color/button_text_color"
-                    app:backgroundTint="@color/button_background_tint" >
+                    app:backgroundTint="@color/button_background_tint"
+                    app:rippleColor="@android:color/transparent">
                 </Button>
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </LinearLayout>

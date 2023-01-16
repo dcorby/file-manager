@@ -13,8 +13,8 @@
         android:layout_height="match_parent">
         <ImageView
             android:id="@+id/sanfile_image"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
             android:layout_margin="8dp"
             android:contentDescription="@string/sanfile_image_content_description"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -24,10 +24,11 @@
         <TextView
             android:id="@+id/sanfile_text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_margin="8dp"
-            android:text="@string/sanfile1_name"
-            android:textAppearance="?attr/textAppearanceHeadline5"
+            android:textSize="16sp"
+            android:textColor="@color/gray2"
+            android:gravity="center_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/sanfile_image"
             app:layout_constraintTop_toTopOf="parent" />

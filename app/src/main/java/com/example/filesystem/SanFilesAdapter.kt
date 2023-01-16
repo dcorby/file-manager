@@ -71,7 +71,8 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
                     if (!multiSelectActivated && getItem(position).docId != prevDocId) {
                         tracker?.deselect(prevDocId)
                     }
-                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.pink))
+                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.maroon))
+                    sanFileTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
                     prevDocId = getItem(position).docId
                 } else {
                     if (getItem(position).docId == multiSelectAnchor) {
@@ -79,6 +80,7 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
                         multiSelectActivated = false
                     }
                     itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.primary_background))
+                    sanFileTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.black))
                 }
             }
         }
