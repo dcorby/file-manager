@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
+import android.provider.DocumentsProvider
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -98,6 +99,9 @@ class FolderFragment : Fragment() {
             tracker?.onRestoreInstanceState(savedInstanceState)
         }
 
+        // *Important*
+        // https://stackoverflow.com/questions/72805727/what-is-the-authority-that-documentscontract-movedocument-needs
+
         // Actions
         // Register these actions outside of the onclicks:
         // https://stackoverflow.com/questions/64476827/how-to-resolve-the-error-lifecycleowners-must-call-register-before-they-are-sta
@@ -110,9 +114,13 @@ class FolderFragment : Fragment() {
         }
         // Create File
         binding.actionCreateFile.setOnClickListener {
-            val action : CreateFile = actions.get("CreateFile") as CreateFile
-            val sanFile: SanFile = action.handle()
-            sanFilesViewModel.insertSanFile(sanFile)
+            val action : CreateFile = actions["CreateFile"] as CreateFile
+            // Use the treeUri of the directory:
+            // https://developer.android.com/reference/android/provider/DocumentsContract
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), "home:File-San")
+            Log.v("File-sanXXX", docUri.toString())
+            action.handle(docUri)
+            observeCurrent()
         }
         // Move
         binding.actionMove.setOnClickListener {
