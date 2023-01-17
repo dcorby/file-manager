@@ -24,6 +24,7 @@ import com.example.filesystem.databinding.FragmentFolderBinding
 import com.example.filesystem.actions.Actions
 import com.example.filesystem.actions.CreateFile
 import com.example.filesystem.actions.CreateFolder
+import com.example.filesystem.actions.Open
 
 /**
  * If the user has already initialized the app, land on this fragment.
@@ -140,6 +141,9 @@ class FolderFragment : Fragment() {
         }
         // Open
         binding.actionOpen.setOnClickListener {
+            val selections = tracker!!.selection
+            val action : Open = actions["Open"] as Open
+            action.handle(requireContext(), selections)
         }
         // Rename
         binding.actionRename.setOnClickListener {
