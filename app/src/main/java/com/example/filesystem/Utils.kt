@@ -17,7 +17,7 @@ class Utils {
         private val fields = arrayOf(
             DocumentsContract.Document.COLUMN_DOCUMENT_ID,
             DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-            DocumentsContract.Document.COLUMN_MIME_TYPE,
+            DocumentsContract.Document.COLUMN_MIME_TYPE
         )
 
         // Implementation is based strongly on this example:
@@ -29,7 +29,6 @@ class Utils {
             // A tree uri has /tree/ in it
             // https://stackoverflow.com/questions/34927748/android-5-0-documentfile-from-tree-uri
             val docId = DocumentsContract.getTreeDocumentId(uri)
-            Log.v("File-San", "getChildren() uri=$uri, docID=$docId")
             val childDocuments: Uri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, docId)
             val dirNodes = LinkedList<Uri>()
             dirNodes.add(childDocuments)
@@ -39,6 +38,7 @@ class Utils {
                 if (c != null) {
                     try {
                         while (c.moveToNext()) {
+
                             val docId = c.getString(0)
                             val name = c.getString(1)
                             val mime = c.getString(2)
