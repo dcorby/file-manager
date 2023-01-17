@@ -1,21 +1,19 @@
 package com.example.filesystem.actions
 
-import android.app.Activity
-import android.content.ContentResolver
-import android.content.Intent
 import android.net.Uri
 import android.provider.DocumentsContract
-import android.provider.DocumentsProvider
-import android.util.Log
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 
-class CreateFile(activity: FragmentActivity) {
+class CreateFile(fragmentActivity: FragmentActivity) {
 
-    private val _activity = activity
+    private val activity = fragmentActivity
 
+    fun handle(uri: Uri) {
+        DocumentsContract.createDocument(activity.contentResolver, uri, "text/plain", "foo")
+    }
+}
+
+//    ** Old implementation **
 //    // "The launcher activity does not return a result."
 //    // https://stackoverflow.com/questions/72985346/activityresultlauncherintent-returns-result-code-before-returning-to-activity
 //    // This is asynchronous, so when we observeCurrent() when we return to the fragment, this is not guaranteed to finish
@@ -34,14 +32,5 @@ class CreateFile(activity: FragmentActivity) {
 //            addCategory(Intent.CATEGORY_OPENABLE)
 //            type = "*/*"
 //        }
-//        Log.v("File-san", handler.toString())
 //        handler.launch(intent)
 //    }
-
-    fun handle(uri: Uri) {
-
-
-        //_activity.contentResolver.
-        DocumentsContract.createDocument(_activity.contentResolver, uri, "text/plain", "foo")
-    }
-}

@@ -27,7 +27,7 @@ with zipfile.ZipFile(f"{icons}/icons.zip", "r") as f:
     f.extractall(f"{icons}/svg")
 
 svg = {}
-supported = ["file", "classic/mp3", "classic/pdf", "classic/folder"]
+supported = ["file", "classic/mp3", "classic/pdf", "classic/folder", "classic/txt"]
 for x in supported:
     files = list(Path(icons).rglob(f"*/{x}.svg"))
     if len(files) != 1:

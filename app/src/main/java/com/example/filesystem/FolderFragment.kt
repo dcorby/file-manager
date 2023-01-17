@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.databinding.FragmentFolderBinding
 import com.example.filesystem.actions.Actions
 import com.example.filesystem.actions.CreateFile
+import com.example.filesystem.actions.CreateFolder
 
 /**
  * If the user has already initialized the app, land on this fragment.
@@ -54,14 +55,18 @@ class FolderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        destination = "/" + (arguments?.getString("destination", "") ?: "")
         headerAdapter = HeaderAdapter()
         sanFilesAdapter = SanFilesAdapter { sanFile -> adapterOnClick(sanFile) }
         val recyclerView: RecyclerView = binding.recyclerView
         recyclerView.adapter = sanFilesAdapter
 
         val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
-        destination = settings.getString("root", null)
+        destination = if (arguments?.getString("destination") != "") {
+            arguments?.getString("destination")
+        } else {
+            settings.getString("root", null)
+        }
+        Log.v("File-san DESTINATION", destination!!)
 
         val uriPermissions = requireActivity().contentResolver.persistedUriPermissions
         var havePermissions = false
@@ -111,14 +116,19 @@ class FolderFragment : Fragment() {
         }
         // Create Folder
         binding.actionCreateFolder.setOnClickListener {
+            val action : CreateFolder = actions["CreateFolder"] as CreateFolder
+            val docId = DocumentsContract.getTreeDocumentId(destination!!.toUri())
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), docId)
+            action.handle(docUri)
+            observeCurrent()
         }
         // Create File
         binding.actionCreateFile.setOnClickListener {
             val action : CreateFile = actions["CreateFile"] as CreateFile
             // Use the treeUri of the directory:
             // https://developer.android.com/reference/android/provider/DocumentsContract
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), "home:File-San")
-            Log.v("File-sanXXX", docUri.toString())
+            val docId = DocumentsContract.getTreeDocumentId(destination!!.toUri())
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), docId)
             action.handle(docUri)
             observeCurrent()
         }
