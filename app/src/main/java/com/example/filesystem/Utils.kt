@@ -2,11 +2,13 @@ package com.example.filesystem
 
 import android.app.Activity
 import android.content.ContentResolver
+import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
 import java.io.Closeable
+import java.net.URLDecoder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -22,14 +24,20 @@ class Utils {
 
         // Implementation is based strongly on this example:
         // https://stackoverflow.com/questions/68789742/not-recuisive-get-list-file-type-in-android-java
-        fun getChildren(activity: Activity, uri: Uri): MutableList<SanFile> {
+        fun getChildren(activity: Activity, uri: Uri, _docId: String?): MutableList<SanFile> {
             val children = ArrayList<SanFile>()
             val contentResolver: ContentResolver = activity.contentResolver
 
+            //contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            //contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+
             // A tree uri has /tree/ in it
             // https://stackoverflow.com/questions/34927748/android-5-0-documentfile-from-tree-uri
-            val docId = DocumentsContract.getTreeDocumentId(uri)
-            val childDocuments: Uri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, docId)
+            val _uri = Uri.parse(URLDecoder.decode(uri.toString(), "UTF-8"))
+            Log.v("File-san", "Getting children for treeUri=${_uri}")
+            val docId = DocumentsContract.getTreeDocumentId(_uri)
+            val did = _docId ?: docId
+            val childDocuments: Uri = DocumentsContract.buildChildDocumentsUriUsingTree(_uri, did)
             val dirNodes = LinkedList<Uri>()
             dirNodes.add(childDocuments)
             while (!dirNodes.isEmpty()) {

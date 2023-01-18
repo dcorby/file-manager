@@ -77,4 +77,9 @@ class InitFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        Log.v("File-san", "InitFragment OnCreate()")
+        super.onCreate(savedInstanceState)
+    }
 }

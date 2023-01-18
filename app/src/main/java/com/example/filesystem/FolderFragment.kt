@@ -7,20 +7,17 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
-import android.provider.DocumentsProvider
-import android.provider.MediaStore
-import android.provider.MediaStore.getDocumentUri
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.Navigation
 import androidx.recyclerview.selection.SelectionPredicates
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
@@ -59,38 +56,16 @@ class FolderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         headerAdapter = HeaderAdapter()
         sanFilesAdapter = SanFilesAdapter { sanFile -> adapterOnClick(sanFile) }
         val recyclerView: RecyclerView = binding.recyclerView
         recyclerView.adapter = sanFilesAdapter
 
-        val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
-        destination = if (arguments?.getString("destination") != "") {
-            arguments?.getString("destination")
-        } else {
-            settings.getString("root", null)
-        }
-        Log.v("File-san DESTINATION", destination!!)
 
-        val uriPermissions = requireActivity().contentResolver.persistedUriPermissions
-        var havePermissions = false
-        // TODO - check that destination contains p.uri, not ==
-        for (p in uriPermissions) {
-            Log.v("File-San", "uriPermission=${p.uri.toString()} (r=${p.isReadPermission}/w=${p.isWritePermission})")
-            if (p.uri.toString() == destination && p.isReadPermission && p.isWritePermission) {
-                havePermissions = true
-            }
-        }
+        val docId = arguments?.getString("docid")
 
-        // If user lost permissions somehow, regain them
-        if (!havePermissions) {
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, "")
-            startActivityForResult(intent, OPEN_DOCUMENT_TREE_REQUEST_CODE)
-        } else {
-            observeCurrent()
-        }
-
+        observeCurrent(docId)
 
         tracker = SelectionTracker.Builder<String>(
             "selectionItem",
@@ -115,7 +90,10 @@ class FolderFragment : Fragment() {
         // Actions
         // Register these actions outside of the onclicks:
         // https://stackoverflow.com/questions/64476827/how-to-resolve-the-error-lifecycleowners-must-call-register-before-they-are-sta
-        val actions: HashMap<String, Any> = Actions.get(requireActivity())
+        var obj = Actions()
+        Log.v("File-san", "this as FragmentActivity=${this as Fragment}")
+        var actions = obj.get(this as Fragment)
+        //val actions: HashMap<String, Any> = Actions.get(activity as FragmentActivity)
         // Copy
         binding.actionCopy.setOnClickListener {
         }
@@ -125,7 +103,7 @@ class FolderFragment : Fragment() {
             val docId = DocumentsContract.getTreeDocumentId(destination!!.toUri())
             val docUri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), docId)
             action.handle(docUri)
-            observeCurrent()
+            observeCurrent(null)
         }
         // Create File
         binding.actionCreateFile.setOnClickListener {
@@ -135,7 +113,7 @@ class FolderFragment : Fragment() {
             val docId = DocumentsContract.getTreeDocumentId(destination!!.toUri())
             val docUri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), docId)
             action.handle(docUri)
-            observeCurrent()
+            observeCurrent(null)
         }
         // Move
         binding.actionMove.setOnClickListener {
@@ -147,19 +125,60 @@ class FolderFragment : Fragment() {
         binding.actionOpen.setOnClickListener {
             val selections = tracker!!.selection
             val action : Open = actions["Open"] as Open
-            action.handle(requireContext(), selections)
+            action.handle(requireContext(), selections, destination!!)
         }
         // Rename
-        // MOVE THIS OUT OF ONCLICK
         binding.actionRename.setOnClickListener {
             val selections = tracker!!.selection
             val action : Rename = actions["Rename"] as Rename
             action.handle(requireContext(), selections, destination!!)
         }
+
     }
 
-    private fun observeCurrent() {
-        val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destination!!.toUri())
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
+        destination = if (arguments?.getString("destination") != "" && arguments?.getString("destination") != null) {
+            Log.v("File-san", "_destination=${arguments?.getString("destination")}")
+            arguments?.getString("destination")
+        } else {
+            Log.v("File-san", "root=${settings.getString("root", null)}")
+            settings.getString("root", null)
+        }
+
+        Log.v("File-san", "destination=$destination")
+
+        Log.v("File-san", "fragmentActivity=${requireActivity()}")
+        val uriPermissions = requireActivity().contentResolver.persistedUriPermissions
+        var havePermissions = false
+        // TODO - check that destination contains p.uri, not ==
+        Log.v("File-san", "destination=$destination")
+        for (p in uriPermissions) {
+            Log.v("File-san", "uriPermission=${p.uri.toString()} (r=${p.isReadPermission}/w=${p.isWritePermission})")
+            //if (p.uri.toString() == destination && p.isReadPermission && p.isWritePermission) {
+            if (destination!!.contains(p.uri.toString()) && p.isReadPermission && p.isWritePermission) {
+                havePermissions = true
+            }
+        }
+        Log.v("File-san", "havePermissions=$havePermissions")
+
+        // If user lost permissions somehow, regain them
+        if (!havePermissions) {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, "")
+            startActivityForResult(intent, OPEN_DOCUMENT_TREE_REQUEST_CODE)
+        }
+
+
+
+
+    }
+
+    private fun observeCurrent(docId: String?) {
+        Log.v("File-san", "Observing for destination=${destination!!}")
+        val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destination!!.toUri(), docId)
         Log.v("File-san", "MutableList length=${mutableList.size}")
 
         // Observe the current directory
@@ -197,7 +216,7 @@ class FolderFragment : Fragment() {
             editor.putString("root", uri.toString())
             editor.commit()
 
-            observeCurrent()
+            observeCurrent(null)
         }
     }
 

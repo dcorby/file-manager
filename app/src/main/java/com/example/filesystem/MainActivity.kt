@@ -2,6 +2,7 @@ package com.example.filesystem
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowInsets
@@ -56,6 +57,7 @@ class MainActivity : AppCompatActivity() {
         // https://stackoverflow.com/questions/51173002/how-to-change-start-destination-of-a-navigation-graph-programmatically
         val settings = getSharedPreferences("UserInfo", 0)
         val root = settings.getString("root", null)
+        Log.v("File-san", "root=$root")
         var startDestinationId : Int? = null
         startDestinationId = if (root == null) {
             R.id.InitFragment

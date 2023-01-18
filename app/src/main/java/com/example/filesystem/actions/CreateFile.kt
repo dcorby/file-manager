@@ -2,14 +2,15 @@ package com.example.filesystem.actions
 
 import android.net.Uri
 import android.provider.DocumentsContract
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 
-class CreateFile(fragmentActivity: FragmentActivity) {
+class CreateFile(fragment: Fragment) {
 
-    private val activity = fragmentActivity
+    private val _fragment = fragment
 
     fun handle(uri: Uri) {
-        DocumentsContract.createDocument(activity.contentResolver, uri, "text/plain", "foo")
+        DocumentsContract.createDocument(_fragment.requireActivity().contentResolver, uri, "text/plain", "foo")
     }
 }
 

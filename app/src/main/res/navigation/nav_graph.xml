@@ -21,6 +21,9 @@
         android:name="com.example.filesystem.FolderFragment"
         android:label="root fragment label"
         tools:layout="@layout/fragment_folder">
+        <action
+            android:id="@+id/action_FolderFragment_to_FolderFragment"
+            app:destination="@id/FolderFragment" />
         <argument
             android:name="destination"
             app:argType="string"
