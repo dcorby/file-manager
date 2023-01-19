@@ -6,24 +6,26 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.FileObserver
 import android.provider.DocumentsContract
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.Navigation
 import androidx.recyclerview.selection.SelectionPredicates
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.actions.*
 import com.example.filesystem.databinding.FragmentFolderBinding
+
 
 /**
  * If the user has already initialized the app, land on this fragment.
@@ -42,6 +44,7 @@ class FolderFragment : Fragment() {
     private var sanFilesAdapter: SanFilesAdapter? = null
     private var destination: String? = null
     private var tracker: SelectionTracker<String>? = null
+    private var fileObserver : FileObserver? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,7 +55,7 @@ class FolderFragment : Fragment() {
         return binding.root
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -134,7 +137,20 @@ class FolderFragment : Fragment() {
             action.handle(requireContext(), selections, destination!!)
         }
 
+
+        fileObserver = DirectoryObserver(destination!!.toUri().toFile(), FileObserver.ALL_EVENTS) {
+        }
+
+        val foo = object : FileObserver(destination!!.toUri().toFile(), FileObserver.ALL_EVENTS) {
+            // set up a file observer to watch this directory on sd card
+            override fun onEvent(event: Int, file: String?) {
+
+            }
+        }
+
+
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -170,10 +186,6 @@ class FolderFragment : Fragment() {
             intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, "")
             startActivityForResult(intent, OPEN_DOCUMENT_TREE_REQUEST_CODE)
         }
-
-
-
-
     }
 
     private fun observeCurrent(docId: String?) {
@@ -224,6 +236,8 @@ class FolderFragment : Fragment() {
         super.onSaveInstanceState(outState)
         tracker?.onSaveInstanceState(outState)
     }
+
+
 }
 
 
