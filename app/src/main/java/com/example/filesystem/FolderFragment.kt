@@ -1,12 +1,12 @@
 package com.example.filesystem
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
+import android.database.ContentObserver
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.FileObserver
+import android.os.*
 import android.provider.DocumentsContract
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,8 +14,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.net.toFile
 import androidx.core.net.toUri
+import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -35,6 +35,12 @@ import com.example.filesystem.databinding.FragmentFolderBinding
 
 const val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
 
+//class DirectoryFileObserver(path: String) : FileObserver(path) {
+//    override fun onEvent(event: Int, path: String?) {
+//        Log.v("FileObserver: ", "File changed")
+//    }
+//}
+
 class FolderFragment : Fragment() {
 
     private var _binding: FragmentFolderBinding? = null
@@ -44,7 +50,19 @@ class FolderFragment : Fragment() {
     private var sanFilesAdapter: SanFilesAdapter? = null
     private var destination: String? = null
     private var tracker: SelectionTracker<String>? = null
+    private var contentObserver1 : ContentObserver? = null
+    private var contentObserver2 : ContentObserver? = null
+    private var contentObserver3 : ContentObserver? = null
+    private var contentObserver4 : ContentObserver? = null
+    private var contentObserver5 : ContentObserver? = null
+    private var contentObserver6 : ContentObserver? = null
+    private var contentObserver7 : ContentObserver? = null
+    private var contentObserver8 : ContentObserver? = null
+    private var contentObserver9 : ContentObserver? = null
+    private var contentObserver10 : ContentObserver? = null
+    private var AUTHORITY = "com.android.externalstorage.documents"
     private var fileObserver : FileObserver? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,6 +73,7 @@ class FolderFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("Range")
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -87,6 +106,20 @@ class FolderFragment : Fragment() {
             tracker?.onRestoreInstanceState(savedInstanceState)
         }
 
+
+        contentObserver1 = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                //super.onChange(selfChange)
+                this.onChange(selfChange, null);
+                Log.v("File-san", "changed")
+            }
+
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                //super.onChange(selfChange, uri)
+                Log.v("File-san", "changed2")
+            }
+        }
+
         // *Important*
         // https://stackoverflow.com/questions/72805727/what-is-the-authority-that-documentscontract-movedocument-needs
 
@@ -117,6 +150,8 @@ class FolderFragment : Fragment() {
             val docUri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), docId)
             action.handle(docUri)
             observeCurrent(null)
+            Log.v("File-san", "Notifying change for docUri=$docUri")
+            requireActivity().contentResolver.notifyChange(docUri, contentObserver1)
         }
         // Move
         binding.actionMove.setOnClickListener {
@@ -138,22 +173,97 @@ class FolderFragment : Fragment() {
         }
 
 
-        fileObserver = DirectoryObserver(destination!!.toUri().toFile(), FileObserver.ALL_EVENTS) {
-        }
 
-        val foo = object : FileObserver(destination!!.toUri().toFile(), FileObserver.ALL_EVENTS) {
-            // set up a file observer to watch this directory on sd card
-            override fun onEvent(event: Int, file: String?) {
 
+
+
+
+
+        val _doc_id = DocumentsContract.getTreeDocumentId(destination!!.toUri())
+        val doc_uri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), _doc_id)
+        val doc_id = DocumentsContract.getDocumentId(doc_uri)
+        val doc_tree_uri = DocumentsContract.buildTreeDocumentUri(doc_uri.authority, doc_id)
+        //val child_doc_uri = DocumentsContract.buildChildDocumentsUriUsingTree(destination!!.toUri(), doc_id)
+        //Log.v("File-san", "child_doc_uri=$child_doc_uri")
+        //requireActivity().contentResolver.registerContentObserver(child_doc_uri, false, MyContentObserver(Handler(
+        //    Looper.getMainLooper())))
+
+        val doc_uri2 = DocumentsContract.buildDocumentUri(AUTHORITY, doc_id)
+        val doc_uri3 = DocumentsContract.buildTreeDocumentUri(AUTHORITY, doc_id)
+
+
+
+
+//            override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
+//                //super.onChange(selfChange, uri, flags)
+//                this.onChange(selfChange, null);
+//                Log.v("File-san", "changed3")
+//            }
+
+
+        //requireActivity().contentResolver.registerContentObserver(destination!!.toUri(), true, tmp!!)
+
+
+
+
+
+
+        val foo = DocumentFile.fromTreeUri(requireContext(), destination!!.toUri() )
+        Log.v("File-san", "test=${foo?.uri.toString()}")
+
+
+        Log.v("File-san", "Content observe on $doc_uri2")
+        Log.v("File-san", "Content observe on $doc_uri")
+        requireActivity().contentResolver.registerContentObserver(doc_uri2, true, contentObserver1!!)
+        requireActivity().contentResolver.registerContentObserver(doc_uri, true, contentObserver1!!)
+        requireActivity().contentResolver.registerContentObserver(destination!!.toUri(), true, contentObserver1!!)
+        requireActivity().contentResolver.registerContentObserver(foo!!.uri, true, contentObserver1!!)
+
+
+
+
+        //val file = File(destination!!.toUri().getPath()) //create path from uri
+        //val split: List<String> = file.getPath().split(":") //split the path.
+        //val filePath = Environment.getExternalStorageDirectory().absolutePath + "/Download/" + split[1]
+
+
+        val dri = DocumentsContract.buildDocumentUriUsingTree(
+            destination!!.toUri(),
+            DocumentsContract.getTreeDocumentId(destination!!.toUri())
+        )
+        Log.v("File-san", "Querying=$dri")
+        val cursor = requireContext().contentResolver.query(dri,  null, null, null, null)
+        // https://stackoverflow.com/questions/60110775/watching-a-folder-for-changes-on-external-sd-card
+        cursor!!.moveToFirst()
+        val string = cursor!!.getString(cursor!!.getColumnIndex("document_id"))
+
+        val strings = string.split(":").toTypedArray()
+        //val newPath = "/storage/" + if (strings[0] == "primary") "emulated/0/" + strings[1] else string.replace(":".toRegex(), "/")
+        //val newPath1 = "/storage/emulated/0/documents/" + strings[1] + "/"
+        val newPath2 = "/storage/documents/" + string.replace(":".toRegex(), "/")
+
+        Log.v("File-san", "newPath2=${newPath2}")
+
+        fileObserver = object : FileObserver(newPath2) {
+            override fun onEvent(event: Int, path: String?) {
+                Log.v("File-san", "OK CHANGE")
+                Toast.makeText(context,"change", Toast.LENGTH_SHORT).show()
+                observeCurrent(null)
             }
         }
+        fileObserver!!.startWatching()
+
+
 
 
     }
 
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
 
         val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
         destination = if (arguments?.getString("destination") != "" && arguments?.getString("destination") != null) {
