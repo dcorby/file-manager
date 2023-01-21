@@ -148,6 +148,23 @@ class FolderFragment : Fragment() {
             //val u = DocumentsContract.buildDocumentUri(AUTHORITY, tracker!!.selection.toList()[0])
             val u2 = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), tracker!!.selection.toList()[0])
             Log.v("File-san", u2.toString())
+
+
+            contentObserver8 = object : ContentObserver(null) {
+                override fun onChange(selfChange: Boolean) {
+                    Log.v("myapp", "change detected")
+                }
+                override fun onChange(selfChange: Boolean, uri: Uri?) {
+                    Log.v("myapp", "change detected")
+                }
+                override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
+                    Log.v("myapp", "change detected")
+                }
+                override fun deliverSelfNotifications(): Boolean {
+                    return true
+                }
+            }
+            requireActivity().contentResolver.registerContentObserver(u2, true, contentObserver8!!)
             DocumentsContract.deleteDocument(requireActivity().contentResolver, u2)
         }
         // Open
