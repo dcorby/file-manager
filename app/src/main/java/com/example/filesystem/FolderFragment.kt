@@ -107,19 +107,6 @@ class FolderFragment : Fragment() {
         }
 
 
-        contentObserver1 = object : ContentObserver(null) {
-            override fun onChange(selfChange: Boolean) {
-                //super.onChange(selfChange)
-                this.onChange(selfChange, null);
-                Log.v("File-san", "changed")
-            }
-
-            override fun onChange(selfChange: Boolean, uri: Uri?) {
-                //super.onChange(selfChange, uri)
-                Log.v("File-san", "changed2")
-            }
-        }
-
         // *Important*
         // https://stackoverflow.com/questions/72805727/what-is-the-authority-that-documentscontract-movedocument-needs
 
@@ -158,6 +145,10 @@ class FolderFragment : Fragment() {
         }
         // Delete
         binding.actionDelete.setOnClickListener {
+            //val u = DocumentsContract.buildDocumentUri(AUTHORITY, tracker!!.selection.toList()[0])
+            val u2 = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), tracker!!.selection.toList()[0])
+            Log.v("File-san", u2.toString())
+            DocumentsContract.deleteDocument(requireActivity().contentResolver, u2)
         }
         // Open
         binding.actionOpen.setOnClickListener {
@@ -174,88 +165,138 @@ class FolderFragment : Fragment() {
 
 
 
-
-
-
-
-
         val _doc_id = DocumentsContract.getTreeDocumentId(destination!!.toUri())
         val doc_uri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), _doc_id)
         val doc_id = DocumentsContract.getDocumentId(doc_uri)
         val doc_tree_uri = DocumentsContract.buildTreeDocumentUri(doc_uri.authority, doc_id)
-        //val child_doc_uri = DocumentsContract.buildChildDocumentsUriUsingTree(destination!!.toUri(), doc_id)
-        //Log.v("File-san", "child_doc_uri=$child_doc_uri")
-        //requireActivity().contentResolver.registerContentObserver(child_doc_uri, false, MyContentObserver(Handler(
-        //    Looper.getMainLooper())))
-
         val doc_uri2 = DocumentsContract.buildDocumentUri(AUTHORITY, doc_id)
         val doc_uri3 = DocumentsContract.buildTreeDocumentUri(AUTHORITY, doc_id)
-
-
-
-
-//            override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
-//                //super.onChange(selfChange, uri, flags)
-//                this.onChange(selfChange, null);
-//                Log.v("File-san", "changed3")
-//            }
-
-
-        //requireActivity().contentResolver.registerContentObserver(destination!!.toUri(), true, tmp!!)
-
-
-
-
-
-
-        val foo = DocumentFile.fromTreeUri(requireContext(), destination!!.toUri() )
-        Log.v("File-san", "test=${foo?.uri.toString()}")
-
-
-        Log.v("File-san", "Content observe on $doc_uri2")
-        Log.v("File-san", "Content observe on $doc_uri")
-        requireActivity().contentResolver.registerContentObserver(doc_uri2, true, contentObserver1!!)
-        requireActivity().contentResolver.registerContentObserver(doc_uri, true, contentObserver1!!)
-        requireActivity().contentResolver.registerContentObserver(destination!!.toUri(), true, contentObserver1!!)
-        requireActivity().contentResolver.registerContentObserver(foo!!.uri, true, contentObserver1!!)
-
-
-
-
-        //val file = File(destination!!.toUri().getPath()) //create path from uri
-        //val split: List<String> = file.getPath().split(":") //split the path.
-        //val filePath = Environment.getExternalStorageDirectory().absolutePath + "/Download/" + split[1]
-
-
         val dri = DocumentsContract.buildDocumentUriUsingTree(
             destination!!.toUri(),
             DocumentsContract.getTreeDocumentId(destination!!.toUri())
         )
-        Log.v("File-san", "Querying=$dri")
-        val cursor = requireContext().contentResolver.query(dri,  null, null, null, null)
-        // https://stackoverflow.com/questions/60110775/watching-a-folder-for-changes-on-external-sd-card
-        cursor!!.moveToFirst()
-        val string = cursor!!.getString(cursor!!.getColumnIndex("document_id"))
+        val foo = DocumentFile.fromTreeUri(requireContext(), destination!!.toUri() )
 
-        val strings = string.split(":").toTypedArray()
-        //val newPath = "/storage/" + if (strings[0] == "primary") "emulated/0/" + strings[1] else string.replace(":".toRegex(), "/")
-        //val newPath1 = "/storage/emulated/0/documents/" + strings[1] + "/"
-        val newPath2 = "/storage/documents/" + string.replace(":".toRegex(), "/")
 
-        Log.v("File-san", "newPath2=${newPath2}")
-
-        fileObserver = object : FileObserver(newPath2) {
-            override fun onEvent(event: Int, path: String?) {
-                Log.v("File-san", "OK CHANGE")
-                Toast.makeText(context,"change", Toast.LENGTH_SHORT).show()
-                observeCurrent(null)
+        // https://github.com/android/storage-samples/issues/47
+        // destination
+        contentObserver1 = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
+                Log.v("myapp", "change detected")
+            }
+            override fun deliverSelfNotifications(): Boolean {
+                return true
             }
         }
-        fileObserver!!.startWatching()
+        requireActivity().contentResolver.registerContentObserver(destination!!.toUri(), true, contentObserver1!!)
 
+        // doc_uri
+        contentObserver2 = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
+                Log.v("myapp", "change detected")
+            }
+            override fun deliverSelfNotifications(): Boolean {
+                return true
+            }
+        }
+        requireActivity().contentResolver.registerContentObserver(doc_uri, true, contentObserver2!!)
 
+        // doc_tree_uri
+        contentObserver3 = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
+                Log.v("myapp", "change detected")
+            }
+            override fun deliverSelfNotifications(): Boolean {
+                return true
+            }
+        }
+        requireActivity().contentResolver.registerContentObserver(doc_tree_uri, true, contentObserver3!!)
 
+        // doc_uri2
+        contentObserver4 = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
+                Log.v("myapp", "change detected")
+            }
+            override fun deliverSelfNotifications(): Boolean {
+                return true
+            }
+        }
+        requireActivity().contentResolver.registerContentObserver(doc_uri2, true, contentObserver4!!)
 
+        // doc_uri3
+        contentObserver5 = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
+                Log.v("myapp", "change detected")
+            }
+            override fun deliverSelfNotifications(): Boolean {
+                return true
+            }
+        }
+        requireActivity().contentResolver.registerContentObserver(doc_uri3, true, contentObserver5!!)
+
+        // dri
+        contentObserver6 = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
+                Log.v("myapp", "change detected")
+            }
+            override fun deliverSelfNotifications(): Boolean {
+                return true
+            }
+        }
+        requireActivity().contentResolver.registerContentObserver(dri, true, contentObserver6!!)
+
+        // foo.uri
+        contentObserver7 = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                Log.v("myapp", "change detected")
+            }
+            override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
+                Log.v("myapp", "change detected")
+            }
+            override fun deliverSelfNotifications(): Boolean {
+                return true
+            }
+        }
+        requireActivity().contentResolver.registerContentObserver(foo!!.uri, true, contentObserver7!!)
     }
 
 
