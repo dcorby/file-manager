@@ -1,17 +1,14 @@
 package com.example.filesystem
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -52,8 +49,6 @@ class FolderFragment : Fragment() {
         return binding.root
     }
 
-    @SuppressLint("Range")
-    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -74,11 +69,11 @@ class FolderFragment : Fragment() {
             SelectionPredicates.createSelectAnything()
         ).build()
 
-        sanFilesAdapter.initTracker()
         sanFilesAdapter.tracker = tracker
+        sanFilesAdapter.initTracker()
 
         if (savedInstanceState != null) {
-            tracker?.onRestoreInstanceState(savedInstanceState)
+            tracker.onRestoreInstanceState(savedInstanceState)
         }
 
         // Actions
@@ -197,7 +192,7 @@ class FolderFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        tracker?.onSaveInstanceState(outState)
+        tracker.onSaveInstanceState(outState)
     }
 }
 

@@ -19,11 +19,11 @@ import androidx.recyclerview.widget.RecyclerView
 class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
     ListAdapter<SanFile, SanFilesAdapter.SanFileViewHolder>(SanFileDiffCallback) {
 
-    var tracker: SelectionTracker<String>? = null
+    lateinit var tracker: SelectionTracker<String>
     var multiSelectActivated = false
     var multiSelectAnchor = ""
     var prevDocId = ""
-    private val selectedPos = RecyclerView.NO_POSITION
+
     init {
         setHasStableIds(true)
     }
@@ -70,10 +70,10 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
                 return@setOnLongClickListener true
             }
 
-            tracker?.let {
+            tracker.let {
                 if (it.isSelected(getItem(position).docId)) {
                     if (!multiSelectActivated && getItem(position).docId != prevDocId) {
-                        tracker?.deselect(prevDocId)
+                        tracker.deselect(prevDocId)
                     }
                     itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.maroon))
                     sanFileTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.white))
@@ -102,16 +102,13 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
     }
 
     fun initTracker() {
-        tracker?.addObserver(
+        tracker.addObserver(
             object : SelectionTracker.SelectionObserver<String>() {
                 override fun onSelectionChanged() {
-                    super.onSelectionChanged()
-                    // Good place to update livedata?
                 }
 
                 override fun onItemStateChanged(key: String, selected: Boolean) {
                     if (tracker.hasSelection()) {
-                        this@SanFilesAdapter.notifyDataSetChanged()
                     }
                     super.onItemStateChanged(key, !selected)
                 }
