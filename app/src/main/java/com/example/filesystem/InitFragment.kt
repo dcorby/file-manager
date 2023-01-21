@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.example.filesystem.databinding.FragmentInitBinding
+import java.net.URLDecoder
 
 
 /**
@@ -48,14 +49,10 @@ class InitFragment : Fragment() {
         if (result.resultCode == Activity.RESULT_OK) {
             contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            // save the root folder
             val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
             val editor = settings.edit()
-            Log.v("File-San", "root folder=$uri")
-            editor.putString("root", uri.toString())
+            editor.putString("root", Utils.decode(uri.toString()))
             editor.commit()
-
-            Log.v("File-San", "Navigate=action_InitFragment_to_FolderFragment")
             val navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_content_main)
             navController.navigate(R.id.action_InitFragment_to_FolderFragment)
         }

@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 
 class Delete(fragment: Fragment) {
 
@@ -14,6 +13,5 @@ class Delete(fragment: Fragment) {
     }
 
     fun handle() {
-
     }
 }

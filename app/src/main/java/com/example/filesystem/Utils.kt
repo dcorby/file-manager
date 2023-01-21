@@ -27,17 +27,9 @@ class Utils {
         fun getChildren(activity: Activity, uri: Uri, _docId: String?): MutableList<SanFile> {
             val children = ArrayList<SanFile>()
             val contentResolver: ContentResolver = activity.contentResolver
-
-            //contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            //contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-
-            // A tree uri has /tree/ in it
-            // https://stackoverflow.com/questions/34927748/android-5-0-documentfile-from-tree-uri
-            val _uri = Uri.parse(URLDecoder.decode(uri.toString(), "UTF-8"))
-            Log.v("File-san", "Getting children for treeUri=${_uri}")
-            val docId = DocumentsContract.getTreeDocumentId(_uri)
+            val docId = DocumentsContract.getTreeDocumentId(uri)
             val did = _docId ?: docId
-            val childDocuments: Uri = DocumentsContract.buildChildDocumentsUriUsingTree(_uri, did)
+            val childDocuments: Uri = DocumentsContract.buildChildDocumentsUriUsingTree(uri, did)
             val dirNodes = LinkedList<Uri>()
             dirNodes.add(childDocuments)
             while (!dirNodes.isEmpty()) {
@@ -55,8 +47,6 @@ class Utils {
                             if (name.contains(".")) {
                                 ext = name.substring(name.lastIndexOf(".") + 1)    
                             }
-                            Log.d("File-san", "docId: $docId, name: $name, mime: $mime, isDir: $isDir, ext: $ext")
-                            //val newNode = DocumentsContract.buildChildDocumentsUriUsingTree(uri, docId)
                             val sanFile: SanFile = SanFile(docId=docId, directory=uri.toString(), name=name, isDir=isDir, ext=ext)
                             children.add(sanFile)
                         }
@@ -80,6 +70,10 @@ class Utils {
             } catch (re: RuntimeException) {
                 throw re
             }
+        }
+
+        fun decode(string : String) : String {
+            return URLDecoder.decode(string, "UTF-8")
         }
     }
 }

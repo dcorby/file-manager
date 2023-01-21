@@ -9,7 +9,7 @@ class ItemsKeyProvider(private val sanFilesAdapter: SanFilesAdapter) : ItemKeyPr
     override fun getKey(position: Int): String {
         //Log.v("File-san", "position=$position")
         //return recyclerView.adapter.currentList[position].docId
-        //return recyclerView.adapter!!.getItem(position)
+        //return recyclerView.Adapter.getItem(position)
         //recyclerView.
         return sanFilesAdapter.currentList[position].docId
     }

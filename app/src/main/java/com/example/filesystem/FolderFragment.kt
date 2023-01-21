@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
-import android.database.ContentObserver
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
@@ -38,11 +37,11 @@ class FolderFragment : Fragment() {
     private var _binding: FragmentFolderBinding? = null
     private val binding get() = _binding!!
     private val sanFilesViewModel: SanFilesViewModel by viewModels()
-    private var headerAdapter: HeaderAdapter? = null
-    private var sanFilesAdapter: SanFilesAdapter? = null
-    private var destination: String? = null
-    private var tracker: SelectionTracker<String>? = null
-    private var contentObserver : ContentObserver? = null
+    lateinit var headerAdapter: HeaderAdapter
+    lateinit var sanFilesAdapter: SanFilesAdapter
+    lateinit var destinationUri: Uri
+    lateinit var tracker: SelectionTracker<String>
+
     private var AUTHORITY = "com.android.externalstorage.documents"
 
     override fun onCreateView(
@@ -68,15 +67,15 @@ class FolderFragment : Fragment() {
         tracker = SelectionTracker.Builder<String>(
             "selectionItem",
             binding.recyclerView,
-            ItemsKeyProvider(sanFilesAdapter!!),
+            ItemsKeyProvider(sanFilesAdapter),
             ItemsDetailsLookup(binding.recyclerView),
             StorageStrategy.createStringStorage()
         ).withSelectionPredicate(
             SelectionPredicates.createSelectAnything()
         ).build()
 
-        sanFilesAdapter!!.initTracker()
-        sanFilesAdapter!!.tracker = tracker
+        sanFilesAdapter.initTracker()
+        sanFilesAdapter.tracker = tracker
 
         if (savedInstanceState != null) {
             tracker?.onRestoreInstanceState(savedInstanceState)
@@ -91,8 +90,8 @@ class FolderFragment : Fragment() {
         // Create Folder
         binding.actionCreateFolder.setOnClickListener {
             val action : CreateFolder = actions["CreateFolder"] as CreateFolder
-            val docId = DocumentsContract.getTreeDocumentId(destination!!.toUri())
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), docId)
+            val docId = DocumentsContract.getTreeDocumentId(destinationUri)
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docId)
             action.handle(docUri)
             observeCurrent(null)
         }
@@ -101,8 +100,8 @@ class FolderFragment : Fragment() {
             val action : CreateFile = actions["CreateFile"] as CreateFile
             // Use the treeUri of the directory:
             // https://developer.android.com/reference/android/provider/DocumentsContract
-            val docId = DocumentsContract.getTreeDocumentId(destination!!.toUri())
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), docId)
+            val docId = DocumentsContract.getTreeDocumentId(destinationUri)
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docId)
             action.handle(docUri)
             observeCurrent(null)
         }
@@ -111,19 +110,19 @@ class FolderFragment : Fragment() {
         }
         // Delete
         binding.actionDelete.setOnClickListener {
-            val u2 = DocumentsContract.buildDocumentUriUsingTree(destination!!.toUri(), tracker!!.selection.toList()[0])
+            val u2 = DocumentsContract.buildDocumentUriUsingTree(destinationUri, tracker.selection.toList()[0])
         }
         // Open
         binding.actionOpen.setOnClickListener {
-            val selections = tracker!!.selection
+            val selections = tracker.selection
             val action : Open = actions["Open"] as Open
-            action.handle(requireContext(), selections, destination!!)
+            action.handle(requireContext(), selections, destinationUri)
         }
         // Rename
         binding.actionRename.setOnClickListener {
-            val selections = tracker!!.selection
+            val selections = tracker.selection
             val action : Rename = actions["Rename"] as Rename
-            action.handle(requireContext(), selections, destination!!)
+            action.handle(selections, destinationUri)
         }
     }
 
@@ -131,18 +130,21 @@ class FolderFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
-        destination = if (arguments?.getString("destination") != "" && arguments?.getString("destination") != null) {
+        val destinationStr = if (!arguments?.getString("destination").isNullOrEmpty()) {
             arguments?.getString("destination")
         } else {
             settings.getString("root", null)
         }
+        destinationUri = destinationStr!!.toUri()
 
         val uriPermissions = requireActivity().contentResolver.persistedUriPermissions
         var havePermissions = false
 
-        for (p in uriPermissions) {
-            if (destination!!.contains(p.uri.toString()) && p.isReadPermission && p.isWritePermission) {
-                havePermissions = true
+        for (uriPermission in uriPermissions) {
+            if (uriPermission.isReadPermission && uriPermission.isWritePermission) {
+                if (destinationStr.contains(Utils.decode(uriPermission.uri.toString()))) {
+                    havePermissions = true
+                }
             }
         }
 
@@ -155,13 +157,13 @@ class FolderFragment : Fragment() {
     }
 
     private fun observeCurrent(docId: String?) {
-        val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destination!!.toUri(), docId)
+        val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destinationUri, docId)
 
         // Observe the current directory
         sanFilesViewModel.initSanFiles(mutableList).observe(viewLifecycleOwner, Observer {
             it?.let {
-                sanFilesAdapter!!.submitList(it as MutableList<SanFile>)
-                headerAdapter!!.updateSanFileDestination(destination!!)
+                sanFilesAdapter.submitList(it as MutableList<SanFile>)
+                headerAdapter.updateSanFileDestination(Utils.decode(destinationUri.toString()))
             }
         })
     }
@@ -180,17 +182,15 @@ class FolderFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == OPEN_DOCUMENT_TREE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            val uri: Uri? = data?.data
-            destination = uri.toString()
+            val uri: Uri = data?.data!!
+            destinationUri = uri
             val contentResolver = requireActivity().contentResolver
-            contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            contentResolver.takePersistableUriPermission(uri!!, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            // save the root folder
+            contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
             val editor = settings.edit()
-            editor.putString("root", uri.toString())
+            editor.putString("root", Utils.decode(uri.toString()))
             editor.commit()
-
             observeCurrent(null)
         }
     }
@@ -199,8 +199,6 @@ class FolderFragment : Fragment() {
         super.onSaveInstanceState(outState)
         tracker?.onSaveInstanceState(outState)
     }
-
-
 }
 
 

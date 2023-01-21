@@ -110,7 +110,7 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
                 }
 
                 override fun onItemStateChanged(key: String, selected: Boolean) {
-                    if (tracker!!.hasSelection()) {
+                    if (tracker.hasSelection()) {
                         this@SanFilesAdapter.notifyDataSetChanged()
                     }
                     super.onItemStateChanged(key, !selected)
