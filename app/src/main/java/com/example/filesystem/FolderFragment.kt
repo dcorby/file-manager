@@ -9,6 +9,7 @@ import android.provider.DocumentsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -19,6 +20,7 @@ import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.actions.*
 import com.example.filesystem.databinding.FragmentFolderBinding
+
 
 // // https://github.com/android/storage-samples/issues/47
 
@@ -49,6 +51,7 @@ class FolderFragment : Fragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -105,7 +108,10 @@ class FolderFragment : Fragment() {
         }
         // Delete
         binding.actionDelete.setOnClickListener {
-            val u2 = DocumentsContract.buildDocumentUriUsingTree(destinationUri, tracker.selection.toList()[0])
+            val docIdToDelete = tracker.selection.toList()[0]
+            val uriToDelete = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docIdToDelete)
+            DocumentsContract.deleteDocument(requireContext().contentResolver, uriToDelete)
+            sanFilesViewModel.removeSanFile(docIdToDelete)
         }
         // Open
         binding.actionOpen.setOnClickListener {
@@ -155,17 +161,14 @@ class FolderFragment : Fragment() {
         val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destinationUri, docId)
 
         // Observe the current directory
-        sanFilesViewModel.initSanFiles(mutableList).observe(viewLifecycleOwner, Observer {
-            it?.let {
-                sanFilesAdapter.submitList(it as MutableList<SanFile>)
-                headerAdapter.updateSanFileDestination(Utils.decode(destinationUri.toString()))
-            }
+        sanFilesViewModel.initSanFiles(mutableList).observe(viewLifecycleOwner, Observer { updatedList ->
+            // onChange(): https://developer.android.com/reference/androidx/lifecycle/Observer
+            sanFilesAdapter.submitList(updatedList as MutableList<SanFile>)
         })
     }
 
     // Not currently used, but available from adapter
     private fun adapterOnClick(sanFile: SanFile) {
-        // Toast.makeText(context,"clicked", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {

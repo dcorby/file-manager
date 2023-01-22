@@ -76,7 +76,6 @@ class InitFragment : Fragment() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.v("File-san", "InitFragment OnCreate()")
         super.onCreate(savedInstanceState)
     }
 }

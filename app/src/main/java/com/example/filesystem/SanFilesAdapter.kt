@@ -24,8 +24,9 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
     var multiSelectAnchor = ""
     var prevDocId = ""
 
+    // it doesn't
     init {
-        setHasStableIds(true)
+        setHasStableIds(false)
     }
 
     /* ViewHolder for SanFile, takes in the inflated view and the onClick behavior. */
@@ -65,7 +66,6 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
                 if (!multiSelectActivated) {
                     multiSelectActivated = true
                     multiSelectAnchor = sanFile.docId
-                    Log.v("File-san", "multiSelectActivated=$multiSelectActivated")
                 }
                 return@setOnLongClickListener true
             }
@@ -115,8 +115,13 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
             })
     }
 
-    override fun getItemCount(): Int = currentList.size
-    override fun getItemId(position: Int): Long = position.toLong()
+    override fun getItemCount(): Int {
+        return currentList.size
+    }
+    // get the stable ID
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
+    }
 
     /* Creates and inflates view and return SanFileViewHolder */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SanFileViewHolder {
@@ -133,7 +138,7 @@ class SanFilesAdapter(private val onClick: (SanFile) -> Unit) :
 
 object SanFileDiffCallback : DiffUtil.ItemCallback<SanFile>() {
     override fun areItemsTheSame(oldItem: SanFile, newItem: SanFile): Boolean {
-        return oldItem == newItem
+        return oldItem.docId == newItem.docId
     }
 
     override fun areContentsTheSame(oldItem: SanFile, newItem: SanFile): Boolean {

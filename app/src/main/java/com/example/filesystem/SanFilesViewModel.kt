@@ -1,5 +1,7 @@
 package com.example.filesystem
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,11 +21,12 @@ class SanFilesViewModel: ViewModel() {
         }
     }
 
-    fun removeSanFile(sanFile: SanFile) {
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun removeSanFile(docId: String) {
         val currentList = sanFilesLiveData!!.value
         if (currentList != null) {
             val updatedList = currentList.toMutableList()
-            updatedList.remove(sanFile)
+            updatedList.removeIf { it.docId == docId }
             sanFilesLiveData!!.postValue(updatedList)
         }
     }

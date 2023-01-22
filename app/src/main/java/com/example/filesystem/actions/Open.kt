@@ -24,8 +24,6 @@ class Open(fragment: Fragment) {
 
         if (isDir) {
             // Handle folder
-            Log.v("File-san", "docUri of folder=$docUri")
-            Log.v("File-san", "docId of folder=$docId")
             val navController = Navigation.findNavController(_fragment.requireActivity(), R.id.nav_host_fragment_content_main)
             val bundle = Bundle()
             bundle.putString("destination", docTreeUri.toString())
