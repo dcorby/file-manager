@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -143,7 +144,7 @@ class FolderFragment : Fragment() {
 
         for (uriPermission in uriPermissions) {
             if (uriPermission.isReadPermission && uriPermission.isWritePermission) {
-                if (destinationStr.contains(Utils.decode(uriPermission.uri.toString()))) {
+                if (Utils.decode(destinationStr).contains(Utils.decode(uriPermission.uri.toString()))) {
                     havePermissions = true
                 }
             }

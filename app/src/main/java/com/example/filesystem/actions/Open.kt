@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.R
+import com.example.filesystem.Utils
 
 class Open(fragment: Fragment) {
 
@@ -26,7 +27,7 @@ class Open(fragment: Fragment) {
             // Handle folder
             val navController = Navigation.findNavController(_fragment.requireActivity(), R.id.nav_host_fragment_content_main)
             val bundle = Bundle()
-            bundle.putString("destination", docTreeUri.toString())
+            bundle.putString("destination", Utils.decode(docTreeUri.toString()))
             bundle.putString("docid", docId)
             navController.navigate(R.id.action_FolderFragment_to_FolderFragment, bundle)
         } else {
