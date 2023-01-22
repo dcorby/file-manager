@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,9 +20,6 @@ import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.actions.*
 import com.example.filesystem.databinding.FragmentFolderBinding
-
-
-// // https://github.com/android/storage-samples/issues/47
 
 /**
  * If the user has already initialized the app, land on this fragment.
@@ -40,6 +36,7 @@ class FolderFragment : Fragment() {
     lateinit var headerAdapter: HeaderAdapter
     lateinit var sanFilesAdapter: SanFilesAdapter
     lateinit var destinationUri: Uri
+    lateinit var destinationDocId: String
     lateinit var tracker: SelectionTracker<String>
 
     private var AUTHORITY = "com.android.externalstorage.documents"
@@ -60,8 +57,7 @@ class FolderFragment : Fragment() {
         sanFilesAdapter = SanFilesAdapter { sanFile -> adapterOnClick(sanFile) }
         val recyclerView: RecyclerView = binding.recyclerView
         recyclerView.adapter = sanFilesAdapter
-        val docId = arguments?.getString("docid")
-        observeCurrent(docId)
+        observeCurrent(destinationDocId)
 
         tracker = SelectionTracker.Builder<String>(
             "selectionItem",
@@ -97,12 +93,17 @@ class FolderFragment : Fragment() {
         // Create File
         binding.actionCreateFile.setOnClickListener {
             val action : CreateFile = actions["CreateFile"] as CreateFile
-            // Use the treeUri of the directory:
-            // https://developer.android.com/reference/android/provider/DocumentsContract
-            val docId = DocumentsContract.getTreeDocumentId(destinationUri)
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docId)
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
+
+            /* Get the docUri from the destination vars
+               It might make sense to build docUri on the fly, e.g.
+               var docUri = DocumentFile.fromTreeUri(requireContext(), destinationUri)!!.uri
+               However, this *always* yields the root docUri. Is this a bug?
+               This thread suggests so: https://stackoverflow.com/questions/62375696/unexpected-behavior-when-documentfile-fromtreeuri-is-called-on-uri-of-subdirec
+             */
+
             action.handle(docUri)
-            observeCurrent(null)
+            observeCurrent(destinationDocId)
         }
         // Move
         binding.actionMove.setOnClickListener {
@@ -128,16 +129,26 @@ class FolderFragment : Fragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
-        val destinationStr = if (!arguments?.getString("destination").isNullOrEmpty()) {
-            arguments?.getString("destination")
-        } else {
+
+        // set destinationStr and destinationUri
+        val destinationStr = if (arguments?.getString("destination").isNullOrEmpty()) {
             settings.getString("root", null)
+        } else {
+            arguments?.getString("destination")
         }
         destinationUri = destinationStr!!.toUri()
+
+        // set destinationDocId
+        destinationDocId = if (arguments?.getString("docid").isNullOrEmpty()) {
+            DocumentsContract.getTreeDocumentId(destinationUri)
+        } else {
+            arguments?.getString("docid")!!
+        }
 
         val uriPermissions = requireActivity().contentResolver.persistedUriPermissions
         var havePermissions = false
