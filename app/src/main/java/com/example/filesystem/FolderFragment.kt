@@ -13,6 +13,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.selection.SelectionPredicates
 import androidx.recyclerview.selection.SelectionTracker
@@ -38,6 +39,7 @@ class FolderFragment : Fragment() {
     lateinit var destinationUri: Uri
     lateinit var destinationDocId: String
     lateinit var tracker: SelectionTracker<String>
+    lateinit var liveData: LiveData<MutableList<SanFile>>
 
     private var AUTHORITY = "com.android.externalstorage.documents"
 
@@ -85,23 +87,20 @@ class FolderFragment : Fragment() {
         // Create Folder
         binding.actionCreateFolder.setOnClickListener {
             val action : CreateFolder = actions["CreateFolder"] as CreateFolder
-            val docId = DocumentsContract.getTreeDocumentId(destinationUri)
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docId)
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
             action.handle(docUri)
             observeCurrent(null)
         }
         // Create File
         binding.actionCreateFile.setOnClickListener {
-            val action : CreateFile = actions["CreateFile"] as CreateFile
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-
             /* Get the docUri from the destination vars
                It might make sense to build docUri on the fly, e.g.
                var docUri = DocumentFile.fromTreeUri(requireContext(), destinationUri)!!.uri
                However, this *always* yields the root docUri. Is this a bug?
                This thread suggests so: https://stackoverflow.com/questions/62375696/unexpected-behavior-when-documentfile-fromtreeuri-is-called-on-uri-of-subdirec
              */
-
+            val action : CreateFile = actions["CreateFile"] as CreateFile
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
             action.handle(docUri)
             observeCurrent(destinationDocId)
         }
@@ -113,7 +112,8 @@ class FolderFragment : Fragment() {
             val docIdToDelete = tracker.selection.toList()[0]
             val uriToDelete = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docIdToDelete)
             DocumentsContract.deleteDocument(requireContext().contentResolver, uriToDelete)
-            sanFilesViewModel.removeSanFile(docIdToDelete)
+            //sanFilesViewModel.removeSanFile(docIdToDelete)
+            observeCurrent(destinationDocId)
         }
         // Open
         binding.actionOpen.setOnClickListener {
@@ -125,7 +125,9 @@ class FolderFragment : Fragment() {
         binding.actionRename.setOnClickListener {
             val selections = tracker.selection
             val action : Rename = actions["Rename"] as Rename
-            action.handle(selections, destinationUri)
+            val docId = selections.toList()[0]
+            action.handle(docId, destinationUri)
+            observeCurrent(destinationDocId)
         }
     }
 
@@ -173,7 +175,8 @@ class FolderFragment : Fragment() {
         val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destinationUri, docId)
 
         // Observe the current directory
-        sanFilesViewModel.initSanFiles(mutableList).observe(viewLifecycleOwner, Observer { updatedList ->
+        liveData = sanFilesViewModel.initSanFiles(mutableList)
+        liveData.observe(viewLifecycleOwner, Observer { updatedList ->
             // onChange(): https://developer.android.com/reference/androidx/lifecycle/Observer
             sanFilesAdapter.submitList(updatedList as MutableList<SanFile>)
         })

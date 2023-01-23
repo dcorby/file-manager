@@ -3,7 +3,6 @@ package com.example.filesystem.actions
 import android.net.Uri
 import android.provider.DocumentsContract
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 
 class CreateFolder(fragment: Fragment) {
 
