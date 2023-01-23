@@ -1,7 +1,6 @@
 package com.example.filesystem
 
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -13,10 +12,11 @@ import com.example.filesystem.databinding.ActivityMainBinding
 // https://stackoverflow.com/questions/51173002/how-to-change-start-destination-of-a-navigation-graph-programmatically
 // https://stackoverflow.com/questions/64414301/why-onviewcreated-is-called-twice-in-android-app-using-navigation-components
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainReceiver {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private var stateManager: HashMap<String, String> = HashMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,4 +57,14 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
     }
+
+    // Interface methods
+    override fun getState(key: String): String? {
+        return stateManager.getOrDefault(key, null)
+    }
+    override fun setState(key: String, value: String) {
+        stateManager[key] = value
+    }
 }
+
+

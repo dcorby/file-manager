@@ -6,11 +6,13 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
+import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
@@ -40,6 +42,7 @@ class FolderFragment : Fragment() {
     lateinit var destinationDocId: String
     lateinit var tracker: SelectionTracker<String>
     lateinit var liveData: LiveData<MutableList<SanFile>>
+    lateinit var receiver: MainReceiver
 
     private var AUTHORITY = "com.android.externalstorage.documents"
 
@@ -106,6 +109,24 @@ class FolderFragment : Fragment() {
         }
         // Move
         binding.actionMove.setOnClickListener {
+            val moveFromUri = receiver.getState("moveFromUri")
+            if (moveFromUri == null) {
+                val docIdToMove = tracker.selection.toList()[0]
+                val uriToMove = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docIdToMove)
+                receiver.setState("moveFromUri", uriToMove.toString())
+                receiver.setState("moveFromParentUri", destinationUri.toString())
+                receiver.setState("moveFromParentDocId", destinationDocId)
+                // ^ removing decode() operation on these strings enabled else{} block to work. WHY??
+            } else {
+                val moveFromParentUri = Utils.decode(receiver.getState("moveFromParentUri")!!)
+                val moveFromParentDocId = Utils.decode(receiver.getState("moveFromParentDocId")!!)
+                val sourceDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(moveFromParentUri.toUri(), moveFromParentDocId)
+                val targetDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
+                Log.v("sourceDocumentUri", Utils.decode(moveFromUri))
+                Log.v("sourceDocumentParentUri", Utils.decode(sourceDocumentParentUri.toString()))
+                Log.v("targetDocumentParentUri", Utils.decode(targetDocumentParentUri.toString()))
+                DocumentsContract.moveDocument(requireContext().contentResolver, moveFromUri.toUri(), sourceDocumentParentUri, targetDocumentParentUri)
+            }
         }
         // Delete
         binding.actionDelete.setOnClickListener {
@@ -134,6 +155,7 @@ class FolderFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        receiver = (activity as MainReceiver)
 
         val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
 
