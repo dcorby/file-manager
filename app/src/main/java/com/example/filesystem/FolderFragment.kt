@@ -92,12 +92,25 @@ class FolderFragment : Fragment() {
         binding.actionCopy.setOnClickListener {
             val copyFromUri = receiver.getState("copyFromUri")
             if (copyFromUri == null) {
+                var text = ""
+                if (tracker.selection.size() == 0) {
+                    text = "Select a file to copy"
+                }
+                if (tracker.selection.size() > 1) {
+                    text = "Multi-file copy is not supported"
+                }
+                if (text != "") {
+                    Utils.showPopup(layoutInflater, requireActivity(), text)
+                    return@setOnClickListener
+                }
                 val docIdToCopy = tracker.selection.toList()[0]
                 val uriToCopy = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docIdToCopy)
                 receiver.setState("copyFromUri", uriToCopy.toString())
+                receiver.setState("copyName", Utils.getNameFromDocId(docIdToCopy))
             } else {
                 val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-                val newUri = DocumentsContract.createDocument(requireActivity().contentResolver, docUri, "text/plain", "copied")
+                val name = receiver.getState("copyName")!!
+                val newUri = DocumentsContract.createDocument(requireActivity().contentResolver, docUri, "text/plain", name)
 
                 val input = requireContext().contentResolver.openInputStream(copyFromUri.toUri())!!
                 val bytes = input.readBytes()

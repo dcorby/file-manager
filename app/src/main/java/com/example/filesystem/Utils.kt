@@ -1,16 +1,23 @@
 package com.example.filesystem
 
+import android.R.layout
+import android.app.ActionBar.LayoutParams
 import android.app.Activity
 import android.content.ContentResolver
-import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.provider.DocumentsContract
-import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.PopupWindow
+import android.widget.TextView
+import androidx.fragment.app.FragmentActivity
 import java.io.Closeable
 import java.net.URLDecoder
 import java.util.*
-import kotlin.collections.ArrayList
+
 
 class Utils {
 
@@ -74,6 +81,23 @@ class Utils {
 
         fun decode(string : String) : String {
             return URLDecoder.decode(string, "UTF-8")
+        }
+
+        fun getNameFromDocId(docId : String) : String {
+            val name = docId.split("/").last()
+            return name
+        }
+
+        fun showPopup(layoutInflater: LayoutInflater, activity: Activity, text: String) {
+            val layout = layoutInflater.inflate(R.layout.popup, null)
+            val popup = layout.findViewById<ViewGroup>(R.id.popup)
+            val textView = popup.findViewById<TextView>(R.id.text_view)
+            textView.text = text
+            val window = PopupWindow(layout, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, true)
+            window.showAtLocation(layout, Gravity.CENTER, 0, 0)
+            popup.setOnClickListener {
+                window.dismiss()
+            }
         }
     }
 }
