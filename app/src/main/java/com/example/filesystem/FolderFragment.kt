@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
-import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
@@ -85,7 +84,35 @@ class FolderFragment : Fragment() {
         var obj = Actions()
         var actions = obj.get(this as Fragment)
         // Copy
+        // https://stackoverflow.com/questions/61687463/documentscontract-copydocument-always-fails
+        // https://stackoverflow.com/questions/13133579/android-save-a-file-from-an-existing-uri
+        // copydocument() does not work, pretty well documented bug or non-implementation
+        // Copying bytes has issues too, over MTP: https://issuetracker.google.com/issues/36956498
+        // FileManager may not refresh on the host machine
         binding.actionCopy.setOnClickListener {
+            val copyFromUri = receiver.getState("copyFromUri")
+            if (copyFromUri == null) {
+                val docIdToCopy = tracker.selection.toList()[0]
+                val uriToCopy = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docIdToCopy)
+                receiver.setState("copyFromUri", uriToCopy.toString())
+            } else {
+                val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
+                val newUri = DocumentsContract.createDocument(requireActivity().contentResolver, docUri, "text/plain", "copied")
+
+                val input = requireContext().contentResolver.openInputStream(copyFromUri.toUri())!!
+                val bytes = input.readBytes()
+                input.close()
+                val output = requireContext().contentResolver.openOutputStream(newUri!!)!!
+                output.write(bytes)
+                output.close()
+                // TODO: Android has no built-in method for file hash, but should implement an equal-bytes check of the two files
+
+                // This fails on most Android devices up to SDK32 with "java.lang.UnsupportedOperationException: Copy not supported"
+                // val targetDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
+                // DocumentsContract.copyDocument(requireContext().contentResolver, copyFromUri.toUri(), targetDocumentParentUri)
+
+                observeCurrent(null)
+            }
         }
         // Create Folder
         binding.actionCreateFolder.setOnClickListener {
@@ -122,9 +149,6 @@ class FolderFragment : Fragment() {
                 val moveFromParentDocId = Utils.decode(receiver.getState("moveFromParentDocId")!!)
                 val sourceDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(moveFromParentUri.toUri(), moveFromParentDocId)
                 val targetDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-                Log.v("sourceDocumentUri", Utils.decode(moveFromUri))
-                Log.v("sourceDocumentParentUri", Utils.decode(sourceDocumentParentUri.toString()))
-                Log.v("targetDocumentParentUri", Utils.decode(targetDocumentParentUri.toString()))
                 DocumentsContract.moveDocument(requireContext().contentResolver, moveFromUri.toUri(), sourceDocumentParentUri, targetDocumentParentUri)
             }
         }
