@@ -30,20 +30,18 @@ import com.example.filesystem.databinding.FragmentFolderBinding
  */
 
 const val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
+const val AUTHORITY = "com.android.externalstorage.documents"
 
 class FolderFragment : Fragment() {
     private var _binding: FragmentFolderBinding? = null
     private val binding get() = _binding!!
     private val sanFilesViewModel: SanFilesViewModel by viewModels()
-    lateinit var headerAdapter: HeaderAdapter
     lateinit var sanFilesAdapter: SanFilesAdapter
     lateinit var destinationUri: Uri
     lateinit var destinationDocId: String
     lateinit var tracker: SelectionTracker<String>
     lateinit var liveData: LiveData<MutableList<SanFile>>
     lateinit var receiver: MainReceiver
-
-    private var AUTHORITY = "com.android.externalstorage.documents"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,7 +55,6 @@ class FolderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        headerAdapter = HeaderAdapter()
         sanFilesAdapter = SanFilesAdapter { sanFile -> adapterOnClick(sanFile) }
         val recyclerView: RecyclerView = binding.recyclerView
         recyclerView.adapter = sanFilesAdapter
@@ -86,7 +83,7 @@ class FolderFragment : Fragment() {
         // Copy
         // https://stackoverflow.com/questions/61687463/documentscontract-copydocument-always-fails
         // https://stackoverflow.com/questions/13133579/android-save-a-file-from-an-existing-uri
-        // copydocument() does not work, pretty well documented bug or non-implementation
+        // copydocument() does not work, well-documented bug or non-implementation
         // Copying bytes has issues too, over MTP: https://issuetracker.google.com/issues/36956498
         // FileManager may not refresh on the host machine
         binding.actionCopy.setOnClickListener {
