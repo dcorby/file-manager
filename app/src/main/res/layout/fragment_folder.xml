@@ -25,8 +25,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="10dp"
             android:layout_gravity="center"
+            android:padding="10dp"
             android:background="@drawable/pathsegment_background">
             <ImageView
                 android:layout_width="wrap_content"
@@ -46,11 +46,14 @@
         <!-- https://developer.android.com/reference/android/widget/HorizontalScrollView -->
         <HorizontalScrollView
         android:layout_width="0dp"
-        android:layout_height="0dp">
+        android:layout_height="match_parent"
+        android:layout_weight="1">
             <LinearLayout
+                android:id="@+id/path_parts"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:layout_gravity="center_vertical">
             </LinearLayout>
         </HorizontalScrollView>
     </LinearLayout>

@@ -65,6 +65,8 @@ class MainActivity : AppCompatActivity(), MainReceiver {
     override fun setState(key: String, value: String) {
         stateManager[key] = value
     }
+
+
 }
 
 

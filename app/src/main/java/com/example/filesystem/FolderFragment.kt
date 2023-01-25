@@ -6,10 +6,11 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
@@ -22,6 +23,7 @@ import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.actions.*
 import com.example.filesystem.databinding.FragmentFolderBinding
+
 
 /**
  * If the user has already initialized the app, land on this fragment.
@@ -75,6 +77,17 @@ class FolderFragment : Fragment() {
 
         if (savedInstanceState != null) {
             tracker.onRestoreInstanceState(savedInstanceState)
+        }
+
+        // Set the path parts
+        val pathParts = Utils.getPathPartsFromDocId(destinationDocId)
+        binding.pathParts.removeAllViews()
+        for (pathPart in pathParts) {
+            val textView = layoutInflater.inflate(R.layout.path_part, null) as TextView
+            textView.text = pathPart
+            val params: LinearLayout.LayoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            textView.setLayoutParams(params)
+            binding.pathParts.addView(textView)
         }
 
         // Actions

@@ -88,6 +88,11 @@ class Utils {
             return name
         }
 
+        fun getPathPartsFromDocId(docId : String) : List<String> {
+            val pathParts = docId.split("/").drop(1)
+            return pathParts
+        }
+
         fun showPopup(layoutInflater: LayoutInflater, activity: Activity, text: String) {
             val layout = layoutInflater.inflate(R.layout.popup, null)
             val popup = layout.findViewById<ViewGroup>(R.id.popup)
