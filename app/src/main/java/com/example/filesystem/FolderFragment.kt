@@ -143,6 +143,7 @@ class FolderFragment : Fragment() {
             val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
             action.handle(docUri)
             observeCurrent(null)
+            Utils.withDelay{ binding.toggleGroup1.uncheck(R.id.action_create_folder) }
         }
         // Create File
         binding.actionCreateFile.setOnClickListener {
@@ -190,6 +191,7 @@ class FolderFragment : Fragment() {
             val selections = tracker.selection
             val action : Open = actions["Open"] as Open
             action.handle(requireContext(), selections, destinationUri)
+            Utils.withDelay{ binding.toggleGroup2.uncheck(R.id.action_open) }
         }
         // Rename
         binding.actionRename.setOnClickListener {
