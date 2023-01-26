@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.ContentResolver
 import android.database.Cursor
 import android.net.Uri
+import android.os.Handler
 import android.provider.DocumentsContract
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -103,6 +104,13 @@ class Utils {
             popup.setOnClickListener {
                 window.dismiss()
             }
+        }
+
+        fun withDelay(action: () -> Unit) {
+            val handler = Handler()
+            handler.postDelayed({
+                action()
+            }, 100)
         }
     }
 }

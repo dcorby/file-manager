@@ -156,6 +156,7 @@ class FolderFragment : Fragment() {
             val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
             action.handle(docUri)
             observeCurrent(destinationDocId)
+            Utils.withDelay{ binding.toggleGroup1.uncheck(R.id.action_create_file) }
         }
         // Move
         binding.actionMove.setOnClickListener {
@@ -182,6 +183,7 @@ class FolderFragment : Fragment() {
             DocumentsContract.deleteDocument(requireContext().contentResolver, uriToDelete)
             //sanFilesViewModel.removeSanFile(docIdToDelete)
             observeCurrent(destinationDocId)
+            Utils.withDelay{ binding.toggleGroup2.uncheck(R.id.action_delete) }
         }
         // Open
         binding.actionOpen.setOnClickListener {
