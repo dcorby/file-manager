@@ -9,7 +9,7 @@ class CreateFile(fragment: Fragment) {
 
     private val _fragment = fragment
 
-    fun handle(uri: Uri) {
-        DocumentsContract.createDocument(_fragment.requireActivity().contentResolver, uri, "text/plain", "foo")
+    fun handle(uri: Uri, filename: String) {
+        DocumentsContract.createDocument(_fragment.requireActivity().contentResolver, uri, "text/plain", filename)
     }
 }

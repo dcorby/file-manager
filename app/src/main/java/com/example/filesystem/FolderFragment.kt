@@ -155,7 +155,12 @@ class FolderFragment : Fragment() {
              */
             val action : CreateFile = actions["CreateFile"] as CreateFile
             val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-            action.handle(docUri)
+            val filename = binding.filename.text.trim()
+            if (filename == "") {
+                Utils.showPopup(layoutInflater, requireActivity(), "Filename is empty")
+                return@setOnClickListener
+            }
+            action.handle(docUri, filename)
             observeCurrent(destinationDocId)
             Utils.withDelay{ binding.toggleGroup1.uncheck(R.id.action_create_file) }
         }
