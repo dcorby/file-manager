@@ -162,6 +162,7 @@ class FolderFragment : Fragment() {
             action.handle(receiver, docUri, filename)
             observeCurrent(destinationDocId)
             Utils.withDelay{ binding.toggleGroup1.uncheck(R.id.action_create_file) }
+            binding.filename.text.clear()
         }
         // Move
         binding.actionMove.setOnClickListener {
