@@ -1,9 +1,10 @@
 package com.example.filesystem
 
-import android.R.layout
 import android.app.ActionBar.LayoutParams
 import android.app.Activity
 import android.content.ContentResolver
+import android.content.Context
+import android.content.res.AssetManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
@@ -11,10 +12,8 @@ import android.provider.DocumentsContract
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.PopupWindow
 import android.widget.TextView
-import androidx.fragment.app.FragmentActivity
 import java.io.Closeable
 import java.net.URLDecoder
 import java.util.*
@@ -111,6 +110,11 @@ class Utils {
             handler.postDelayed({
                 action()
             }, 100)
+        }
+
+        fun readAssetsFile(context: Context, fileName: String): String {
+            val assetManager: AssetManager = context.getAssets()
+            return assetManager.open(fileName).bufferedReader().use { it.readText() }
         }
     }
 }

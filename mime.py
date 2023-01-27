@@ -2,7 +2,7 @@ import re
 import json
 import pprint
 
-directory = "/home/dmc7z/AndroidStudioProjects/FileSystem"
+directory = "/home/dmc7z/AndroidStudioProjects/FileSystem/app/src/main/assets"
 
 mime_types = {}
 with open("/etc/mime.types") as fi:

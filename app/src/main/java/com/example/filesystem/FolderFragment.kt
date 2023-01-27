@@ -121,7 +121,6 @@ class FolderFragment : Fragment() {
                 val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
                 val name = receiver.getState("copyName")!!
                 val newUri = DocumentsContract.createDocument(requireActivity().contentResolver, docUri, "text/plain", name)
-
                 val input = requireContext().contentResolver.openInputStream(copyFromUri.toUri())!!
                 val bytes = input.readBytes()
                 input.close()
@@ -155,12 +154,12 @@ class FolderFragment : Fragment() {
              */
             val action : CreateFile = actions["CreateFile"] as CreateFile
             val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-            val filename = binding.filename.text.trim()
+            val filename = binding.filename.text.trim().toString()
             if (filename == "") {
                 Utils.showPopup(layoutInflater, requireActivity(), "Filename is empty")
                 return@setOnClickListener
             }
-            action.handle(docUri, filename)
+            action.handle(receiver, docUri, filename)
             observeCurrent(destinationDocId)
             Utils.withDelay{ binding.toggleGroup1.uncheck(R.id.action_create_file) }
         }
@@ -291,6 +290,3 @@ class FolderFragment : Fragment() {
         tracker.onSaveInstanceState(outState)
     }
 }
-
-
-
