@@ -25,13 +25,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.actions.*
 import com.example.filesystem.databinding.FragmentFolderBinding
 
-
-/**
- * If the user has already initialized the app, land on this fragment.
- * This could happen when they open the app, or after the
- * activity result callback if just getting started
- */
-
 const val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
 const val AUTHORITY = "com.android.externalstorage.documents"
 
@@ -80,6 +73,11 @@ class FolderFragment : Fragment() {
             tracker.onRestoreInstanceState(savedInstanceState)
         }
 
+        // Check whether we have an active copy
+        if (receiver.getState("copy-FromUri") != null) {
+            binding.toggleGroup2.check(R.id.action_copy)
+        }
+
         // Set the path parts
         val pathParts = Utils.getPathPartsFromDocId(destinationDocId)
         binding.pathParts.removeAllViews()
@@ -92,8 +90,8 @@ class FolderFragment : Fragment() {
         }
 
         // Actions
-        var obj = Actions()
-        var actions = obj.get(this as Fragment)
+        val actions = Actions(this as Fragment)
+
         // Copy
         // https://stackoverflow.com/questions/61687463/documentscontract-copydocument-always-fails
         // https://stackoverflow.com/questions/13133579/android-save-a-file-from-an-existing-uri
@@ -101,7 +99,7 @@ class FolderFragment : Fragment() {
         // Copying bytes has issues too, over MTP: https://issuetracker.google.com/issues/36956498
         // FileManager may not refresh on the host machine
         binding.actionCopy.setOnClickListener {
-            val copyFromUri = receiver.getState("copyFromUri")
+            val copyFromUri = receiver.getState("copy-FromUri")
             if (copyFromUri == null) {
                 var text = ""
                 if (tracker.selection.size() == 0) {
@@ -111,16 +109,16 @@ class FolderFragment : Fragment() {
                     text = "Multi-file copy is not supported"
                 }
                 if (text != "") {
-                    Utils.showPopup(layoutInflater, requireActivity(), text)
+                    Utils.showPopup(requireActivity(), text)
                     return@setOnClickListener
                 }
                 val docIdToCopy = tracker.selection.toList()[0]
                 val uriToCopy = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docIdToCopy)
-                receiver.setState("copyFromUri", uriToCopy.toString())
-                receiver.setState("copyName", Utils.getNameFromDocId(docIdToCopy))
+                receiver.setState("copy-FromUri", uriToCopy.toString())
+                receiver.setState("copy-Name", Utils.getNameFromDocId(docIdToCopy))
             } else {
                 val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-                val name = receiver.getState("copyName")!!
+                val name = receiver.getState("copy-Name")!!
                 val newUri = DocumentsContract.createDocument(requireActivity().contentResolver, docUri, "text/plain", name)
                 val input = requireContext().contentResolver.openInputStream(copyFromUri.toUri())!!
                 val bytes = input.readBytes()
@@ -128,18 +126,20 @@ class FolderFragment : Fragment() {
                 val output = requireContext().contentResolver.openOutputStream(newUri!!)!!
                 output.write(bytes)
                 output.close()
+                receiver.setState("copy-FromUri", null)
+                receiver.setState("copy-Name", null)
                 // TODO: Android has no built-in method for file hash, but should implement an equal-bytes check of the two files
 
                 // This fails on most Android devices up to SDK32 with "java.lang.UnsupportedOperationException: Copy not supported"
                 // val targetDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
                 // DocumentsContract.copyDocument(requireContext().contentResolver, copyFromUri.toUri(), targetDocumentParentUri)
 
-                observeCurrent(null)
+                observeCurrent(destinationDocId)
             }
         }
         // Create Folder
         binding.actionCreateFolder.setOnClickListener {
-            val action : CreateFolder = actions["CreateFolder"] as CreateFolder
+            val action = actions.get("CreateFolder") as CreateFolder
             val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
             action.handle(docUri)
             observeCurrent(null)
@@ -153,11 +153,11 @@ class FolderFragment : Fragment() {
                However, this *always* yields the root docUri. Is this a bug?
                This thread suggests so: https://stackoverflow.com/questions/62375696/unexpected-behavior-when-documentfile-fromtreeuri-is-called-on-uri-of-subdirec
              */
-            val action : CreateFile = actions["CreateFile"] as CreateFile
+            val action = actions.get("CreateFile") as CreateFile
             val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
             val filename = binding.filename.text.trim().toString()
             if (filename == "") {
-                Utils.showPopup(layoutInflater, requireActivity(), "Filename is empty")
+                Utils.showPopup(requireActivity(), "Filename is empty")
                 return@setOnClickListener
             }
             action.handle(receiver, docUri, filename)
@@ -167,17 +167,17 @@ class FolderFragment : Fragment() {
         }
         // Move
         binding.actionMove.setOnClickListener {
-            val moveFromUri = receiver.getState("moveFromUri")
+            val moveFromUri = receiver.getState("move-FromUri")
             if (moveFromUri == null) {
                 val docIdToMove = tracker.selection.toList()[0]
                 val uriToMove = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docIdToMove)
-                receiver.setState("moveFromUri", uriToMove.toString())
-                receiver.setState("moveFromParentUri", destinationUri.toString())
-                receiver.setState("moveFromParentDocId", destinationDocId)
+                receiver.setState("move-FromUri", uriToMove.toString())
+                receiver.setState("move-FromParentUri", destinationUri.toString())
+                receiver.setState("move-FromParentDocId", destinationDocId)
                 // ^ removing decode() operation on these strings enabled else{} block to work. WHY??
             } else {
-                val moveFromParentUri = Utils.decode(receiver.getState("moveFromParentUri")!!)
-                val moveFromParentDocId = Utils.decode(receiver.getState("moveFromParentDocId")!!)
+                val moveFromParentUri = Utils.decode(receiver.getState("move-FromParentUri")!!)
+                val moveFromParentDocId = Utils.decode(receiver.getState("move-FromParentDocId")!!)
                 val sourceDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(moveFromParentUri.toUri(), moveFromParentDocId)
                 val targetDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
                 DocumentsContract.moveDocument(requireContext().contentResolver, moveFromUri.toUri(), sourceDocumentParentUri, targetDocumentParentUri)
@@ -195,13 +195,13 @@ class FolderFragment : Fragment() {
         // Open
         binding.actionOpen.setOnClickListener {
             val selections = tracker.selection
-            val action : Open = actions["Open"] as Open
-            action.handle(requireContext(), binding, selections, destinationUri)
+            val action = actions.get("Open") as Open
+            action.handle(requireActivity(), binding, selections, destinationUri)
         }
         // Rename
         binding.actionRename.setOnClickListener {
             val selections = tracker.selection
-            val action : Rename = actions["Rename"] as Rename
+            val action = actions.get("Rename") as Rename
             val docId = selections.toList()[0]
             action.handle(docId, destinationUri)
             observeCurrent(destinationDocId)
@@ -224,10 +224,10 @@ class FolderFragment : Fragment() {
         destinationUri = destinationStr!!.toUri()
 
         // set destinationDocId
-        destinationDocId = if (arguments?.getString("docid").isNullOrEmpty()) {
+        destinationDocId = if (arguments?.getString("docId").isNullOrEmpty()) {
             DocumentsContract.getTreeDocumentId(destinationUri)
         } else {
-            arguments?.getString("docid")!!
+            arguments?.getString("docId")!!
         }
 
         val uriPermissions = requireActivity().contentResolver.persistedUriPermissions

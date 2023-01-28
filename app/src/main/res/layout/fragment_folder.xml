@@ -99,7 +99,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
-                app:singleSelection="true">
+                app:singleSelection="false">
                 <Button
                     android:id="@+id/action_create_file"
                     style="?attr/materialButtonOutlinedStyle"
@@ -149,7 +149,7 @@
                 android:id="@+id/toggle_group2"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                app:singleSelection="true">
+                app:singleSelection="false">
                 <Button
                     android:id="@+id/action_open"
                     style="?attr/materialButtonOutlinedStyle"

@@ -24,6 +24,7 @@
         <action
             android:id="@+id/action_FolderFragment_to_FolderFragment"
             app:destination="@id/FolderFragment" />
+        <!-- arg seems to send even without this declaration -->
         <argument
             android:name="destination"
             app:argType="string"

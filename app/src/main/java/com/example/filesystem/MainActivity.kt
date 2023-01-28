@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity(), MainReceiver {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var mimeTypes: Map<String, *>
-    private var stateManager: HashMap<String, String> = HashMap()
+    private var stateManager: HashMap<String, String?> = HashMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,9 +66,9 @@ class MainActivity : AppCompatActivity(), MainReceiver {
 
     // Interface methods
     override fun getState(key: String): String? {
-        return stateManager.getOrDefault(key, null)
+        return stateManager.get(key)
     }
-    override fun setState(key: String, value: String) {
+    override fun setState(key: String, value: String?) {
         stateManager[key] = value
     }
     override fun getMimeType(key: String): Any? {

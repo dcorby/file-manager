@@ -94,7 +94,9 @@ class Utils {
             return pathParts
         }
 
-        fun showPopup(layoutInflater: LayoutInflater, activity: Activity, text: String) {
+        // optional callback syntax: https://discuss.kotlinlang.org/t/optional-function-parameters/905
+        fun showPopup(activity: Activity, text: String, onDismiss : (() -> Unit)? = null) {
+            val layoutInflater = activity.layoutInflater
             val layout = layoutInflater.inflate(R.layout.popup, null)
             val popup = layout.findViewById<ViewGroup>(R.id.popup)
             val textView = popup.findViewById<TextView>(R.id.text_view)
@@ -103,6 +105,9 @@ class Utils {
             window.showAtLocation(layout, Gravity.CENTER, 0, 0)
             popup.setOnClickListener {
                 window.dismiss()
+                if (onDismiss != null) {
+                    onDismiss()
+                }
             }
         }
 
