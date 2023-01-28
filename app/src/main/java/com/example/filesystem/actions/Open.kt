@@ -12,17 +12,18 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.R
 import com.example.filesystem.Utils
+import com.example.filesystem.databinding.FragmentFolderBinding
 
 class Open(fragment: Fragment) {
 
     private val _fragment = fragment
 
-    fun handle(context: Context, selections: Selection<String>, destinationUri: Uri) {
+    fun handle(context: Context, binding: FragmentFolderBinding, selections: Selection<String>, destinationUri: Uri) {
         val docId = selections.toList()[0]
         val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docId)
         val docTreeUri = DocumentsContract.buildTreeDocumentUri(docUri.authority, docId)
         val isDir = context.contentResolver.getType(docUri) == DocumentsContract.Document.MIME_TYPE_DIR
-
+        Utils.withDelay { binding.toggleGroup2.uncheck(R.id.action_open) }
         if (isDir) {
             // Handle folder
             val navController = Navigation.findNavController(_fragment.requireActivity(), R.id.nav_host_fragment_content_main)

@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -195,8 +196,7 @@ class FolderFragment : Fragment() {
         binding.actionOpen.setOnClickListener {
             val selections = tracker.selection
             val action : Open = actions["Open"] as Open
-            action.handle(requireContext(), selections, destinationUri)
-            Utils.withDelay{ binding.toggleGroup2.uncheck(R.id.action_open) }
+            action.handle(requireContext(), binding, selections, destinationUri)
         }
         // Rename
         binding.actionRename.setOnClickListener {
