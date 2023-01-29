@@ -11,10 +11,12 @@ import android.os.Handler
 import android.provider.DocumentsContract
 import android.util.Log
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.PopupWindow
 import android.widget.TextView
+import android.widget.Toast
 import java.io.Closeable
 import java.net.URLDecoder
 import java.util.*
@@ -111,10 +113,31 @@ class Utils {
             }
         }
 
-        fun withDelay(action: () -> Unit) {
+        fun showPrompt(activity: Activity, onSubmit: (EditText) -> Unit) {
+            val layoutInflater = activity.layoutInflater
+            val layout = layoutInflater.inflate(R.layout.prompt, null)
+            val prompt = layout.findViewById<ViewGroup>(R.id.prompt)
+            val editText = prompt.findViewById<EditText>(R.id.edit_text)
+            val window = PopupWindow(layout, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, true)
+            window.showAtLocation(layout, Gravity.CENTER, 0, 0)
+            prompt.setOnClickListener {
+                window.dismiss()
+            }
+
+            editText.setOnEditorActionListener { v, actionId, event ->
+                window.dismiss()
+                onSubmit(editText)
+                true
+            }
+        }
+
+        fun withDelay(action: () -> Unit, callback : (() -> Unit)? = null) {
             val handler = Handler()
             handler.postDelayed({
                 action()
+                if (callback != null) {
+                    callback()
+                }
             }, 100)
         }
 

@@ -28,39 +28,41 @@ class Open(fragment: Fragment) {
         if (!validate()) {
             return
         }
-        Utils.withDelay { mBinding.toggleGroup2.uncheck(R.id.action_open) }
-        val docId = selections.toList()[0]
-        val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docId)
-        val docTreeUri = DocumentsContract.buildTreeDocumentUri(docUri.authority, docId)
-        val isDir = activity.contentResolver.getType(docUri) == DocumentsContract.Document.MIME_TYPE_DIR
-        if (isDir) {
-            // Folder
-            val navController = Navigation.findNavController(mFragment.requireActivity(), R.id.nav_host_fragment_content_main)
-            val bundle = Bundle()
-            bundle.putString("destinationUri", Utils.decode(docTreeUri.toString()))
-            bundle.putString("destinationDocId", docId)
-            navController.navigate(R.id.action_FolderFragment_to_FolderFragment, bundle)
-        } else {
-            // File
-            val intent: Intent = Intent().apply {
-                action = Intent.ACTION_EDIT
-                setDataAndType(docUri, "text/*")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_open) }, {
+            val docId = selections.toList()[0]
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docId)
+            val docTreeUri = DocumentsContract.buildTreeDocumentUri(docUri.authority, docId)
+            val isDir = activity.contentResolver.getType(docUri) == DocumentsContract.Document.MIME_TYPE_DIR
+            if (isDir) {
+                // Folder
+                val navController =
+                    Navigation.findNavController(mFragment.requireActivity(), R.id.nav_host_fragment_content_main)
+                val bundle = Bundle()
+                bundle.putString("fragmentUri", Utils.decode(docTreeUri.toString()))
+                bundle.putString("fragmentDocId", docId)
+                navController.navigate(R.id.action_FolderFragment_to_FolderFragment, bundle)
+            } else {
+                // File
+                val intent: Intent = Intent().apply {
+                    action = Intent.ACTION_EDIT
+                    setDataAndType(docUri, "text/*")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(activity, Intent.createChooser(intent, null), null)
             }
-            startActivity(activity, Intent.createChooser(intent, null), null)
-        }
+        })
     }
 
     private fun validate() : Boolean {
         if (mSelections.size() == 0) {
             Utils.showPopup(mActivity, "Select a file to open") {
-                mBinding.toggleGroup2.uncheck(R.id.action_open)
+                mBinding.toggleGroup.uncheck(R.id.action_open)
             }
             return false
         }
         if (mSelections.size() > 1) {
             Utils.showPopup(mActivity, "Only one file may be selected for open") {
-                mBinding.toggleGroup2.uncheck(R.id.action_open)
+                mBinding.toggleGroup.uncheck(R.id.action_open)
             }
             return false
         }

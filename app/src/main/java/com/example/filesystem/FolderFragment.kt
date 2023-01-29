@@ -75,7 +75,7 @@ class FolderFragment : Fragment() {
 
         // Check whether we have an active copy
         if (receiver.getActionState("Copy", "sourceUri") != null) {
-            binding.toggleGroup2.check(R.id.action_copy)
+            binding.toggleGroup.check(R.id.action_copy)
         }
 
         // Set the path parts
@@ -103,7 +103,7 @@ class FolderFragment : Fragment() {
         // Create Folder
         binding.actionCreateFolder.setOnClickListener {
             val action = actions.get("CreateFolder") as CreateFolder
-            action.handle(binding, fragmentUri, fragmentDocId)
+            action.handle(requireActivity(), binding, fragmentUri, fragmentDocId)
             observeCurrent(fragmentDocId)
         }
         // Create File

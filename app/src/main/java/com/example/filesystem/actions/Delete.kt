@@ -21,6 +21,6 @@ class Delete(fragment: Fragment) {
         val uri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, docId)
         DocumentsContract.deleteDocument(activity.contentResolver, uri)
         //sanFilesViewModel.removeSanFile(docIdToDelete)
-        Utils.withDelay{ binding.toggleGroup2.uncheck(R.id.action_delete) }
+        Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
     }
 }
