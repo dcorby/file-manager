@@ -2,8 +2,6 @@ package com.example.filesystem.actions
 
 import android.net.Uri
 import android.provider.DocumentsContract
-import android.util.Log
-import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.example.filesystem.MainReceiver
@@ -40,20 +38,9 @@ class CreateFile(fragment: Fragment) {
                 }
                 return
             }
-
-            var ext: String? = null
-            var name: String? = null
-            val parts = filename.split(".")
-            if (parts.size == 1) {
-                ext = "bin"  // maps to application/octet-stream
-                name = filename
-            } else {
-                ext = parts.last()
-                name = parts.dropLast(1).joinToString(".")
-            }
+            val (ext, name) = Utils.explodeFilename(filename)
             val mimeType = mReceiver.getMimeType(ext) as String
             DocumentsContract.createDocument(mFragment.requireActivity().contentResolver, docUri, mimeType, name)
-
             Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
             editText.text.clear()
             callback()

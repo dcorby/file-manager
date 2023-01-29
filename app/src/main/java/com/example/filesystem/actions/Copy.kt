@@ -7,7 +7,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.MainReceiver
+import com.example.filesystem.R
 import com.example.filesystem.Utils
+import com.example.filesystem.databinding.FragmentFolderBinding
 
 /*
   https://stackoverflow.com/questions/61687463/documentscontract-copydocument-always-fails
@@ -23,28 +25,21 @@ import com.example.filesystem.Utils
 
 class Copy(fragment: Fragment) {
 
-    private val mFragment = fragment
+    private lateinit var mActivity : FragmentActivity
     private lateinit var mReceiver : MainReceiver
+    private lateinit var mBinding : FragmentFolderBinding
     private lateinit var mSelection : Selection<String>
 
-    fun handle(activity: FragmentActivity, selection: Selection<String>, fragmentUri: Uri, fragmentDocId: String) : Boolean {
+    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, selection: Selection<String>, fragmentUri: Uri, fragmentDocId: String) : Boolean {
+        mActivity = activity
         mReceiver = (activity as MainReceiver)
+        mBinding = binding
         mSelection = selection
-
+        if (!validate()) {
+            return false
+        }
         val sourceUri = mReceiver.getActionState("Copy", "sourceUri")
         if (sourceUri == null) {
-            // Get file info and prepare to copy
-            var popupText = ""
-            if (mSelection.size() == 0) {
-                popupText = "Select a file to copy"
-            }
-            if (mSelection.size() > 1) {
-                popupText = "Multi-file copy is not supported"
-            }
-            if (popupText != "") {
-                Utils.showPopup(activity, popupText)
-                return false
-            }
             val sourceDocId = mSelection.toList()[0]
             val sourceUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, sourceDocId)
             mReceiver.setActionState("Copy", "sourceUri", sourceUri.toString())
@@ -54,16 +49,39 @@ class Copy(fragment: Fragment) {
             // Make the actual copy
             val filename = mReceiver.getActionState("Copy", "filename")!!
             val parentUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
-            val targetUri = DocumentsContract.createDocument(activity.contentResolver, parentUri, "text/plain", filename)
-            val inputStream = activity.contentResolver.openInputStream(sourceUri.toUri())!!
+            val (ext, _) = Utils.explodeFilename(filename)
+            val mimeType = mReceiver.getMimeType(ext) as String
+            val targetUri = DocumentsContract.createDocument(mActivity.contentResolver, parentUri, mimeType, filename)
+            val inputStream = mActivity.contentResolver.openInputStream(sourceUri.toUri())!!
             val bytes = inputStream.readBytes()
             inputStream.close()
-            val outputStream = activity.contentResolver.openOutputStream(targetUri!!)!!
+            val outputStream = mActivity.contentResolver.openOutputStream(targetUri!!)!!
             outputStream.write(bytes)
             outputStream.close()
             mReceiver.setActionState("Copy", "sourceUri", null)
             mReceiver.setActionState("Copy", "filename", null)
             return true
         }
+    }
+
+    private fun validate() : Boolean {
+
+        val sourceUri = mReceiver.getActionState("Copy", "sourceUri")
+        // Only need to validate if user hasn't yet selected a file to copy
+        if (sourceUri == null) {
+            if (mSelection.size() == 0) {
+                Utils.showPopup(mActivity, "Select a file to copy") {
+                    mBinding.toggleGroup.uncheck(R.id.action_copy)
+                }
+                return false
+            }
+            if (mSelection.size() > 1) {
+                Utils.showPopup(mActivity, "Multi-file copy is not supported") {
+                    mBinding.toggleGroup.uncheck(R.id.action_copy)
+                }
+                return false
+            }
+        }
+        return true
     }
 }

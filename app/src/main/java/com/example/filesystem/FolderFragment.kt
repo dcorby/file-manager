@@ -92,11 +92,10 @@ class FolderFragment : Fragment() {
         // Actions
         val actions = Actions(this as Fragment)
 
-        // Copy
-        binding.actionCopy.setOnClickListener {
-            val action = actions.get("Copy") as Copy
-            val success = action.handle(requireActivity(), tracker.selection, fragmentUri, fragmentDocId)
-            if (success) {
+        // Create File
+        binding.actionCreateFile.setOnClickListener {
+            val action = actions.get("CreateFile") as CreateFile
+            action.handle(requireActivity(), binding, fragmentUri, fragmentDocId) {
                 observeCurrent(fragmentDocId)
             }
         }
@@ -107,10 +106,23 @@ class FolderFragment : Fragment() {
                 observeCurrent(fragmentDocId)
             }
         }
-        // Create File
-        binding.actionCreateFile.setOnClickListener {
-            val action = actions.get("CreateFile") as CreateFile
-            action.handle(requireActivity(), binding, fragmentUri, fragmentDocId) {
+        // Open
+        binding.actionOpen.setOnClickListener {
+            val action = actions.get("Open") as Open
+            action.handle(requireActivity(), binding, tracker.selection, fragmentUri)
+        }
+        // Rename
+        binding.actionRename.setOnClickListener {
+            val action = actions.get("Rename") as Rename
+            action.handle(requireActivity(), binding, tracker.selection, fragmentUri) {
+                observeCurrent(fragmentDocId)
+            }
+        }
+        // Copy
+        binding.actionCopy.setOnClickListener {
+            val action = actions.get("Copy") as Copy
+            val success = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId)
+            if (success) {
                 observeCurrent(fragmentDocId)
             }
         }
@@ -124,18 +136,6 @@ class FolderFragment : Fragment() {
             val action = actions.get("Delete") as Delete
             action.handle(requireActivity(), binding, tracker.selection, fragmentUri)
             observeCurrent(fragmentDocId)
-        }
-        // Open
-        binding.actionOpen.setOnClickListener {
-            val action = actions.get("Open") as Open
-            action.handle(requireActivity(), binding, tracker.selection, fragmentUri)
-        }
-        // Rename
-        binding.actionRename.setOnClickListener {
-            val action = actions.get("Rename") as Rename
-            action.handle(requireActivity(), binding, tracker.selection, fragmentUri) {
-                observeCurrent(fragmentDocId)
-            }
         }
     }
 

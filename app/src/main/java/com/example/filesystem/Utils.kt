@@ -145,9 +145,23 @@ class Utils {
             }, 100)
         }
 
-        fun readAssetsFile(context: Context, fileName: String): String {
+        fun readAssetsFile(context: Context, filename: String): String {
             val assetManager: AssetManager = context.getAssets()
-            return assetManager.open(fileName).bufferedReader().use { it.readText() }
+            return assetManager.open(filename).bufferedReader().use { it.readText() }
+        }
+
+        fun explodeFilename(filename: String): Pair<String, String> {
+            var name: String? = null
+            var ext: String? = null
+            val parts = filename.split(".")
+            if (parts.size == 1) {
+                name = filename
+                ext = "bin"  // maps to application/octet-stream
+            } else {
+                name = parts.dropLast(1).joinToString(".")
+                ext = parts.last()
+            }
+            return Pair(name, ext)
         }
     }
 }
