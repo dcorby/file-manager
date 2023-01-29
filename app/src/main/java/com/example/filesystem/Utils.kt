@@ -84,9 +84,9 @@ class Utils {
             return URLDecoder.decode(string, "UTF-8")
         }
 
-        fun getNameFromDocId(docId : String) : String {
-            val name = docId.split("/").last()
-            return name
+        fun getFilenameFromDocId(docId : String) : String {
+            val filename = docId.split("/").last()
+            return filename
         }
 
         fun getPathPartsFromDocId(docId : String) : List<String> {

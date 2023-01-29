@@ -33,8 +33,8 @@ class FolderFragment : Fragment() {
     private val binding get() = _binding!!
     private val sanFilesViewModel: SanFilesViewModel by viewModels()
     lateinit var sanFilesAdapter: SanFilesAdapter
-    lateinit var destinationUri: Uri
-    lateinit var destinationDocId: String
+    lateinit var fragmentUri: Uri
+    lateinit var fragmentDocId: String
     lateinit var tracker: SelectionTracker<String>
     lateinit var liveData: LiveData<MutableList<SanFile>>
     lateinit var receiver: MainReceiver
@@ -54,7 +54,7 @@ class FolderFragment : Fragment() {
         sanFilesAdapter = SanFilesAdapter { sanFile -> adapterOnClick(sanFile) }
         val recyclerView: RecyclerView = binding.recyclerView
         recyclerView.adapter = sanFilesAdapter
-        observeCurrent(destinationDocId)
+        observeCurrent(fragmentDocId)
 
         tracker = SelectionTracker.Builder<String>(
             "selectionItem",
@@ -74,12 +74,12 @@ class FolderFragment : Fragment() {
         }
 
         // Check whether we have an active copy
-        if (receiver.getState("copy-FromUri") != null) {
+        if (receiver.getActionState("Copy", "sourceUri") != null) {
             binding.toggleGroup2.check(R.id.action_copy)
         }
 
         // Set the path parts
-        val pathParts = Utils.getPathPartsFromDocId(destinationDocId)
+        val pathParts = Utils.getPathPartsFromDocId(fragmentDocId)
         binding.pathParts.removeAllViews()
         for (pathPart in pathParts) {
             val textView = layoutInflater.inflate(R.layout.path_part, null) as TextView
@@ -93,118 +93,46 @@ class FolderFragment : Fragment() {
         val actions = Actions(this as Fragment)
 
         // Copy
-        // https://stackoverflow.com/questions/61687463/documentscontract-copydocument-always-fails
-        // https://stackoverflow.com/questions/13133579/android-save-a-file-from-an-existing-uri
-        // copydocument() does not work, well-documented bug or non-implementation
-        // Copying bytes has issues too, over MTP: https://issuetracker.google.com/issues/36956498
-        // FileManager may not refresh on the host machine
         binding.actionCopy.setOnClickListener {
-            val copyFromUri = receiver.getState("copy-FromUri")
-            if (copyFromUri == null) {
-                var text = ""
-                if (tracker.selection.size() == 0) {
-                    text = "Select a file to copy"
-                }
-                if (tracker.selection.size() > 1) {
-                    text = "Multi-file copy is not supported"
-                }
-                if (text != "") {
-                    Utils.showPopup(requireActivity(), text)
-                    return@setOnClickListener
-                }
-                val docIdToCopy = tracker.selection.toList()[0]
-                val uriToCopy = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docIdToCopy)
-                receiver.setState("copy-FromUri", uriToCopy.toString())
-                receiver.setState("copy-Name", Utils.getNameFromDocId(docIdToCopy))
-            } else {
-                val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-                val name = receiver.getState("copy-Name")!!
-                val newUri = DocumentsContract.createDocument(requireActivity().contentResolver, docUri, "text/plain", name)
-                val input = requireContext().contentResolver.openInputStream(copyFromUri.toUri())!!
-                val bytes = input.readBytes()
-                input.close()
-                val output = requireContext().contentResolver.openOutputStream(newUri!!)!!
-                output.write(bytes)
-                output.close()
-                receiver.setState("copy-FromUri", null)
-                receiver.setState("copy-Name", null)
-                // TODO: Android has no built-in method for file hash, but should implement an equal-bytes check of the two files
-
-                // This fails on most Android devices up to SDK32 with "java.lang.UnsupportedOperationException: Copy not supported"
-                // val targetDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-                // DocumentsContract.copyDocument(requireContext().contentResolver, copyFromUri.toUri(), targetDocumentParentUri)
-
-                observeCurrent(destinationDocId)
+            val action = actions.get("Copy") as Copy
+            val success = action.handle(requireActivity(), tracker.selection, fragmentUri, fragmentDocId)
+            if (success) {
+                observeCurrent(fragmentDocId)
             }
         }
         // Create Folder
         binding.actionCreateFolder.setOnClickListener {
             val action = actions.get("CreateFolder") as CreateFolder
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-            action.handle(docUri)
-            observeCurrent(null)
-            Utils.withDelay{ binding.toggleGroup1.uncheck(R.id.action_create_folder) }
+            action.handle(binding, fragmentUri, fragmentDocId)
+            observeCurrent(fragmentDocId)
         }
         // Create File
         binding.actionCreateFile.setOnClickListener {
-            /* Get the docUri from the destination vars
-               It might make sense to build docUri on the fly, e.g.
-               var docUri = DocumentFile.fromTreeUri(requireContext(), destinationUri)!!.uri
-               However, this *always* yields the root docUri. Is this a bug?
-               This thread suggests so: https://stackoverflow.com/questions/62375696/unexpected-behavior-when-documentfile-fromtreeuri-is-called-on-uri-of-subdirec
-             */
             val action = actions.get("CreateFile") as CreateFile
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-            val filename = binding.filename.text.trim().toString()
-            if (filename == "") {
-                Utils.showPopup(requireActivity(), "Filename is empty")
-                return@setOnClickListener
-            }
-            action.handle(receiver, docUri, filename)
-            observeCurrent(destinationDocId)
-            Utils.withDelay{ binding.toggleGroup1.uncheck(R.id.action_create_file) }
-            binding.filename.text.clear()
+            action.handle(requireActivity(), binding, fragmentUri, fragmentDocId)
+            observeCurrent(fragmentDocId)
         }
         // Move
         binding.actionMove.setOnClickListener {
-            val moveFromUri = receiver.getState("move-FromUri")
-            if (moveFromUri == null) {
-                val docIdToMove = tracker.selection.toList()[0]
-                val uriToMove = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docIdToMove)
-                receiver.setState("move-FromUri", uriToMove.toString())
-                receiver.setState("move-FromParentUri", destinationUri.toString())
-                receiver.setState("move-FromParentDocId", destinationDocId)
-                // ^ removing decode() operation on these strings enabled else{} block to work. WHY??
-            } else {
-                val moveFromParentUri = Utils.decode(receiver.getState("move-FromParentUri")!!)
-                val moveFromParentDocId = Utils.decode(receiver.getState("move-FromParentDocId")!!)
-                val sourceDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(moveFromParentUri.toUri(), moveFromParentDocId)
-                val targetDocumentParentUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, destinationDocId)
-                DocumentsContract.moveDocument(requireContext().contentResolver, moveFromUri.toUri(), sourceDocumentParentUri, targetDocumentParentUri)
-            }
+            val action = actions.get("Move") as Move
+            action.handle(requireActivity(), tracker.selection, fragmentUri, fragmentDocId)
         }
         // Delete
         binding.actionDelete.setOnClickListener {
-            val docIdToDelete = tracker.selection.toList()[0]
-            val uriToDelete = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docIdToDelete)
-            DocumentsContract.deleteDocument(requireContext().contentResolver, uriToDelete)
-            //sanFilesViewModel.removeSanFile(docIdToDelete)
-            observeCurrent(destinationDocId)
-            Utils.withDelay{ binding.toggleGroup2.uncheck(R.id.action_delete) }
+            val action = actions.get("Delete") as Delete
+            action.handle(requireActivity(), binding, tracker.selection, fragmentUri)
+            observeCurrent(fragmentDocId)
         }
         // Open
         binding.actionOpen.setOnClickListener {
-            val selections = tracker.selection
             val action = actions.get("Open") as Open
-            action.handle(requireActivity(), binding, selections, destinationUri)
+            action.handle(requireActivity(), binding, tracker.selection, fragmentUri)
         }
         // Rename
         binding.actionRename.setOnClickListener {
-            val selections = tracker.selection
             val action = actions.get("Rename") as Rename
-            val docId = selections.toList()[0]
-            action.handle(docId, destinationUri)
-            observeCurrent(destinationDocId)
+            action.handle(tracker.selection, fragmentUri)
+            observeCurrent(fragmentDocId)
         }
     }
 
@@ -215,19 +143,19 @@ class FolderFragment : Fragment() {
 
         val settings: SharedPreferences = requireActivity().getSharedPreferences("UserInfo", 0)
 
-        // set destinationStr and destinationUri
-        val destinationStr = if (arguments?.getString("destination").isNullOrEmpty()) {
+        // set fragmentStr and fragmentUri
+        val fragmentStr = if (arguments?.getString("fragmentUri").isNullOrEmpty()) {
             settings.getString("root", null)
         } else {
-            arguments?.getString("destination")
+            arguments?.getString("fragmentUri")
         }
-        destinationUri = destinationStr!!.toUri()
+        fragmentUri = fragmentStr!!.toUri()
 
-        // set destinationDocId
-        destinationDocId = if (arguments?.getString("docId").isNullOrEmpty()) {
-            DocumentsContract.getTreeDocumentId(destinationUri)
+        // set fragmentDocId
+        fragmentDocId = if (arguments?.getString("fragmentDocId").isNullOrEmpty()) {
+            DocumentsContract.getTreeDocumentId(fragmentUri)
         } else {
-            arguments?.getString("docId")!!
+            arguments?.getString("fragmentDocId")!!
         }
 
         val uriPermissions = requireActivity().contentResolver.persistedUriPermissions
@@ -235,7 +163,7 @@ class FolderFragment : Fragment() {
 
         for (uriPermission in uriPermissions) {
             if (uriPermission.isReadPermission && uriPermission.isWritePermission) {
-                if (Utils.decode(destinationStr).contains(Utils.decode(uriPermission.uri.toString()))) {
+                if (Utils.decode(fragmentStr).contains(Utils.decode(uriPermission.uri.toString()))) {
                     havePermissions = true
                 }
             }
@@ -250,7 +178,7 @@ class FolderFragment : Fragment() {
     }
 
     private fun observeCurrent(docId: String?) {
-        val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), destinationUri, docId)
+        val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), fragmentUri, docId)
 
         // Observe the current directory
         liveData = sanFilesViewModel.initSanFiles(mutableList)
@@ -274,7 +202,7 @@ class FolderFragment : Fragment() {
 
         if (requestCode == OPEN_DOCUMENT_TREE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val uri: Uri = data?.data!!
-            destinationUri = uri
+            fragmentUri = uri
             val contentResolver = requireActivity().contentResolver
             contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)

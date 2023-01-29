@@ -37,8 +37,8 @@ class Open(fragment: Fragment) {
             // Folder
             val navController = Navigation.findNavController(mFragment.requireActivity(), R.id.nav_host_fragment_content_main)
             val bundle = Bundle()
-            bundle.putString("destination", Utils.decode(docTreeUri.toString()))
-            bundle.putString("docId", docId)
+            bundle.putString("destinationUri", Utils.decode(docTreeUri.toString()))
+            bundle.putString("destinationDocId", docId)
             navController.navigate(R.id.action_FolderFragment_to_FolderFragment, bundle)
         } else {
             // File
