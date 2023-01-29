@@ -109,8 +109,9 @@ class FolderFragment : Fragment() {
         // Create File
         binding.actionCreateFile.setOnClickListener {
             val action = actions.get("CreateFile") as CreateFile
-            action.handle(requireActivity(), binding, fragmentUri, fragmentDocId)
-            observeCurrent(fragmentDocId)
+            action.handle(requireActivity(), binding, fragmentUri, fragmentDocId) {
+                observeCurrent(fragmentDocId)
+            }
         }
         // Move
         binding.actionMove.setOnClickListener {

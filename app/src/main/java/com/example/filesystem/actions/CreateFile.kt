@@ -2,6 +2,7 @@ package com.example.filesystem.actions
 
 import android.net.Uri
 import android.provider.DocumentsContract
+import android.util.Log
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -24,13 +25,14 @@ class CreateFile(fragment: Fragment) {
     private lateinit var mReceiver : MainReceiver
     private lateinit var mBinding : FragmentFolderBinding
 
-    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, fragmentUri: Uri, fragmentDocId: String) {
+    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, fragmentUri: Uri, fragmentDocId: String, callback : (() -> Unit)) {
 
         mReceiver = (activity as MainReceiver)
         mBinding = binding
 
         val docUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
         Utils.showPrompt(activity, fun(editText) {
+            // onSubmit()
             val filename = editText.text.trim().toString()
             if (filename == "") {
                 Utils.showPopup(activity, "Filename is empty") {
@@ -54,6 +56,10 @@ class CreateFile(fragment: Fragment) {
 
             Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
             editText.text.clear()
+            callback()
+        }, fun() {
+            // onDismiss()
+            Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
         })
     }
 }

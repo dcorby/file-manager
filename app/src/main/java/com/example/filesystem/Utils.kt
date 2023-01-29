@@ -13,10 +13,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.EditText
-import android.widget.PopupWindow
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import java.io.Closeable
 import java.net.URLDecoder
 import java.util.*
@@ -113,17 +110,24 @@ class Utils {
             }
         }
 
-        fun showPrompt(activity: Activity, onSubmit: (EditText) -> Unit) {
+        fun showPrompt(activity: Activity, onSubmit: (EditText) -> Unit, onDismiss : (() -> Unit)? = null) {
             val layoutInflater = activity.layoutInflater
             val layout = layoutInflater.inflate(R.layout.prompt, null)
             val prompt = layout.findViewById<ViewGroup>(R.id.prompt)
             val editText = prompt.findViewById<EditText>(R.id.edit_text)
+            val submitText = prompt.findViewById<Button>(R.id.submit_text)
             val window = PopupWindow(layout, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, true)
             window.showAtLocation(layout, Gravity.CENTER, 0, 0)
             prompt.setOnClickListener {
                 window.dismiss()
+                if (onDismiss != null) {
+                    onDismiss()
+                }
             }
-
+            submitText.setOnClickListener {
+                window.dismiss()
+                onSubmit(editText)
+            }
             editText.setOnEditorActionListener { v, actionId, event ->
                 window.dismiss()
                 onSubmit(editText)
