@@ -14,7 +14,7 @@ class Delete(fragment: Fragment) {
     private val mFragment = fragment
     private lateinit var mActivity : FragmentActivity
     private lateinit var mBinding : FragmentFolderBinding
-    private lateinit var mSelections : Selection<String>
+    private lateinit var mSelection : Selection<String>
 
     fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, selection: Selection<String>, fragmentUri: Uri) {
         val docId = selection.toList()[0]

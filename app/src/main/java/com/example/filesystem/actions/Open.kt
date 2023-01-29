@@ -19,24 +19,23 @@ class Open(fragment: Fragment) {
     private val mFragment = fragment
     private lateinit var mActivity : FragmentActivity
     private lateinit var mBinding : FragmentFolderBinding
-    private lateinit var mSelections : Selection<String>
+    private lateinit var mSelection : Selection<String>
 
-    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, selections: Selection<String>, destinationUri: Uri) {
+    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, selection: Selection<String>, destinationUri: Uri) {
         mActivity = activity
         mBinding = binding
-        mSelections = selections
+        mSelection = selection
         if (!validate()) {
             return
         }
         Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_open) }, {
-            val docId = selections.toList()[0]
+            val docId = mSelection.toList()[0]
             val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docId)
             val docTreeUri = DocumentsContract.buildTreeDocumentUri(docUri.authority, docId)
-            val isDir = activity.contentResolver.getType(docUri) == DocumentsContract.Document.MIME_TYPE_DIR
+            val isDir = mActivity.contentResolver.getType(docUri) == DocumentsContract.Document.MIME_TYPE_DIR
             if (isDir) {
                 // Folder
-                val navController =
-                    Navigation.findNavController(mFragment.requireActivity(), R.id.nav_host_fragment_content_main)
+                val navController = Navigation.findNavController(mFragment.requireActivity(), R.id.nav_host_fragment_content_main)
                 val bundle = Bundle()
                 bundle.putString("fragmentUri", Utils.decode(docTreeUri.toString()))
                 bundle.putString("fragmentDocId", docId)
@@ -48,19 +47,19 @@ class Open(fragment: Fragment) {
                     setDataAndType(docUri, "text/*")
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                startActivity(activity, Intent.createChooser(intent, null), null)
+                startActivity(mActivity, Intent.createChooser(intent, null), null)
             }
         })
     }
 
     private fun validate() : Boolean {
-        if (mSelections.size() == 0) {
+        if (mSelection.size() == 0) {
             Utils.showPopup(mActivity, "Select a file to open") {
                 mBinding.toggleGroup.uncheck(R.id.action_open)
             }
             return false
         }
-        if (mSelections.size() > 1) {
+        if (mSelection.size() > 1) {
             Utils.showPopup(mActivity, "Only one file may be selected for open") {
                 mBinding.toggleGroup.uncheck(R.id.action_open)
             }

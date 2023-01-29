@@ -13,7 +13,7 @@ class CreateFolder(fragment: Fragment) {
     private val mFragment = fragment
     private lateinit var mBinding : FragmentFolderBinding
 
-    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, fragmentUri: Uri, fragmentDocId: String, callback : (() -> Unit)) {
+    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, fragmentUri: Uri, fragmentDocId: String, callback: (() -> Unit)) {
 
         mBinding = binding
 

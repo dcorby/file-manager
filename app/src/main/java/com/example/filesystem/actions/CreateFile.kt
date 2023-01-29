@@ -25,7 +25,7 @@ class CreateFile(fragment: Fragment) {
     private lateinit var mReceiver : MainReceiver
     private lateinit var mBinding : FragmentFolderBinding
 
-    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, fragmentUri: Uri, fragmentDocId: String, callback : (() -> Unit)) {
+    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, fragmentUri: Uri, fragmentDocId: String, callback: (() -> Unit)) {
 
         mReceiver = (activity as MainReceiver)
         mBinding = binding

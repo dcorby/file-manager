@@ -133,8 +133,9 @@ class FolderFragment : Fragment() {
         // Rename
         binding.actionRename.setOnClickListener {
             val action = actions.get("Rename") as Rename
-            action.handle(tracker.selection, fragmentUri)
-            observeCurrent(fragmentDocId)
+            action.handle(requireActivity(), binding, tracker.selection, fragmentUri) {
+                observeCurrent(fragmentDocId)
+            }
         }
     }
 
