@@ -200,6 +200,15 @@ class FolderFragment : Fragment() {
         _binding = null
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (receiver.getActionState("Copy", "sourceUri") != null) {
+            binding.toggleGroup.check(R.id.action_copy)
+        } else {
+            binding.toggleGroup.uncheck(R.id.action_copy)
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 

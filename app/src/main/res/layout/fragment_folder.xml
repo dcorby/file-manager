@@ -95,6 +95,8 @@
             android:id="@+id/toggle_group"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             app:singleSelection="false">
             <Button
                 android:id="@+id/action_create_file"
@@ -102,8 +104,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="File"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
                 app:icon="@drawable/ic_add_24dp"
                 app:iconTint="@color/button_text_color"
                 android:textColor="@color/button_text_color"
@@ -115,8 +115,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="Folder"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
                 app:icon="@drawable/ic_add_24dp"
                 app:iconTint="@color/button_text_color"
                 android:textColor="@color/button_text_color"
@@ -129,8 +127,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="Open"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
                 android:textColor="@color/button_text_color"
                 app:backgroundTint="@color/button_background_tint"
                 app:rippleColor="@android:color/transparent">
@@ -142,8 +138,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="Rename"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
                 android:textColor="@color/button_text_color"
                 app:backgroundTint="@color/button_background_tint"
                 app:rippleColor="@android:color/transparent">
@@ -155,8 +149,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="Copy"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
                 android:textColor="@color/button_text_color"
                 app:backgroundTint="@color/button_background_tint"
                 app:rippleColor="@android:color/transparent">
@@ -168,8 +160,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="Move"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
                 android:textColor="@color/button_text_color"
                 app:backgroundTint="@color/button_background_tint"
                 app:rippleColor="@android:color/transparent">
@@ -181,8 +171,6 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="Delete"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
                 android:textColor="@color/button_text_color"
                 app:backgroundTint="@color/button_background_tint"
                 app:rippleColor="@android:color/transparent">

@@ -2,6 +2,7 @@ package com.example.filesystem.actions
 
 import android.net.Uri
 import android.provider.DocumentsContract
+import android.util.Log
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -49,8 +50,8 @@ class Copy(fragment: Fragment) {
             // Make the actual copy
             val filename = mReceiver.getActionState("Copy", "filename")!!
             val parentUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
-            val (ext, _) = Utils.explodeFilename(filename)
-            val mimeType = mReceiver.getMimeType(ext) as String
+            val (_, ext) = Utils.explodeFilename(filename)
+            val mimeType = mReceiver.getMimeType(ext)
             val targetUri = DocumentsContract.createDocument(mActivity.contentResolver, parentUri, mimeType, filename)
             val inputStream = mActivity.contentResolver.openInputStream(sourceUri.toUri())!!
             val bytes = inputStream.readBytes()

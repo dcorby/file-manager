@@ -151,17 +151,17 @@ class Utils {
         }
 
         fun explodeFilename(filename: String): Pair<String, String> {
-            var name: String? = null
+            var base: String? = null
             var ext: String? = null
             val parts = filename.split(".")
             if (parts.size == 1) {
-                name = filename
+                base = filename
                 ext = "bin"  // maps to application/octet-stream
             } else {
-                name = parts.dropLast(1).joinToString(".")
+                base = parts.dropLast(1).joinToString(".")
                 ext = parts.last()
             }
-            return Pair(name, ext)
+            return Pair(base, ext)
         }
     }
 }

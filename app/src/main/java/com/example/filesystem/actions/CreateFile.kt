@@ -38,9 +38,9 @@ class CreateFile(fragment: Fragment) {
                 }
                 return
             }
-            val (ext, name) = Utils.explodeFilename(filename)
-            val mimeType = mReceiver.getMimeType(ext) as String
-            DocumentsContract.createDocument(mFragment.requireActivity().contentResolver, docUri, mimeType, name)
+            val (base, ext) = Utils.explodeFilename(filename)
+            val mimeType = mReceiver.getMimeType(ext)
+            DocumentsContract.createDocument(mFragment.requireActivity().contentResolver, docUri, mimeType, base)
             Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
             editText.text.clear()
             callback()

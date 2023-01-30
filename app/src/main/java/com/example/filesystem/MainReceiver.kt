@@ -3,5 +3,5 @@ package com.example.filesystem
 interface MainReceiver {
     fun getActionState(action: String, key: String): String?
     fun setActionState(action: String, key: String, value: String?)
-    fun getMimeType(key: String): Any?
+    fun getMimeType(key: String): String
 }

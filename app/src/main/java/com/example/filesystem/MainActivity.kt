@@ -76,11 +76,12 @@ class MainActivity : AppCompatActivity(), MainReceiver {
     override fun setActionState(action: String, key: String, value: String?) {
         actionStates[action]!![key] = value
     }
-    override fun getMimeType(key: String): Any? {
-        return mimeTypes.getOrDefault(key, null)
+    override fun getMimeType(key: String): String {
+        if (mimeTypes.containsKey(key)) {
+            return mimeTypes[key] as String
+        }
+        return "application/octet-stream"
     }
-
-
 }
 
 
