@@ -66,7 +66,7 @@ class Utils {
         }
 
         // Check if the mime type is a directory
-        private fun isDirectory(mimeType: String): Boolean {
+        fun isDirectory(mimeType: String): Boolean {
             return DocumentsContract.Document.MIME_TYPE_DIR.equals(mimeType)
         }
 

@@ -1,5 +1,7 @@
 package com.example.filesystem.actions
 
+import android.R.attr.mimeType
+import android.content.ContentResolver
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
@@ -43,30 +45,52 @@ class Copy(fragment: Fragment) {
         if (sourceUri == null) {
             val sourceDocId = mSelection.toList()[0]
             val sourceUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, sourceDocId)
+            val mimeType = mActivity.contentResolver.getType(sourceUri)
+            if (mimeType != null && Utils.isDirectory(mimeType)) {
+                Utils.showPopup(mActivity, "Folder copy not supported") {
+                    mBinding.toggleGroup.uncheck(R.id.action_copy)
+                }
+                return false
+            }
             mReceiver.setActionState("Copy", "sourceUri", sourceUri.toString())
             mReceiver.setActionState("Copy", "filename", Utils.getFilenameFromDocId(sourceDocId))
             return false
         } else {
-            // Make the actual copy
-            val filename = mReceiver.getActionState("Copy", "filename")!!
-            val parentUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
-            val (_, ext) = Utils.explodeFilename(filename)
-            val mimeType = mReceiver.getMimeType(ext)
-            val targetUri = DocumentsContract.createDocument(mActivity.contentResolver, parentUri, mimeType, filename)
-            val inputStream = mActivity.contentResolver.openInputStream(sourceUri.toUri())!!
-            val bytes = inputStream.readBytes()
-            inputStream.close()
-            val outputStream = mActivity.contentResolver.openOutputStream(targetUri!!)!!
-            outputStream.write(bytes)
-            outputStream.close()
-            mReceiver.setActionState("Copy", "sourceUri", null)
-            mReceiver.setActionState("Copy", "filename", null)
-            return true
+            var targetUri: Uri? = null
+            var isError = false
+            try {
+                // Make the actual copy
+                val filename = mReceiver.getActionState("Copy", "filename")!!
+                val parentUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
+                val (_, ext) = Utils.explodeFilename(filename)
+                val mimeType = mReceiver.getMimeType(ext)
+                targetUri = DocumentsContract.createDocument(mActivity.contentResolver, parentUri, mimeType, filename)
+                val inputStream = mActivity.contentResolver.openInputStream(sourceUri.toUri())!!
+                val bytes = inputStream.readBytes()
+                inputStream.close()
+                val outputStream = mActivity.contentResolver.openOutputStream(targetUri!!)!!
+                outputStream.write(bytes)
+                outputStream.close()
+                mReceiver.setActionState("Copy", "sourceUri", null)
+                mReceiver.setActionState("Copy", "filename", null)
+                return true
+            } catch(e: Exception) {
+                Utils.showPopup(mActivity, "Error copying file") {
+                    mBinding.toggleGroup.uncheck(R.id.action_copy)
+                    mReceiver.setActionState("Copy", "sourceUri", null)
+                    mReceiver.setActionState("Copy", "filename", null)
+                }
+                isError = true
+                return false
+            } finally {
+                if (isError && targetUri != null) {
+                    DocumentsContract.deleteDocument(mActivity.contentResolver, targetUri)
+                }
+            }
         }
     }
 
     private fun validate() : Boolean {
-
         val sourceUri = mReceiver.getActionState("Copy", "sourceUri")
         // Only need to validate if user hasn't yet selected a file to copy
         if (sourceUri == null) {

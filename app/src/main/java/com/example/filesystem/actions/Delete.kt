@@ -1,5 +1,6 @@
 package com.example.filesystem.actions
 
+import android.app.AlertDialog
 import android.net.Uri
 import android.provider.DocumentsContract
 import androidx.fragment.app.Fragment
@@ -11,16 +12,21 @@ import com.example.filesystem.databinding.FragmentFolderBinding
 
 class Delete(fragment: Fragment) {
 
-    private val mFragment = fragment
-    private lateinit var mActivity : FragmentActivity
-    private lateinit var mBinding : FragmentFolderBinding
-    private lateinit var mSelection : Selection<String>
+    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, selection: Selection<String>, fragmentUri: Uri, callback: (() -> Unit)) {
 
-    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, selection: Selection<String>, fragmentUri: Uri) {
         val docId = selection.toList()[0]
         val uri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, docId)
-        DocumentsContract.deleteDocument(activity.contentResolver, uri)
-        //sanFilesViewModel.removeSanFile(docIdToDelete)
-        Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
+        val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
+        builder.setMessage("Are you sure?")
+        builder.setPositiveButton("Yes") { _, _ ->
+            DocumentsContract.deleteDocument(activity.contentResolver, uri)
+            Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
+            callback()
+        }
+        builder.setNegativeButton("No") { _, _ ->
+            Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
+            callback()
+        }
+        builder.show()
     }
 }

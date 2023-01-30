@@ -6,10 +6,12 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
-import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.View.OnTouchListener
 import android.view.ViewGroup
+import android.widget.CompoundButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
@@ -27,6 +29,10 @@ import com.example.filesystem.databinding.FragmentFolderBinding
 
 const val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
 const val AUTHORITY = "com.android.externalstorage.documents"
+
+/*
+  https://github.com/material-components/material-components-android/issues/2291
+ */
 
 class FolderFragment : Fragment() {
     private var _binding: FragmentFolderBinding? = null
@@ -73,9 +79,12 @@ class FolderFragment : Fragment() {
             tracker.onRestoreInstanceState(savedInstanceState)
         }
 
-        // Check whether we have an active copy
+        // Check whether we have an active copy or move
         if (receiver.getActionState("Copy", "sourceUri") != null) {
             binding.toggleGroup.check(R.id.action_copy)
+        }
+        if (receiver.getActionState("Move", "sourceUri") != null) {
+            binding.toggleGroup.check(R.id.action_move)
         }
 
         // Set the path parts
@@ -129,13 +138,17 @@ class FolderFragment : Fragment() {
         // Move
         binding.actionMove.setOnClickListener {
             val action = actions.get("Move") as Move
-            action.handle(requireActivity(), tracker.selection, fragmentUri, fragmentDocId)
+            val success = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId)
+            if (success) {
+                observeCurrent(fragmentDocId)
+            }
         }
         // Delete
         binding.actionDelete.setOnClickListener {
             val action = actions.get("Delete") as Delete
-            action.handle(requireActivity(), binding, tracker.selection, fragmentUri)
-            observeCurrent(fragmentDocId)
+            action.handle(requireActivity(), binding, tracker.selection, fragmentUri) {
+                observeCurrent(fragmentDocId)
+            }
         }
     }
 
@@ -202,10 +215,17 @@ class FolderFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        // Check for active copy
         if (receiver.getActionState("Copy", "sourceUri") != null) {
             binding.toggleGroup.check(R.id.action_copy)
         } else {
             binding.toggleGroup.uncheck(R.id.action_copy)
+        }
+        // Check for active move
+        if (receiver.getActionState("Move", "sourceUri") != null) {
+            binding.toggleGroup.check(R.id.action_move)
+        } else {
+            binding.toggleGroup.uncheck(R.id.action_move)
         }
     }
 
