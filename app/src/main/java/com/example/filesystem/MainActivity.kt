@@ -70,6 +70,10 @@ class MainActivity : AppCompatActivity(), MainReceiver {
     }
 
     // Interface methods
+    override fun getActionState(action: String): HashMap<String, String> {
+        return actionStates[action]!! as HashMap<String, String>
+        // ^ fix for kotlin.collections/java.util issue
+    }
     override fun getActionState(action: String, key: String): String? {
         return actionStates[action]!![key]
     }

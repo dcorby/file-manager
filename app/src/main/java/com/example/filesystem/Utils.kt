@@ -1,6 +1,5 @@
 package com.example.filesystem
 
-import android.app.ActionBar.LayoutParams
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
@@ -9,20 +8,14 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
 import android.provider.DocumentsContract
-import android.util.Log
-import android.view.Gravity
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.widget.*
 import java.io.Closeable
 import java.net.URLDecoder
 import java.util.*
 
-
 class Utils {
-
     companion object {
-
         private val fields = arrayOf(
             DocumentsContract.Document.COLUMN_DOCUMENT_ID,
             DocumentsContract.Document.COLUMN_DISPLAY_NAME,
@@ -94,14 +87,12 @@ class Utils {
         }
 
         // optional callback syntax: https://discuss.kotlinlang.org/t/optional-function-parameters/905
-        fun showPopup(activity: Activity, text: String, onDismiss : (() -> Unit)? = null) {
-            val layoutInflater = activity.layoutInflater
-            val layout = layoutInflater.inflate(R.layout.popup, null)
-            val popup = layout.findViewById<ViewGroup>(R.id.popup)
+        fun showPopup(fragment: FolderFragment, text: String, onDismiss : (() -> Unit)? = null) {
+            val window = fragment.getPopupWindow("popup")
+            val contentView = window.contentView
+            val popup = contentView.findViewById<ViewGroup>(R.id.popup)
             val textView = popup.findViewById<TextView>(R.id.text_view)
             textView.text = text
-            val window = PopupWindow(layout, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, true)
-            window.showAtLocation(layout, Gravity.CENTER, 0, 0)
             popup.setOnClickListener {
                 window.dismiss()
                 if (onDismiss != null) {
@@ -110,14 +101,12 @@ class Utils {
             }
         }
 
-        fun showPrompt(activity: Activity, onSubmit: (EditText) -> Unit, onDismiss : (() -> Unit)? = null) {
-            val layoutInflater = activity.layoutInflater
-            val layout = layoutInflater.inflate(R.layout.prompt, null)
-            val prompt = layout.findViewById<ViewGroup>(R.id.prompt)
-            val editText = prompt.findViewById<EditText>(R.id.edit_text)
-            val submitText = prompt.findViewById<Button>(R.id.submit_text)
-            val window = PopupWindow(layout, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, true)
-            window.showAtLocation(layout, Gravity.CENTER, 0, 0)
+        fun showPrompt(fragment: FolderFragment, onSubmit: (EditText) -> Unit, onDismiss : (() -> Unit)? = null) {
+            val window = fragment.getPopupWindow("prompt")
+            val contentView = window.contentView
+            val prompt = contentView.findViewById<ViewGroup>(R.id.prompt)
+            val editText = contentView.findViewById<EditText>(R.id.edit_text)
+            val submitText = contentView.findViewById<Button>(R.id.submit_text)
             prompt.setOnClickListener {
                 window.dismiss()
                 if (onDismiss != null) {

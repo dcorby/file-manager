@@ -1,8 +1,8 @@
 package com.example.filesystem.actions
 
-import androidx.fragment.app.Fragment
+import com.example.filesystem.FolderFragment
 
-class Actions(fragment: Fragment) {
+class Actions(fragment: FolderFragment) {
     private val hashMap = hashMapOf(
         "Copy" to Copy(fragment),
         "CreateFile" to CreateFile(fragment),

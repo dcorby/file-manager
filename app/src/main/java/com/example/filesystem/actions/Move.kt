@@ -3,27 +3,31 @@ package com.example.filesystem.actions
 import android.net.Uri
 import android.os.Build
 import android.provider.DocumentsContract
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.selection.Selection
+import com.example.filesystem.FolderFragment
 import com.example.filesystem.MainReceiver
 import com.example.filesystem.R
 import com.example.filesystem.Utils
 import com.example.filesystem.databinding.FragmentFolderBinding
 
-class Move(fragment: Fragment) {
-
+class Move(fragment: FolderFragment) {
+    private val mFragment = fragment
     private lateinit var mActivity : FragmentActivity
     private lateinit var mReceiver : MainReceiver
     private lateinit var mBinding : FragmentFolderBinding
     private lateinit var mSelection : Selection<String>
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, selection: Selection<String>, fragmentUri: Uri, fragmentDocId: String) : Boolean {
+    fun handle(activity: FragmentActivity,
+               binding: FragmentFolderBinding,
+               selection: Selection<String>,
+               fragmentUri: Uri,
+               fragmentDocId: String) : Boolean {
+
         mActivity = activity
         mReceiver = (activity as MainReceiver)
         mBinding = binding
@@ -63,13 +67,13 @@ class Move(fragment: Fragment) {
         // Only need to validate if user hasn't yet selected a file to move
         if (sourceUri == null) {
             if (mSelection.size() == 0) {
-                Utils.showPopup(mActivity, "Select a file to move") {
+                Utils.showPopup(mFragment, "Select a file to move") {
                     mBinding.toggleGroup.uncheck(R.id.action_move)
                 }
                 return false
             }
             if (mSelection.size() > 1) {
-                Utils.showPopup(mActivity, "Multi-file move is not supported") {
+                Utils.showPopup(mFragment, "Multi-file move is not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_move)
                 }
                 return false

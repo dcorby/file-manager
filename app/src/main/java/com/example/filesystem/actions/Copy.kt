@@ -9,6 +9,7 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.selection.Selection
+import com.example.filesystem.FolderFragment
 import com.example.filesystem.MainReceiver
 import com.example.filesystem.R
 import com.example.filesystem.Utils
@@ -26,14 +27,19 @@ import com.example.filesystem.databinding.FragmentFolderBinding
   This fails on most Android devices up to SDK32 with "java.lang.UnsupportedOperationException: Copy not supported"
  */
 
-class Copy(fragment: Fragment) {
-
+class Copy(fragment: FolderFragment) {
+    private val mFragment = fragment
     private lateinit var mActivity : FragmentActivity
     private lateinit var mReceiver : MainReceiver
     private lateinit var mBinding : FragmentFolderBinding
     private lateinit var mSelection : Selection<String>
 
-    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, selection: Selection<String>, fragmentUri: Uri, fragmentDocId: String) : Boolean {
+    fun handle(activity: FragmentActivity,
+               binding: FragmentFolderBinding,
+               selection: Selection<String>,
+               fragmentUri: Uri,
+               fragmentDocId: String) : Boolean {
+
         mActivity = activity
         mReceiver = (activity as MainReceiver)
         mBinding = binding
@@ -47,7 +53,7 @@ class Copy(fragment: Fragment) {
             val sourceUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, sourceDocId)
             val mimeType = mActivity.contentResolver.getType(sourceUri)
             if (mimeType != null && Utils.isDirectory(mimeType)) {
-                Utils.showPopup(mActivity, "Folder copy not supported") {
+                Utils.showPopup(mFragment, "Folder copy not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
                 }
                 return false
@@ -75,7 +81,7 @@ class Copy(fragment: Fragment) {
                 mReceiver.setActionState("Copy", "filename", null)
                 return true
             } catch(e: Exception) {
-                Utils.showPopup(mActivity, "Error copying file") {
+                Utils.showPopup(mFragment, "Error copying file") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
                     mReceiver.setActionState("Copy", "sourceUri", null)
                     mReceiver.setActionState("Copy", "filename", null)
@@ -95,13 +101,13 @@ class Copy(fragment: Fragment) {
         // Only need to validate if user hasn't yet selected a file to copy
         if (sourceUri == null) {
             if (mSelection.size() == 0) {
-                Utils.showPopup(mActivity, "Select a file to copy") {
+                Utils.showPopup(mFragment, "Select a file to copy") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
                 }
                 return false
             }
             if (mSelection.size() > 1) {
-                Utils.showPopup(mActivity, "Multi-file copy is not supported") {
+                Utils.showPopup(mFragment, "Multi-file copy is not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
                 }
                 return false

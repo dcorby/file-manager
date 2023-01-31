@@ -4,18 +4,16 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
-import android.util.Log
 import androidx.core.content.ContextCompat.startActivity
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.Navigation
 import androidx.recyclerview.selection.Selection
+import com.example.filesystem.FolderFragment
 import com.example.filesystem.R
 import com.example.filesystem.Utils
 import com.example.filesystem.databinding.FragmentFolderBinding
 
-class Open(fragment: Fragment) {
-
+class Open(fragment: FolderFragment) {
     private val mFragment = fragment
     private lateinit var mActivity : FragmentActivity
     private lateinit var mBinding : FragmentFolderBinding
@@ -54,13 +52,13 @@ class Open(fragment: Fragment) {
 
     private fun validate() : Boolean {
         if (mSelection.size() == 0) {
-            Utils.showPopup(mActivity, "Select a file to open") {
+            Utils.showPopup(mFragment, "Select a file to open") {
                 mBinding.toggleGroup.uncheck(R.id.action_open)
             }
             return false
         }
         if (mSelection.size() > 1) {
-            Utils.showPopup(mActivity, "Only one file may be selected for open") {
+            Utils.showPopup(mFragment, "Only one file may be selected for open") {
                 mBinding.toggleGroup.uncheck(R.id.action_open)
             }
             return false
