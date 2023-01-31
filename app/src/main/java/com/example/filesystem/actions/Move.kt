@@ -8,10 +8,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.selection.Selection
-import com.example.filesystem.FolderFragment
-import com.example.filesystem.MainReceiver
-import com.example.filesystem.R
-import com.example.filesystem.Utils
+import com.example.filesystem.*
 import com.example.filesystem.databinding.FragmentFolderBinding
 
 class Move(fragment: FolderFragment) {
@@ -35,17 +32,17 @@ class Move(fragment: FolderFragment) {
         if (!validate()) {
             return false
         }
-        val sourceUri = mReceiver.getActionState("Move", "sourceUri")
+        val sourceUri = mReceiver.getActionState("move", "sourceUri")
         if (sourceUri == null) {
             val sourceDocId = selection.toList()[0]
             val sourceUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, sourceDocId)
-            mReceiver.setActionState("Move","sourceUri", sourceUri.toString())
-            mReceiver.setActionState("Move","sourceParentUri", fragmentUri.toString())
-            mReceiver.setActionState("Move","sourceParentDocId", fragmentDocId)
+            mReceiver.setActionState("move","sourceUri", sourceUri.toString())
+            mReceiver.setActionState("move","sourceParentUri", fragmentUri.toString())
+            mReceiver.setActionState("move","sourceParentDocId", fragmentDocId)
             return false
         } else {
-            val sourceParentUri = Utils.decode(mReceiver.getActionState("Move", "sourceParentUri")!!)
-            val sourceParentDocId = Utils.decode(mReceiver.getActionState("Move", "sourceParentDocId")!!)
+            val sourceParentUri = Utils.decode(mReceiver.getActionState("move", "sourceParentUri")!!)
+            val sourceParentDocId = Utils.decode(mReceiver.getActionState("move", "sourceParentDocId")!!)
             val sourceParentDocUri = DocumentsContract.buildDocumentUriUsingTree(sourceParentUri.toUri(), sourceParentDocId)
             val targetParentDocUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
             try {
@@ -55,15 +52,15 @@ class Move(fragment: FolderFragment) {
                 Toast.makeText(mActivity, "File already exists", Toast.LENGTH_SHORT).show()
                 return false
             }
-            mReceiver.setActionState("Move","sourceUri", null)
-            mReceiver.setActionState("Move","sourceParentUri", null)
-            mReceiver.setActionState("Move","sourceParentDocId", null)
+            mReceiver.setActionState("move","sourceUri", null)
+            mReceiver.setActionState("move","sourceParentUri", null)
+            mReceiver.setActionState("move","sourceParentDocId", null)
             return true
         }
     }
 
     private fun validate() : Boolean {
-        val sourceUri = mReceiver.getActionState("Move", "sourceUri")
+        val sourceUri = mReceiver.getActionState("move", "sourceUri")
         // Only need to validate if user hasn't yet selected a file to move
         if (sourceUri == null) {
             if (mSelection.size() == 0) {

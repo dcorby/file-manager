@@ -3,10 +3,7 @@ package com.example.filesystem.actions
 import android.net.Uri
 import android.provider.DocumentsContract
 import androidx.fragment.app.FragmentActivity
-import com.example.filesystem.FolderFragment
-import com.example.filesystem.MainReceiver
-import com.example.filesystem.R
-import com.example.filesystem.Utils
+import com.example.filesystem.*
 import com.example.filesystem.databinding.FragmentFolderBinding
 
 /*
@@ -19,6 +16,7 @@ import com.example.filesystem.databinding.FragmentFolderBinding
 
 class CreateFile(fragment: FolderFragment) {
     private val mFragment = fragment
+    private lateinit var mActivity : FragmentActivity
     private lateinit var mReceiver : MainReceiver
     private lateinit var mBinding : FragmentFolderBinding
 

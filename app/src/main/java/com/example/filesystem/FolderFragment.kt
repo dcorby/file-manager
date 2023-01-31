@@ -26,6 +26,8 @@ import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.actions.*
 import com.example.filesystem.databinding.FragmentFolderBinding
+import java.util.*
+import kotlin.collections.HashMap
 
 const val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
 const val AUTHORITY = "com.android.externalstorage.documents"
@@ -46,11 +48,14 @@ class FolderFragment : Fragment() {
     lateinit var tracker: SelectionTracker<String>
     lateinit var liveData: LiveData<MutableList<SanFile>>
     lateinit var receiver: MainReceiver
+    private var currentAction: String? = null
+
     private var popup: PopupWindow? = null
     private var prompt: PopupWindow? = null
     private var builder: AlertDialog.Builder? = null
     private var dialog: AlertDialog? = null
-    private var currentAction: String? = null
+
+    private var layout: View? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -87,10 +92,10 @@ class FolderFragment : Fragment() {
         }
 
         // Check whether we have an active copy or move
-        if (receiver.getActionState("Copy", "sourceUri") != null) {
+        if (receiver.getActionState("copy", "sourceUri") != null) {
             binding.toggleGroup.check(R.id.action_copy)
         }
-        if (receiver.getActionState("Move", "sourceUri") != null) {
+        if (receiver.getActionState("move", "sourceUri") != null) {
             binding.toggleGroup.check(R.id.action_move)
         }
 
@@ -112,104 +117,113 @@ class FolderFragment : Fragment() {
 
         // Create File
         fun createFile() {
-            val action = actions.get("CreateFile") as CreateFile
+            val action = actions.get("createFile") as CreateFile
             action.handle(requireActivity(), binding, fragmentUri, fragmentDocId) {
                 observeCurrent(fragmentDocId)
             }
         }
         binding.actionCreateFile.setOnClickListener {
-            currentAction = "CreateFile"
+            currentAction = "createFile"
             createFile()
             currentAction = null
         }
         fun createFolder() {
-            val action = actions.get("CreateFolder") as CreateFolder
+            val action = actions.get("createFolder") as CreateFolder
             action.handle(binding, fragmentUri, fragmentDocId) {
                 observeCurrent(fragmentDocId)
             }
         }
         // Create Folder
         binding.actionCreateFolder.setOnClickListener {
-            currentAction = "CreateFolder"
+            currentAction = "createFolder"
             createFolder()
             currentAction = null
         }
         // Open
         fun open() {
-            val action = actions.get("Open") as Open
+            val action = actions.get("open") as Open
             action.handle(requireActivity(), binding, tracker.selection, fragmentUri)
         }
         binding.actionOpen.setOnClickListener {
-            currentAction = "Open"
+            currentAction = "open"
             open()
             currentAction = null
         }
         // Rename
         fun rename() {
-            val action = actions.get("Rename") as Rename
+            val action = actions.get("rename") as Rename
             action.handle(requireActivity(), binding, tracker.selection, fragmentUri) {
                 observeCurrent(fragmentDocId)
             }
         }
         binding.actionRename.setOnClickListener {
-            currentAction = "Rename"
+            currentAction = "rename"
             rename()
             currentAction = null
         }
         // Copy
         fun copy() {
-            val action = actions.get("Copy") as Copy
-            val success = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId)
-            if (success) {
+            Log.v("TEST", "copy() called")
+            currentAction = "copy"
+            val action = actions.get("copy") as Copy
+            val copied = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId,
+                fun() {
+                    currentAction = null
+                })
+            if (copied) {
                 observeCurrent(fragmentDocId)
             }
         }
         binding.actionCopy.setOnClickListener {
-            Log.v("TEST","Setting currentAction in onClick")
-            currentAction = "Copy"
             copy()
-            Log.v("TEST","Nulling currentAction in onClick")
-            currentAction = null
         }
         // Move
         fun move() {
-            val action = actions.get("Move") as Move
+            val action = actions.get("move") as Move
             val success = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId)
             if (success) {
                 observeCurrent(fragmentDocId)
             }
         }
         binding.actionMove.setOnClickListener {
-            currentAction = "Move"
+            currentAction = "move"
             move()
             currentAction = null
         }
         // Delete
         fun delete() {
-            val action = actions.get("Delete") as Delete
+            val action = actions.get("delete") as Delete
             action.handle(requireActivity(), binding, tracker.selection, fragmentUri) {
                 observeCurrent(fragmentDocId)
             }
         }
         binding.actionDelete.setOnClickListener {
-            currentAction = "Delete"
+            currentAction = "delete"
             delete()
             currentAction = null
         }
 
+        if (layout == null) {
+            layout = layoutInflater.inflate(R.layout.popup, binding.fragmentParent, false)
+        }
+
+
+        Log.v("TEST", "ONVIEWCREATED")
         // If we have savedInstanceState, check for a currentAction and initiate it
         // https://stackoverflow.com/questions/69622835/how-to-call-a-function-in-kotlin-from-a-string-name
-        val actionFuncs = listOf(::Copy, ::CreateFile, ::CreateFolder, ::Delete, ::Move, ::Open, ::Rename).associateBy { it.name }
+        val actionFuncs = listOf(::copy, ::createFile, ::createFolder, ::delete, ::move, ::open, ::rename).associateBy { it.name }
         if (savedInstanceState != null) {
             Log.v("TEST", "savedInstanceState is not null")
             if (savedInstanceState.getString("currentAction") != null) {
                 Log.v("TEST", "currentAction is not null")
                 val currentAction = savedInstanceState.getString("currentAction")!!
+                Log.v("TEST", "currentAction is $currentAction")
                 val actionState = savedInstanceState.getSerializable(currentAction) as HashMap<String, String>
                 for ((key, value) in actionState) {
                     receiver.setActionState(currentAction, key, value)
                 }
-                actionFuncs[currentAction]?.invoke(this)
+                Log.v("TEST", "invoking currentAction=$currentAction")
+                actionFuncs[currentAction]?.invoke()
             }
         }
     }
@@ -260,27 +274,31 @@ class FolderFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        //val prompt = receiver.getPopup("prompt")
+        //val popup = receiver.getPopup("popup")
+//        val dialog = receiver.get
         if (prompt != null && prompt!!.isShowing) {
             prompt!!.dismiss()
         }
         if (popup != null && popup!!.isShowing) {
             popup!!.dismiss()
+            popup = null
         }
-        if (dialog != null && dialog!!.isShowing) {
-            dialog!!.dismiss()
-        }
+        //if (dialog != null && dialog!!.isShowing) {
+        //    dialog!!.dismiss()
+        //}
     }
 
     override fun onResume() {
         super.onResume()
         // Check for active copy
-        if (receiver.getActionState("Copy", "sourceUri") != null) {
+        if (receiver.getActionState("copy", "sourceUri") != null) {
             binding.toggleGroup.check(R.id.action_copy)
         } else {
             binding.toggleGroup.uncheck(R.id.action_copy)
         }
         // Check for active move
-        if (receiver.getActionState("Move", "sourceUri") != null) {
+        if (receiver.getActionState("move", "sourceUri") != null) {
             binding.toggleGroup.check(R.id.action_move)
         } else {
             binding.toggleGroup.uncheck(R.id.action_move)
@@ -318,44 +336,29 @@ class FolderFragment : Fragment() {
         }
     }
 
-    fun getPopupWindow(type: String) : PopupWindow {
-        when (type) {
-            "popup" -> {
-                if (popup == null) {
-                    val layout = layoutInflater.inflate(R.layout.popup, null)
-                    popup = PopupWindow(
-                        layout,
-                        ActionBar.LayoutParams.MATCH_PARENT,
-                        ActionBar.LayoutParams.MATCH_PARENT,
-                        true
-                    )
-                    popup!!.showAtLocation(layout, Gravity.CENTER, 0, 0)
-                }
-                return popup as PopupWindow
-            }
-            "prompt" -> {
-                if (prompt == null) {
-                    val contentView = layoutInflater.inflate(R.layout.prompt, null)
-                    prompt = PopupWindow(
-                        contentView,
-                        ActionBar.LayoutParams.MATCH_PARENT,
-                        ActionBar.LayoutParams.MATCH_PARENT,
-                        true
-                    )
-                    prompt!!.showAtLocation(contentView, Gravity.CENTER, 0, 0)
-                }
-                return prompt as PopupWindow
-            }
-            else -> throw Exception("Unknown popup type")
+    fun getPopup(type: String) : PopupWindow {
+        if (type == "popup") {
+            //return popup!!
+
+
+                    val popup2 = PopupWindow(requireActivity())
+                    popup2!!.contentView = layout
+                    if (popup2.isShowing) {
+                        popup2.dismiss()
+                    }
+                    popup2!!.showAtLocation(layout, Gravity.CENTER, 0, 0)
+            return popup2
+
+
         }
+        if (type == "prompt") {
+            return prompt!!
+        }
+        throw Exception("Unknown popup type")
     }
 
-    fun getAlertDialog() : Pair<AlertDialog.Builder, AlertDialog> {
-        if (dialog == null) {
-            builder = AlertDialog.Builder(requireActivity())
-            dialog = builder!!.create()
-        }
-        return Pair(builder!!, dialog!!)
-    }
+//    fun getPopupWindow(type : String) : PopupWindow {
+//        return receiver.getPopup(type)
+//    }
 
 }

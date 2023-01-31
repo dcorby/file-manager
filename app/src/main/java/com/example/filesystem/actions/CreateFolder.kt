@@ -2,13 +2,16 @@ package com.example.filesystem.actions
 
 import android.net.Uri
 import android.provider.DocumentsContract
+import androidx.fragment.app.FragmentActivity
 import com.example.filesystem.FolderFragment
+import com.example.filesystem.MainActivity
 import com.example.filesystem.R
 import com.example.filesystem.Utils
 import com.example.filesystem.databinding.FragmentFolderBinding
 
 class CreateFolder(fragment: FolderFragment) {
     private val mFragment = fragment
+    private lateinit var mActivity : FragmentActivity
     private lateinit var mBinding : FragmentFolderBinding
 
     fun handle(binding: FragmentFolderBinding, fragmentUri: Uri, fragmentDocId: String, callback: (() -> Unit)) {

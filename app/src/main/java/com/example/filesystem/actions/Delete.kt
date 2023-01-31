@@ -16,18 +16,18 @@ class Delete(fragment: FolderFragment) {
 
         val docId = selection.toList()[0]
         val uri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, docId)
-        val (builder, dialog) = mFragment.getAlertDialog()
-        builder.setMessage("Are you sure?")
-        builder.setPositiveButton("Yes") { _, _ ->
-            DocumentsContract.deleteDocument(activity.contentResolver, uri)
-            Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-            callback()
-        }
-        builder.setNegativeButton("No") { _, _ ->
-            Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-            callback()
-        }
-        builder.show()
-        dialog.dismiss()
+//        val (builder, dialog) = mFragment.getAlertDialog()
+//        builder.setMessage("Are you sure?")
+//        builder.setPositiveButton("Yes") { _, _ ->
+//            DocumentsContract.deleteDocument(activity.contentResolver, uri)
+//            Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
+//            callback()
+//        }
+//        builder.setNegativeButton("No") { _, _ ->
+//            Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
+//            callback()
+//        }
+//        builder.show()
+//        dialog.dismiss()
     }
 }

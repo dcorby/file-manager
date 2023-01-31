@@ -8,8 +8,10 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
 import android.provider.DocumentsContract
+import android.util.Log
 import android.view.ViewGroup
 import android.widget.*
+import androidx.fragment.app.FragmentActivity
 import java.io.Closeable
 import java.net.URLDecoder
 import java.util.*
@@ -88,21 +90,28 @@ class Utils {
 
         // optional callback syntax: https://discuss.kotlinlang.org/t/optional-function-parameters/905
         fun showPopup(fragment: FolderFragment, text: String, onDismiss : (() -> Unit)? = null) {
-            val window = fragment.getPopupWindow("popup")
-            val contentView = window.contentView
-            val popup = contentView.findViewById<ViewGroup>(R.id.popup)
-            val textView = popup.findViewById<TextView>(R.id.text_view)
-            textView.text = text
-            popup.setOnClickListener {
-                window.dismiss()
-                if (onDismiss != null) {
-                    onDismiss()
+
+            // https://stackoverflow.com/questions/9529504/unable-to-add-window-token-android-os-binderproxy-is-not-valid-is-your-activ
+            // Hmm...???
+            Handler().post {
+                if (!fragment.requireActivity().isFinishing) {
+                    val window = fragment.getPopup("popup")
+                    val contentView = window.contentView
+                    val popup = contentView.findViewById<ViewGroup>(R.id.popup)
+                    val textView = popup.findViewById<TextView>(R.id.text_view)
+                    textView.text = text
+                    popup.setOnClickListener {
+                        window.dismiss()
+                        if (onDismiss != null) {
+                            onDismiss()
+                        }
+                    }
                 }
             }
         }
 
         fun showPrompt(fragment: FolderFragment, onSubmit: (EditText) -> Unit, onDismiss : (() -> Unit)? = null) {
-            val window = fragment.getPopupWindow("prompt")
+            val window = fragment.getPopup("prompt")
             val contentView = window.contentView
             val prompt = contentView.findViewById<ViewGroup>(R.id.prompt)
             val editText = contentView.findViewById<EditText>(R.id.edit_text)
