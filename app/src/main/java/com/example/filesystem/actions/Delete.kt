@@ -1,6 +1,7 @@
 package com.example.filesystem.actions
 
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.provider.DocumentsContract
 import android.util.Log
@@ -14,12 +15,7 @@ import com.example.filesystem.R
 import com.example.filesystem.Utils
 import com.example.filesystem.databinding.FragmentFolderBinding
 
-interface DialogCallback {
-    fun onDialogClickYes()
-    fun onDialogClickNo()
-}
-
-class Delete(fragment: FolderFragment) : DialogCallback {
+class Delete(fragment: FolderFragment) {
     private val mFragment = fragment
     private lateinit var mBinding : FragmentFolderBinding
     private lateinit var mSelection : Selection<String>
@@ -47,11 +43,14 @@ class Delete(fragment: FolderFragment) : DialogCallback {
                 // https://lukeneedham.medium.com/listeners-in-dialogfragments-be636bd7f480
                 // https://stackoverflow.com/questions/64869501/how-to-replace-settargetfragment-now-that-it-is-deprecated
 
-                val fragmentManager: FragmentManager = mFragment.parentFragmentManager
-                var dialogFragment: DialogFragment? = fragmentManager.findFragmentByTag("dialog") as DialogFragment?
+                // val fragmentManager: FragmentManager = mFragment.parentFragmentManager
+                // var dialogFragment: DialogFragment? = fragmentManager.findFragmentByTag("dialog") as DialogFragment?
                 // dialogFragment?.dismiss()
                 // ^ this is in FolderFragment onResume(). It's a smoother UI effect there
-                dialogFragment = MyDialogFragment()
+                val dialogFragment = MyDialogFragment()
+                val bundle = Bundle()
+                bundle.putString("uri", mUri.toString())
+                dialogFragment.arguments = bundle
                 dialogFragment.setTargetFragment(mFragment, 1)
                 dialogFragment.show(mFragment.requireFragmentManager(), "dialog")
             }
@@ -76,14 +75,5 @@ class Delete(fragment: FolderFragment) : DialogCallback {
         return true
     }
 
-    override fun onDialogClickYes() {
-        DocumentsContract.deleteDocument(mFragment.requireActivity().contentResolver, mUri)
-        Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_delete) })
-        mFinish(true)
-    }
 
-    override fun onDialogClickNo() {
-        Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_delete) })
-        mFinish(false)
-    }
 }

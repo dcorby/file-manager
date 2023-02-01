@@ -38,7 +38,12 @@ const val AUTHORITY = "com.android.externalstorage.documents"
   https://github.com/material-components/material-components-android/issues/2291
  */
 
-class FolderFragment : Fragment() {
+interface DialogCallback {
+    fun onDialogClickYes(uri: Uri)
+    fun onDialogClickNo()
+}
+
+class FolderFragment : Fragment(), DialogCallback {
 
     private var _binding: FragmentFolderBinding? = null
     private val binding get() = _binding!!
@@ -272,10 +277,6 @@ class FolderFragment : Fragment() {
         if (this::popup.isInitialized && popup.isShowing) {
             popup.dismiss()
         }
-
-
-
-
     }
 
     override fun onResume() {
@@ -358,18 +359,15 @@ class FolderFragment : Fragment() {
         throw Exception("Unknown popup type")
     }
 
-    //fun getDialogFragment() : MyDialogFragment {
-    //    dialog = MyDialogFragment()
-    //    return dialog
-    //}
+    override fun onDialogClickYes(uri: Uri) {
+        DocumentsContract.deleteDocument(this.requireActivity().contentResolver, uri)
+        Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
+        currentAction = null
+        observeCurrent(fragmentDocId)
+    }
 
-    //fun getAlertDialog() : Pair<AlertDialog.Builder, AlertDialog> {
-    //    builder = AlertDialog.Builder(this.requireContext())
-    //    dialog = builder.create()
-    //    return Pair(builder, dialog)
-    //}
-
-    //override fun onDummyDialogClick() {
-    //    Toast.makeText(requireContext(), "Dummy click", Toast.LENGTH_SHORT).show()
-    //}
+    override fun onDialogClickNo() {
+        Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
+        currentAction = null
+    }
 }
