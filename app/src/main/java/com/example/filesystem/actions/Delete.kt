@@ -1,15 +1,12 @@
 package com.example.filesystem.actions
 
-import android.app.AlertDialog
-import android.app.Dialog
-import android.content.DialogInterface
 import android.net.Uri
-import android.os.Bundle
 import android.os.Handler
 import android.provider.DocumentsContract
-import android.widget.Toast
+import android.util.Log
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.FolderFragment
 import com.example.filesystem.MyDialogFragment
@@ -17,26 +14,17 @@ import com.example.filesystem.R
 import com.example.filesystem.Utils
 import com.example.filesystem.databinding.FragmentFolderBinding
 
-//class Test(activity: FragmentActivity) {
-//    val mActivity = activity
-//    fun yes() {
-//        Toast.makeText(mActivity, "yes", Toast.LENGTH_SHORT).show()
-//    }
-//    fun no() {
-//        Toast.makeText(mActivity, "no", Toast.LENGTH_SHORT).show()
-//    }
-//}
-
-interface DummyDialogCallback {
-    fun onDummyDialogClick()
+interface DialogCallback {
+    fun onDialogClickYes()
+    fun onDialogClickNo()
 }
 
-
-class Delete(fragment: FolderFragment) : DummyDialogCallback {
+class Delete(fragment: FolderFragment) : DialogCallback {
     private val mFragment = fragment
     private lateinit var mBinding : FragmentFolderBinding
     private lateinit var mSelection : Selection<String>
     private lateinit var mFinish : (Boolean) -> Unit
+    private lateinit var mUri : Uri
 
     fun handle(activity: FragmentActivity,
                binding: FragmentFolderBinding,
@@ -53,64 +41,19 @@ class Delete(fragment: FolderFragment) : DummyDialogCallback {
         }
 
         val docId = mSelection.toList()[0]
-        val uri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, docId)
+        mUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, docId)
         Handler().post {
             if (!mFragment.requireActivity().isFinishing) {
-                /*
-                val (builder, dialog) = mFragment.getAlertDialog()
-                builder.setMessage("Are you sure?")
-                builder.setPositiveButton("Yes") { _, _ ->
-                    DocumentsContract.deleteDocument(activity.contentResolver, uri)
-                    Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-                    finish(true)
-                }
-                builder.setNegativeButton("No") { _, _ ->
-                    Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-                    finish(false)
-                }
-                builder.show()
-                //dialog.dismiss()
-
-                 */
-//                val dialog = MyDialogFragment()
-//                val yes = {  }
-//                val no = { Toast.makeText(activity, "no", Toast.LENGTH_SHORT).show() }
-//                val bundle = Bundle()
-//                val test = Test(activity)
-//                fun sum() = 1 + 2
-//                bundle.putSerializable("test", sum())
-//                dialog.show(activity.supportFragmentManager, "sdfsdf")
-
-                fun yes() {
-                    Toast.makeText(activity, "yes", Toast.LENGTH_SHORT).show()
-                }
-                fun no() {
-                    Toast.makeText(activity, "no", Toast.LENGTH_SHORT).show()
-                }
-
                 // https://lukeneedham.medium.com/listeners-in-dialogfragments-be636bd7f480
                 // https://stackoverflow.com/questions/64869501/how-to-replace-settargetfragment-now-that-it-is-deprecated
-//                class MyDialogFragment : DialogFragment() {
-//                    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-//                        val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
-//                        //arguments.
-//                        //private val mBuilder: AlertDialog.Builder = builder
-//                        builder.setTitle("Really?")
-//                        builder.setMessage("Are you sure?")
-//                        //null should be your on click listener
-//                        builder.setPositiveButton("Yes", DialogInterface.OnClickListener { dialog, which ->  })
-//                        builder.setNegativeButton("No", DialogInterface.OnClickListener { dialog, which -> dialog.dismiss() })
-//                        return builder.create()
-//                    }
-//                }
 
-                val dialog = MyDialogFragment()
-                dialog.setTargetFragment(mFragment, 1)
-                dialog.show(mFragment.requireFragmentManager(), "sdfsdf")
-
-                //val builder: AlertDialog.Builder = AlertDialog.Builder(activity)
-                //val dialog = MyDialogFragment(builder)
-                //dialog.show(activity.supportFragmentManager, "sdfsdf")
+                val fragmentManager: FragmentManager = mFragment.parentFragmentManager
+                var dialogFragment: DialogFragment? = fragmentManager.findFragmentByTag("dialog") as DialogFragment?
+                // dialogFragment?.dismiss()
+                // ^ this is in FolderFragment onResume(). It's a smoother UI effect there
+                dialogFragment = MyDialogFragment()
+                dialogFragment.setTargetFragment(mFragment, 1)
+                dialogFragment.show(mFragment.requireFragmentManager(), "dialog")
             }
         }
     }
@@ -133,7 +76,14 @@ class Delete(fragment: FolderFragment) : DummyDialogCallback {
         return true
     }
 
-    override fun onDummyDialogClick() {
-        Toast.makeText(mFragment.requireActivity(), "Dummy click", Toast.LENGTH_SHORT).show()
+    override fun onDialogClickYes() {
+        DocumentsContract.deleteDocument(mFragment.requireActivity().contentResolver, mUri)
+        Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_delete) })
+        mFinish(true)
+    }
+
+    override fun onDialogClickNo() {
+        Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_delete) })
+        mFinish(false)
     }
 }

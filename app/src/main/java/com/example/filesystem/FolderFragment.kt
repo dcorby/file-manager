@@ -3,11 +3,8 @@ package com.example.filesystem
 import android.app.ActionBar
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.Dialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
-import android.icu.text.CaseMap.Fold
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
@@ -21,6 +18,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -40,9 +38,7 @@ const val AUTHORITY = "com.android.externalstorage.documents"
   https://github.com/material-components/material-components-android/issues/2291
  */
 
-
-
-class FolderFragment : Fragment(), DummyDialogCallback  {
+class FolderFragment : Fragment() {
 
     private var _binding: FragmentFolderBinding? = null
     private val binding get() = _binding!!
@@ -59,8 +55,7 @@ class FolderFragment : Fragment(), DummyDialogCallback  {
     // popup and alert windows
     lateinit var popup: PopupWindow
     lateinit var prompt: PopupWindow
-    lateinit var builder: AlertDialog.Builder
-    //lateinit var dialog: AlertDialog
+    //lateinit var dialog: MyDialogFragment
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -277,9 +272,10 @@ class FolderFragment : Fragment(), DummyDialogCallback  {
         if (this::popup.isInitialized && popup.isShowing) {
             popup.dismiss()
         }
-        //if (this::dialog.isInitialized && dialog.isShowing) {
-            //dialog.dismiss()
-        //}
+
+
+
+
     }
 
     override fun onResume() {
@@ -296,6 +292,13 @@ class FolderFragment : Fragment(), DummyDialogCallback  {
         } else {
             binding.toggleGroup.uncheck(R.id.action_move)
         }
+
+        // Dismiss the delete dialog fragment if necessary
+        // Provides a smoother UI effect here
+        // https://stackoverflow.com/questions/9325238/proper-way-of-dismissing-dialogfragment-while-application-is-in-background
+        val fragmentManager: FragmentManager = parentFragmentManager
+        val dialogFragment: DialogFragment? = fragmentManager.findFragmentByTag("dialog") as DialogFragment?
+        dialogFragment?.dismiss()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -355,13 +358,18 @@ class FolderFragment : Fragment(), DummyDialogCallback  {
         throw Exception("Unknown popup type")
     }
 
+    //fun getDialogFragment() : MyDialogFragment {
+    //    dialog = MyDialogFragment()
+    //    return dialog
+    //}
+
     //fun getAlertDialog() : Pair<AlertDialog.Builder, AlertDialog> {
     //    builder = AlertDialog.Builder(this.requireContext())
     //    dialog = builder.create()
     //    return Pair(builder, dialog)
     //}
 
-    override fun onDummyDialogClick() {
-        Toast.makeText(requireContext(), "Dummy click", Toast.LENGTH_SHORT).show()
-    }
+    //override fun onDummyDialogClick() {
+    //    Toast.makeText(requireContext(), "Dummy click", Toast.LENGTH_SHORT).show()
+    //}
 }
