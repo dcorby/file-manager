@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
+import android.icu.text.CaseMap.Fold
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
@@ -50,12 +51,11 @@ class FolderFragment : Fragment() {
     lateinit var receiver: MainReceiver
     private var currentAction: String? = null
 
-    private var popup: PopupWindow? = null
-    private var prompt: PopupWindow? = null
-    private var builder: AlertDialog.Builder? = null
-    private var dialog: AlertDialog? = null
-
-    private var layout: View? = null
+    // popup and alert windows
+    lateinit var popup: PopupWindow
+    lateinit var prompt: PopupWindow
+    lateinit var builder: AlertDialog.Builder
+    //lateinit var dialog: AlertDialog
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -163,7 +163,6 @@ class FolderFragment : Fragment() {
         }
         // Copy
         fun copy() {
-            Log.v("TEST", "copy() called")
             currentAction = "copy"
             val action = actions.get("copy") as Copy
             val copied = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId,
@@ -192,37 +191,30 @@ class FolderFragment : Fragment() {
         }
         // Delete
         fun delete() {
+            currentAction = "delete"
             val action = actions.get("delete") as Delete
-            action.handle(requireActivity(), binding, tracker.selection, fragmentUri) {
-                observeCurrent(fragmentDocId)
-            }
+            action.handle(requireActivity(), binding, tracker.selection, fragmentUri,
+                fun(success) {
+                    if (success) {
+                        observeCurrent(fragmentDocId)
+                    }
+                    currentAction = null
+                })
         }
         binding.actionDelete.setOnClickListener {
-            currentAction = "delete"
             delete()
-            currentAction = null
         }
 
-        if (layout == null) {
-            layout = layoutInflater.inflate(R.layout.popup, binding.fragmentParent, false)
-        }
-
-
-        Log.v("TEST", "ONVIEWCREATED")
         // If we have savedInstanceState, check for a currentAction and initiate it
         // https://stackoverflow.com/questions/69622835/how-to-call-a-function-in-kotlin-from-a-string-name
         val actionFuncs = listOf(::copy, ::createFile, ::createFolder, ::delete, ::move, ::open, ::rename).associateBy { it.name }
         if (savedInstanceState != null) {
-            Log.v("TEST", "savedInstanceState is not null")
             if (savedInstanceState.getString("currentAction") != null) {
-                Log.v("TEST", "currentAction is not null")
                 val currentAction = savedInstanceState.getString("currentAction")!!
-                Log.v("TEST", "currentAction is $currentAction")
                 val actionState = savedInstanceState.getSerializable(currentAction) as HashMap<String, String>
                 for ((key, value) in actionState) {
                     receiver.setActionState(currentAction, key, value)
                 }
-                Log.v("TEST", "invoking currentAction=$currentAction")
                 actionFuncs[currentAction]?.invoke()
             }
         }
@@ -274,18 +266,14 @@ class FolderFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        //val prompt = receiver.getPopup("prompt")
-        //val popup = receiver.getPopup("popup")
-//        val dialog = receiver.get
-        if (prompt != null && prompt!!.isShowing) {
-            prompt!!.dismiss()
+        if (this::prompt.isInitialized && prompt.isShowing) {
+            prompt.dismiss()
         }
-        if (popup != null && popup!!.isShowing) {
-            popup!!.dismiss()
-            popup = null
+        if (this::popup.isInitialized && popup.isShowing) {
+            popup.dismiss()
         }
-        //if (dialog != null && dialog!!.isShowing) {
-        //    dialog!!.dismiss()
+        //if (this::dialog.isInitialized && dialog.isShowing) {
+            //dialog.dismiss()
         //}
     }
 
@@ -328,37 +316,43 @@ class FolderFragment : Fragment() {
             tracker.onSaveInstanceState(outState)
         }
         // save ActionState data
-        Log.v("TEST", "currentAction=$currentAction")
         if (currentAction != null) {
-            Log.v("TEST", "Saving currentAction=$currentAction")
             outState.putString("currentAction", currentAction)
             outState.putSerializable(currentAction, receiver.getActionState(currentAction!!))
         }
     }
 
-    fun getPopup(type: String) : PopupWindow {
+    fun getPopupWindow(type: String) : PopupWindow {
+        // popup
         if (type == "popup") {
-            //return popup!!
-
-
-                    val popup2 = PopupWindow(requireActivity())
-                    popup2!!.contentView = layout
-                    if (popup2.isShowing) {
-                        popup2.dismiss()
-                    }
-                    popup2!!.showAtLocation(layout, Gravity.CENTER, 0, 0)
-            return popup2
-
-
+            val layout = layoutInflater.inflate(R.layout.popup, binding.fragmentParent, false)
+            popup = PopupWindow(
+                layout,
+                ActionBar.LayoutParams.MATCH_PARENT,
+                ActionBar.LayoutParams.MATCH_PARENT,
+                true
+            )
+            popup.showAtLocation(layout, Gravity.CENTER, 0, 0)
+            return popup
         }
+        // prompt
         if (type == "prompt") {
-            return prompt!!
+            val layout = layoutInflater.inflate(R.layout.prompt, binding.fragmentParent, false)
+            prompt = PopupWindow(
+                layout,
+                ActionBar.LayoutParams.MATCH_PARENT,
+                ActionBar.LayoutParams.MATCH_PARENT,
+                true
+            )
+            prompt.showAtLocation(layout, Gravity.CENTER, 0, 0)
+            return prompt
         }
         throw Exception("Unknown popup type")
     }
 
-//    fun getPopupWindow(type : String) : PopupWindow {
-//        return receiver.getPopup(type)
-//    }
-
+    //fun getAlertDialog() : Pair<AlertDialog.Builder, AlertDialog> {
+    //    builder = AlertDialog.Builder(this.requireContext())
+    //    dialog = builder.create()
+    //    return Pair(builder, dialog)
+    //}
 }

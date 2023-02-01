@@ -1,12 +1,8 @@
 package com.example.filesystem
 
-import android.app.ActionBar
-import android.app.AlertDialog
 import android.os.Bundle
-import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.PopupWindow
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -28,7 +24,6 @@ class MainActivity : AppCompatActivity(), MainReceiver {
         "open" to HashMap(),
         "rename" to HashMap()
     )
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,44 +86,6 @@ class MainActivity : AppCompatActivity(), MainReceiver {
         }
         return "application/octet-stream"
     }
-
-//    override fun getPopup(type: String) : PopupWindow {
-//        when (type) {
-//            "popup" -> {
-//                val layout = layoutInflater.inflate(R.layout.popup, binding.root, false)
-//                popup = PopupWindow(
-//                    layout,
-//                    ActionBar.LayoutParams.MATCH_PARENT,
-//                    ActionBar.LayoutParams.MATCH_PARENT,
-//                    true
-//                )
-//                popup!!.showAtLocation(layout, Gravity.CENTER, 0, 0)
-//                return popup as PopupWindow
-//            }
-//            "prompt" -> {
-//                if (prompt == null) {
-//                    val contentView = layoutInflater.inflate(R.layout.prompt, binding.root, false)
-//                    prompt = PopupWindow(
-//                        contentView,
-//                        ActionBar.LayoutParams.MATCH_PARENT,
-//                        ActionBar.LayoutParams.MATCH_PARENT,
-//                        true
-//                    )
-//                    prompt!!.showAtLocation(contentView, Gravity.CENTER, 0, 0)
-//                }
-//                return prompt as PopupWindow
-//            }
-//            else -> throw Exception("Unknown popup type")
-//        }
-//    }
-//
-//    fun getAlertDialog() : Pair<AlertDialog.Builder, AlertDialog> {
-//        if (dialog == null) {
-//            builder = AlertDialog.Builder(this)
-//            dialog = builder!!.create()
-//        }
-//        return Pair(builder!!, dialog!!)
-//    }
 }
 
 
