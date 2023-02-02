@@ -2,7 +2,6 @@ package com.example.filesystem.actions
 
 import android.net.Uri
 import android.provider.DocumentsContract
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.*
 import com.example.filesystem.databinding.FragmentFolderBinding
@@ -35,28 +34,40 @@ class CreateFile(fragment: FolderFragment,
         mFragment.currentAction = "createFile"
 
         val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, mFragmentDocId)
-        Utils.showPrompt(mFragment, fun(editText) {
+        Utils.showPrompt(mFragment,
             // onSubmit()
-            val filename = editText.text.trim().toString()
-            if (filename == "") {
-                Utils.showPopup(mFragment, "Filename is empty") {
+            fun(editText) {
+                val filename = editText.text.trim().toString()
+                if (filename == "") {
+                    Utils.showPopup(mFragment, "Filename is empty") {
+                        Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
+                    }
+                    finish()
+                    return
+                } else {
+                    val (base, ext) = Utils.explodeFilename(filename)
+                    val mimeType = mReceiver.getMimeType(ext)
+                    DocumentsContract.createDocument(
+                        mFragment.requireActivity().contentResolver,
+                        docUri,
+                        mimeType,
+                        base
+                    )
                     Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
+                    editText.text.clear()
+                    mFragment.observeCurrent(mFragmentDocId)
+                    finish()
                 }
-                return
-            }
-            val (base, ext) = Utils.explodeFilename(filename)
-            val mimeType = mReceiver.getMimeType(ext)
-            DocumentsContract.createDocument(mFragment.requireActivity().contentResolver, docUri, mimeType, base)
-            Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
-            editText.text.clear()
-            mFragment.observeCurrent(mFragmentDocId)
-        }, fun() {
+            },
             // onDismiss()
-            Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
+            fun() {
+                Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) }) {
+                    finish()
+                }
         })
     }
 
-    fun finish() {
+    private fun finish() {
         mFragment.currentAction = null
     }
 }
