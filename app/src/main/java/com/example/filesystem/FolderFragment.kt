@@ -2,13 +2,11 @@ package com.example.filesystem
 
 import android.app.ActionBar
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -41,6 +39,7 @@ const val AUTHORITY = "com.android.externalstorage.documents"
 interface DialogCallback {
     fun onDialogClickYes(uri: Uri)
     fun onDialogClickNo()
+    fun onDismiss()
 }
 
 class FolderFragment : Fragment(), DialogCallback {
@@ -173,6 +172,9 @@ class FolderFragment : Fragment(), DialogCallback {
             val copied = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId,
                 fun() {
                     currentAction = null
+                    binding.close.setOnClickListener(null)
+                    receiver.setActionState("copy", "sourceUri", null)
+                    receiver.setActionState("copy", "filename", null)
                 })
             if (copied) {
                 observeCurrent(fragmentDocId)
@@ -359,14 +361,18 @@ class FolderFragment : Fragment(), DialogCallback {
         throw Exception("Unknown popup type")
     }
 
+    // Delete callbacks
     override fun onDialogClickYes(uri: Uri) {
         DocumentsContract.deleteDocument(this.requireActivity().contentResolver, uri)
         Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
         currentAction = null
         observeCurrent(fragmentDocId)
     }
-
     override fun onDialogClickNo() {
+        Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
+        currentAction = null
+    }
+    override fun onDismiss() {
         Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
         currentAction = null
     }

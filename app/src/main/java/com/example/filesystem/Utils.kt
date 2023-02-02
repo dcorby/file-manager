@@ -8,8 +8,10 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
 import android.provider.DocumentsContract
+import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.view.get
 import java.io.Closeable
 import java.net.URLDecoder
 import java.util.*
@@ -160,6 +162,21 @@ class Utils {
                 ext = parts.last()
             }
             return Pair(base, ext)
+        }
+
+        fun showStatus(layout: LinearLayout, prefix: String, pathParts: List<String>, filename: String) : View {
+            val status = "${prefix}: Home${pathParts.joinToString("/")}/${filename}"
+            val text = layout.findViewById(R.id.text) as TextView
+            text.text = status
+            layout.visibility = View.VISIBLE
+            val close = layout.findViewById(R.id.close) as View
+            return close
+        }
+
+        fun cleanStatus(layout: LinearLayout) {
+            val text = layout.findViewById(R.id.text) as TextView
+            text.text = ""
+            layout.visibility = View.GONE
         }
     }
 }

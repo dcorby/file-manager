@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.DialogFragment
 
 // https://lukeneedham.medium.com/listeners-in-dialogfragments-be636bd7f480
@@ -27,5 +28,11 @@ class MyDialogFragment : DialogFragment() {
             callback?.onDialogClickNo()
         })
         return builder.create()
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        val callback = targetFragment as? DialogCallback
+        callback?.onDismiss()
     }
 }

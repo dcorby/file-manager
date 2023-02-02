@@ -61,6 +61,16 @@ class Copy(fragment: FolderFragment) {
             }
             mReceiver.setActionState("copy", "sourceUri", sourceUri.toString())
             mReceiver.setActionState("copy", "filename", Utils.getFilenameFromDocId(sourceDocId))
+            val close = Utils.showStatus(
+                mBinding.status,
+                "Copying",
+                Utils.getPathPartsFromDocId(fragmentDocId),
+                Utils.getFilenameFromDocId(sourceDocId))
+            close.setOnClickListener {
+                Utils.cleanStatus(mBinding.status)
+                mBinding.toggleGroup.uncheck(R.id.action_copy)
+                mFinish()
+            }
             return false
         } else {
             var targetUri: Uri? = null
