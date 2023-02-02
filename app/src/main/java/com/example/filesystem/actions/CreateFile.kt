@@ -3,6 +3,7 @@ package com.example.filesystem.actions
 import android.net.Uri
 import android.provider.DocumentsContract
 import androidx.fragment.app.FragmentActivity
+import androidx.recyclerview.selection.Selection
 import com.example.filesystem.*
 import com.example.filesystem.databinding.FragmentFolderBinding
 
@@ -14,22 +15,26 @@ import com.example.filesystem.databinding.FragmentFolderBinding
   This thread suggests so: https://stackoverflow.com/questions/62375696/unexpected-behavior-when-documentfile-fromtreeuri-is-called-on-uri-of-subdirec
 */
 
-class CreateFile(fragment: FolderFragment) {
+class CreateFile(fragment: FolderFragment,
+                 binding: FragmentFolderBinding,
+                 selection: Selection<String>,
+                 fragmentUri: Uri,
+                 fragmentDocId: String,
+                 callback: (() -> Unit)) : Action {
+
     private val mFragment = fragment
-    private lateinit var mActivity : FragmentActivity
-    private lateinit var mReceiver : MainReceiver
-    private lateinit var mBinding : FragmentFolderBinding
+    private var mActivity = fragment.requireActivity()
+    private var mReceiver = fragment.requireActivity() as MainReceiver
+    private var mBinding = binding
+    private var mSelection = selection
+    private var mFragmentUri = fragmentUri
+    private var mFragmentDocId = fragmentDocId
+    private var mCallback = callback
 
-    fun handle(activity: FragmentActivity,
-               binding: FragmentFolderBinding,
-               fragmentUri: Uri,
-               fragmentDocId: String,
-               callback: (() -> Unit)) {
+    override fun handle() {
+        mFragment.currentAction = "createFile"
 
-        mReceiver = (activity as MainReceiver)
-        mBinding = binding
-
-        val docUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
+        val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, mFragmentDocId)
         Utils.showPrompt(mFragment, fun(editText) {
             // onSubmit()
             val filename = editText.text.trim().toString()
@@ -44,10 +49,14 @@ class CreateFile(fragment: FolderFragment) {
             DocumentsContract.createDocument(mFragment.requireActivity().contentResolver, docUri, mimeType, base)
             Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
             editText.text.clear()
-            callback()
+            mFragment.observeCurrent(mFragmentDocId)
         }, fun() {
             // onDismiss()
             Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
         })
+    }
+
+    fun finish() {
+        mFragment.currentAction = null
     }
 }

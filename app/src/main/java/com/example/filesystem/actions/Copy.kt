@@ -1,13 +1,9 @@
 package com.example.filesystem.actions
 
-import android.R.attr.mimeType
-import android.content.ContentResolver
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
 import androidx.core.net.toUri
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.*
 import com.example.filesystem.databinding.FragmentFolderBinding
@@ -24,51 +20,50 @@ import com.example.filesystem.databinding.FragmentFolderBinding
   This fails on most Android devices up to SDK32 with "java.lang.UnsupportedOperationException: Copy not supported"
  */
 
-class Copy(fragment: FolderFragment) {
+class Copy(fragment: FolderFragment,
+           binding: FragmentFolderBinding,
+           selection: Selection<String>,
+           fragmentUri: Uri,
+           fragmentDocId: String,
+           callback: (() -> Unit)) : Action {
+
     private val mFragment = fragment
-    private lateinit var mActivity : FragmentActivity
-    private lateinit var mReceiver : MainReceiver
-    private lateinit var mBinding : FragmentFolderBinding
-    private lateinit var mSelection : Selection<String>
-    private lateinit var mFinish : () -> Unit
+    private var mActivity = fragment.requireActivity()
+    private var mReceiver = fragment.requireActivity() as MainReceiver
+    private var mBinding = binding
+    private var mSelection = selection
+    private var mFragmentUri = fragmentUri
+    private var mFragmentDocId = fragmentDocId
+    private var mCallback = callback
 
-    fun handle(activity: FragmentActivity,
-               binding: FragmentFolderBinding,
-               selection: Selection<String>,
-               fragmentUri: Uri,
-               fragmentDocId: String,
-               finish: (() -> Unit)) : Boolean {
-
-        mActivity = activity
-        mReceiver = (activity as MainReceiver)
-        mBinding = binding
-        mSelection = selection
-        mFinish = finish
+    override fun handle() {
+        mFragment.currentAction = "copy"
         if (!validate()) {
-            return false
+            return
         }
+
         val sourceUri = mReceiver.getActionState("copy", "sourceUri")
         if (sourceUri == null) {
             val sourceDocId = mSelection.toList()[0]
-            val sourceUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, sourceDocId)
+            val sourceUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, sourceDocId)
             val mimeType = mActivity.contentResolver.getType(sourceUri)
             if (mimeType != null && Utils.isDirectory(mimeType)) {
                 Utils.showPopup(mFragment, "Folder copy not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
-                    mFinish()
+                    mCallback()
                 }
-                return false
+                return
             }
             mReceiver.setActionState("copy", "sourceUri", sourceUri.toString())
             mReceiver.setActionState("copy", "sourceDocId", sourceDocId)
-            return false
+            return
         } else {
             var targetUri: Uri? = null
             var isError = false
             try {
                 // Make the actual copy
                 val filename = Utils.getFilenameFromDocId(mReceiver.getActionState("copy", "sourceDocId")!!)
-                val parentUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
+                val parentUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, mFragmentDocId)
                 val (_, ext) = Utils.explodeFilename(filename)
                 val mimeType = mReceiver.getMimeType(ext)
                 targetUri = DocumentsContract.createDocument(mActivity.contentResolver, parentUri, mimeType, filename)
@@ -80,14 +75,14 @@ class Copy(fragment: FolderFragment) {
                 outputStream.close()
                 mReceiver.setActionState("copy", "sourceUri", null)
                 mReceiver.setActionState("copy", "sourceDocId", null)
-                mFinish()
-                return true
+                mCallback()
+                return
             } catch(e: Exception) {
                 Utils.showPopup(mFragment, "Error copying file") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
                     mReceiver.setActionState("copy", "sourceUri", null)
                     mReceiver.setActionState("copy", "sourceDocId", null)
-                    mFinish()
+                    mCallback()
                 }
                 isError = true
             } finally {
@@ -95,7 +90,7 @@ class Copy(fragment: FolderFragment) {
                     DocumentsContract.deleteDocument(mActivity.contentResolver, targetUri)
                 }
             }
-            return false
+            return
         }
     }
 
@@ -106,18 +101,26 @@ class Copy(fragment: FolderFragment) {
             if (mSelection.size() == 0) {
                 Utils.showPopup(mFragment, "Select a file to copy") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
-                    mFinish()
+                    mCallback()
                 }
                 return false
             }
             if (mSelection.size() > 1) {
                 Utils.showPopup(mFragment, "Multi-file copy is not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
-                    mFinish()
+                    mCallback()
                 }
                 return false
             }
         }
         return true
+    }
+
+    fun finish() {
+        mFragment.currentAction = null
+        mBinding.toggleGroup.uncheck(R.id.action_copy)
+        mBinding.close.setOnClickListener(null)
+        mReceiver.setActionState("copy", "sourceUri", null)
+        mReceiver.setActionState("copy", "sourceDocId", null)
     }
 }

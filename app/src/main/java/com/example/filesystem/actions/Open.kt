@@ -9,27 +9,36 @@ import androidx.fragment.app.FragmentActivity
 import androidx.navigation.Navigation
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.FolderFragment
-import com.example.filesystem.MainActivity
+import com.example.filesystem.MainReceiver
 import com.example.filesystem.R
 import com.example.filesystem.Utils
 import com.example.filesystem.databinding.FragmentFolderBinding
 
-class Open(fragment: FolderFragment) {
-    private val mFragment = fragment
-    private lateinit var mActivity : FragmentActivity
-    private lateinit var mBinding : FragmentFolderBinding
-    private lateinit var mSelection : Selection<String>
+class Open(fragment: FolderFragment,
+           binding: FragmentFolderBinding,
+           selection: Selection<String>,
+           fragmentUri: Uri,
+           fragmentDocId: String,
+           callback: (() -> Unit)) : Action {
 
-    fun handle(activity: FragmentActivity, binding: FragmentFolderBinding, selection: Selection<String>, destinationUri: Uri) {
-        mActivity = activity
-        mBinding = binding
-        mSelection = selection
+    private val mFragment = fragment
+    private var mActivity = fragment.requireActivity()
+    private var mReceiver = fragment.requireActivity() as MainReceiver
+    private var mBinding = binding
+    private var mSelection = selection
+    private var mFragmentUri = fragmentUri
+    private var mFragmentDocId = fragmentDocId
+    private var mCallback = callback
+
+    override fun handle() {
+        mFragment.currentAction = "open"
         if (!validate()) {
             return
         }
+
         Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_open) }, {
             val docId = mSelection.toList()[0]
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(destinationUri, docId)
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)
             val docTreeUri = DocumentsContract.buildTreeDocumentUri(docUri.authority, docId)
             val isDir = mActivity.contentResolver.getType(docUri) == DocumentsContract.Document.MIME_TYPE_DIR
             if (isDir) {

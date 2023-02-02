@@ -4,40 +4,34 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.DocumentsContract
-import android.util.Log
-import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.selection.Selection
-import com.example.filesystem.FolderFragment
-import com.example.filesystem.MyDialogFragment
-import com.example.filesystem.R
-import com.example.filesystem.Utils
+import com.example.filesystem.*
 import com.example.filesystem.databinding.FragmentFolderBinding
 
-class Delete(fragment: FolderFragment) {
+class Delete(fragment: FolderFragment,
+             binding: FragmentFolderBinding,
+             selection: Selection<String>,
+             fragmentUri: Uri,
+             fragmentDocId: String,
+             callback: (() -> Unit)) : Action {
+
     private val mFragment = fragment
-    private lateinit var mBinding : FragmentFolderBinding
-    private lateinit var mSelection : Selection<String>
-    private lateinit var mFinish : (Boolean) -> Unit
-    private lateinit var mUri : Uri
+    private var mActivity = fragment.requireActivity()
+    private var mReceiver = fragment.requireActivity() as MainReceiver
+    private var mBinding = binding
+    private var mSelection = selection
+    private var mFragmentUri = fragmentUri
+    private var mFragmentDocId = fragmentDocId
+    private var mCallback = callback
 
-    fun handle(activity: FragmentActivity,
-               binding: FragmentFolderBinding,
-               selection: Selection<String>,
-               fragmentUri: Uri,
-               finish: ((Boolean) -> Unit)) {
-
-        mBinding = binding
-        mSelection = selection
-        mFinish = finish
-
+    override fun handle() {
+        mFragment.currentAction = "delete"
         if (!validate()) {
             return
         }
 
         val docId = mSelection.toList()[0]
-        mUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, docId)
+        val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)
         Handler().post {
             if (!mFragment.requireActivity().isFinishing) {
                 // https://lukeneedham.medium.com/listeners-in-dialogfragments-be636bd7f480
@@ -49,7 +43,7 @@ class Delete(fragment: FolderFragment) {
                 // ^ this is in FolderFragment onResume(). It's a smoother UI effect there
                 val dialogFragment = MyDialogFragment()
                 val bundle = Bundle()
-                bundle.putString("uri", mUri.toString())
+                bundle.putString("uri", docUri.toString())
                 dialogFragment.arguments = bundle
                 dialogFragment.setTargetFragment(mFragment, 1)
                 dialogFragment.show(mFragment.requireFragmentManager(), "dialog")
@@ -61,19 +55,17 @@ class Delete(fragment: FolderFragment) {
         if (mSelection.size() == 0) {
             Utils.showPopup(mFragment, "Select a file to delete") {
                 mBinding.toggleGroup.uncheck(R.id.action_delete)
-                mFinish(false)
+                mCallback()
             }
             return false
         }
         if (mSelection.size() > 1) {
             Utils.showPopup(mFragment, "Multi-file delete is not supported") {
                 mBinding.toggleGroup.uncheck(R.id.action_delete)
-                mFinish(false)
+                mCallback()
             }
             return false
         }
         return true
     }
-
-
 }

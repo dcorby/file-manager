@@ -5,40 +5,44 @@ import android.provider.DocumentsContract
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.FolderFragment
-import com.example.filesystem.MainActivity
+import com.example.filesystem.MainReceiver
 import com.example.filesystem.R
 import com.example.filesystem.Utils
 import com.example.filesystem.databinding.FragmentFolderBinding
 
-class Rename(fragment: FolderFragment) {
+class Rename(fragment: FolderFragment,
+             binding: FragmentFolderBinding,
+             selection: Selection<String>,
+             fragmentUri: Uri,
+             fragmentDocId: String,
+             callback: (() -> Unit)) : Action {
+
     private val mFragment = fragment
-    private lateinit var mActivity : FragmentActivity
-    private lateinit var mBinding : FragmentFolderBinding
-    private lateinit var mSelection : Selection<String>
+    private var mActivity = fragment.requireActivity()
+    private var mReceiver = fragment.requireActivity() as MainReceiver
+    private var mBinding = binding
+    private var mSelection = selection
+    private var mFragmentUri = fragmentUri
+    private var mFragmentDocId = fragmentDocId
+    private var mCallback = callback
 
-    fun handle(activity: FragmentActivity,
-               binding: FragmentFolderBinding,
-               selection: Selection<String>,
-               fragmentUri: Uri,
-               callback: (() -> Unit)) {
-
-        mActivity = activity
-        mBinding = binding
-        mSelection = selection
+    override fun handle() {
+        mFragment.currentAction = "rename"
         if (!validate()) {
             return
         }
+
         Utils.showPrompt(mFragment, fun(editText) {
             // onSubmit()
             val filename = editText.text.trim().toString()
             val docId = mSelection.toList()[0]
-            val parentUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, docId)
+            val parentUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)
             val docUri = DocumentsContract.buildDocumentUriUsingTree(parentUri, docId)
             DocumentsContract.renameDocument(mFragment.requireActivity().contentResolver, docUri, filename)
 
             Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_rename) })
             editText.text.clear()
-            callback()
+            mCallback()
         }, fun() {
             // onDismiss()
             Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_rename) })

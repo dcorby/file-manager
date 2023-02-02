@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -54,7 +55,7 @@ class FolderFragment : Fragment(), DialogCallback {
     lateinit var tracker: SelectionTracker<String>
     lateinit var liveData: LiveData<MutableList<SanFile>>
     lateinit var receiver: MainReceiver
-    private var currentAction: String? = null
+    var currentAction: String? = null
 
     // popup and alert windows
     lateinit var popup: PopupWindow
@@ -117,149 +118,26 @@ class FolderFragment : Fragment(), DialogCallback {
         }
 
         // Actions
-        val actions = Actions(this)
+        fun callback() {}
+        val actions = Actions(this, binding, tracker.selection, fragmentUri, fragmentDocId, ::callback).map
+        binding.actionCopy.setOnClickListener { actions["copy"]?.handle() }
+        binding.actionCreateFile.setOnClickListener { actions["createFile"]?.handle() }
+        binding.actionCreateFolder.setOnClickListener { actions["createFolder"]?.handle() }
+        binding.actionDelete.setOnClickListener { actions["delete"]?.handle() }
+        binding.actionMove.setOnClickListener { actions["move"]?.handle() }
+        binding.actionOpen.setOnClickListener { actions["open"]?.handle() }
+        binding.actionRename.setOnClickListener { actions["rename"]?.handle() }
 
-        // Create File
-        fun createFile() {
-            val action = actions.get("createFile") as CreateFile
-            action.handle(requireActivity(), binding, fragmentUri, fragmentDocId) {
-                observeCurrent(fragmentDocId)
-            }
-        }
-        binding.actionCreateFile.setOnClickListener {
-            currentAction = "createFile"
-            createFile()
-            currentAction = null
-        }
-        fun createFolder() {
-            val action = actions.get("createFolder") as CreateFolder
-            action.handle(binding, fragmentUri, fragmentDocId) {
-                observeCurrent(fragmentDocId)
-            }
-        }
-        // Create Folder
-        binding.actionCreateFolder.setOnClickListener {
-            currentAction = "createFolder"
-            createFolder()
-            currentAction = null
-        }
-        // Open
-        fun open() {
-            val action = actions.get("open") as Open
-            action.handle(requireActivity(), binding, tracker.selection, fragmentUri)
-        }
-        binding.actionOpen.setOnClickListener {
-            currentAction = "open"
-            open()
-            currentAction = null
-        }
-        // Rename
-        fun rename() {
-            val action = actions.get("rename") as Rename
-            action.handle(requireActivity(), binding, tracker.selection, fragmentUri) {
-                observeCurrent(fragmentDocId)
-            }
-        }
-        binding.actionRename.setOnClickListener {
-            currentAction = "rename"
-            rename()
-            currentAction = null
-        }
-        // Copy/MoveFinish
-        fun copyFinish() {
-            currentAction = null
-            binding.toggleGroup.uncheck(R.id.action_copy)
-            binding.close.setOnClickListener(null)
-            receiver.setActionState("copy", "sourceUri", null)
-            receiver.setActionState("copy", "sourceDocId", null)
-        }
-        fun moveFinish() {
-            currentAction = null
-            binding.toggleGroup.uncheck(R.id.action_move)
-            binding.close.setOnClickListener(null)
-            receiver.setActionState("move","sourceUri", null)
-            receiver.setActionState("move","sourceParentUri", null)
-            receiver.setActionState("move","sourceParentDocId", null)
-        }
-        // Copy
-        fun copy() {
-            if (currentAction == "move") {
-                moveFinish()
-            }
-            currentAction = "copy"
-            val action = actions.get("copy") as Copy
-            val copied = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId
-            ) { copyFinish() }
-            if (copied) {
-                observeCurrent(fragmentDocId)
-            } else {
-                val close = Utils.showStatus(
-                    binding.status,
-                    "Copying",
-                    fragmentDocId,
-                    receiver.getActionState("copy", "sourceDocId")!!
-                )
-                close.setOnClickListener { copyFinish() }
-            }
-        }
-        binding.actionCopy.setOnClickListener {
-            copy()
-        }
-        // Move
-        fun move() {
-            if (currentAction == "copy") {
-                copyFinish()
-            }
-            currentAction = "move"
-            val action = actions.get("move") as Move
-            val moved = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId,
-                fun() {
-                    currentAction = null
-                })
-            if (moved) {
-                observeCurrent(fragmentDocId)
-            } else {
-                val close = Utils.showStatus(
-                    binding.status,
-                    "Moving",
-                    fragmentDocId,
-                    receiver.getActionState("move", "sourceDocId")!!
-                )
-                close.setOnClickListener { moveFinish() }
-            }
-        }
-        binding.actionMove.setOnClickListener {
-            move()
-        }
-        // Delete
-        fun delete() {
-            currentAction = "delete"
-            val action = actions.get("delete") as Delete
-            action.handle(requireActivity(), binding, tracker.selection, fragmentUri,
-                fun(success) {
-                    if (success) {
-                        observeCurrent(fragmentDocId)
-                    }
-                    currentAction = null
-                })
-        }
-        binding.actionDelete.setOnClickListener {
-            delete()
-        }
-
-        // If we have savedInstanceState, check for a currentAction and initiate it
-        // https://stackoverflow.com/questions/69622835/how-to-call-a-function-in-kotlin-from-a-string-name
-        val actionFuncs = listOf(::copy, ::createFile, ::createFolder, ::delete, ::move, ::open, ::rename).associateBy { it.name }
         if (savedInstanceState != null) {
             if (savedInstanceState.getString("currentAction") != null) {
-                val currentAction = savedInstanceState.getString("currentAction")!!
+                currentAction = savedInstanceState.getString("currentAction")!!
                 if (currentAction != "copy") {
                     val actionState = savedInstanceState.getSerializable(currentAction) as HashMap<String, String>
                     for ((key, value) in actionState) {
-                        receiver.setActionState(currentAction, key, value)
+                        receiver.setActionState(currentAction!!, key, value)
                     }
                 }
-                actionFuncs[currentAction]?.invoke()
+                actions[currentAction]?.handle()
             }
         }
     }
@@ -292,7 +170,7 @@ class FolderFragment : Fragment(), DialogCallback {
         }
     }
 
-    private fun observeCurrent(docId: String?) {
+    fun observeCurrent(docId: String?) {
         val mutableList: MutableList<SanFile> = Utils.getChildren(requireActivity(), fragmentUri, docId)
 
         // Observe the current directory

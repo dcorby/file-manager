@@ -2,20 +2,28 @@ package com.example.filesystem.actions
 
 import android.net.Uri
 import android.provider.DocumentsContract
-import androidx.fragment.app.FragmentActivity
-import com.example.filesystem.FolderFragment
-import com.example.filesystem.MainActivity
-import com.example.filesystem.R
-import com.example.filesystem.Utils
+import androidx.recyclerview.selection.Selection
+import com.example.filesystem.*
 import com.example.filesystem.databinding.FragmentFolderBinding
 
-class CreateFolder(fragment: FolderFragment) {
-    private val mFragment = fragment
-    private lateinit var mActivity : FragmentActivity
-    private lateinit var mBinding : FragmentFolderBinding
+class CreateFolder(fragment: FolderFragment,
+                   binding: FragmentFolderBinding,
+                   selection: Selection<String>,
+                   fragmentUri: Uri,
+                   fragmentDocId: String,
+                   callback: (() -> Unit)) : Action {
 
-    fun handle(binding: FragmentFolderBinding, fragmentUri: Uri, fragmentDocId: String, callback: (() -> Unit)) {
-        mBinding = binding
+    private val mFragment = fragment
+    private var mActivity = fragment.requireActivity()
+    private var mReceiver = fragment.requireActivity() as MainReceiver
+    private var mBinding = binding
+    private var mSelection = selection
+    private var mFragmentUri = fragmentUri
+    private var mFragmentDocId = fragmentDocId
+    private var mCallback = callback
+
+    override fun handle() {
+        mFragment.currentAction = "createFolder"
 
         Utils.showPrompt(mFragment, fun(editText) {
             // onSubmit()
@@ -27,7 +35,7 @@ class CreateFolder(fragment: FolderFragment) {
                 return
             }
 
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
+            val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, mFragmentDocId)
             DocumentsContract.createDocument(
                 mFragment.requireActivity().contentResolver,
                 docUri,
@@ -35,7 +43,7 @@ class CreateFolder(fragment: FolderFragment) {
                 filename)
             Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })
             editText.text.clear()
-            callback()
+            mCallback()
         }, fun() {
             // onDismiss()
             Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })

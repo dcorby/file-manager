@@ -6,63 +6,64 @@ import android.provider.DocumentsContract
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.*
 import com.example.filesystem.databinding.FragmentFolderBinding
 
-class Move(fragment: FolderFragment) {
+class Move(fragment: FolderFragment,
+           binding: FragmentFolderBinding,
+           selection: Selection<String>,
+           fragmentUri: Uri,
+           fragmentDocId: String,
+           callback: (() -> Unit)) : Action {
+
     private val mFragment = fragment
-    private lateinit var mActivity : FragmentActivity
-    private lateinit var mReceiver : MainReceiver
-    private lateinit var mBinding : FragmentFolderBinding
-    private lateinit var mSelection : Selection<String>
-    private lateinit var mFinish : () -> Unit
+    private var mActivity = fragment.requireActivity()
+    private var mReceiver = fragment.requireActivity() as MainReceiver
+    private var mBinding = binding
+    private var mSelection = selection
+    private var mFragmentUri = fragmentUri
+    private var mFragmentDocId = fragmentDocId
+    private var mCallback = callback
 
     @RequiresApi(Build.VERSION_CODES.N)
-    fun handle(activity: FragmentActivity,
-               binding: FragmentFolderBinding,
-               selection: Selection<String>,
-               fragmentUri: Uri,
-               fragmentDocId: String,
-               finish: (() -> Unit)) : Boolean {
-
-        mActivity = activity
-        mReceiver = (activity as MainReceiver)
-        mBinding = binding
-        mSelection = selection
-        mFinish = finish
-
+    override fun handle() {
+        mFragment.currentAction = "move"
         if (!validate()) {
-            return false
+            return
         }
+
         val sourceUri = mReceiver.getActionState("move", "sourceUri")
         if (sourceUri == null) {
-            val sourceDocId = selection.toList()[0]
-            val sourceUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, sourceDocId)
+            val sourceDocId = mSelection.toList()[0]
+            val sourceUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, sourceDocId)
             mReceiver.setActionState("move","sourceUri", sourceUri.toString())
             mReceiver.setActionState("move","sourceDocId", sourceDocId)
-            mReceiver.setActionState("move","sourceParentUri", fragmentUri.toString())
-            mReceiver.setActionState("move","sourceParentDocId", fragmentDocId)
-            return false
+            mReceiver.setActionState("move","sourceParentUri", mFragmentUri.toString())
+            mReceiver.setActionState("move","sourceParentDocId", mFragmentDocId)
+            return
         } else {
             val sourceParentUri = Utils.decode(mReceiver.getActionState("move", "sourceParentUri")!!)
             val sourceParentDocId = Utils.decode(mReceiver.getActionState("move", "sourceParentDocId")!!)
             val sourceParentDocUri = DocumentsContract.buildDocumentUriUsingTree(sourceParentUri.toUri(), sourceParentDocId)
-            val targetParentDocUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
+            val targetParentDocUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, mFragmentDocId)
             try {
-                DocumentsContract.moveDocument(activity.contentResolver, sourceUri.toUri(), sourceParentDocUri, targetParentDocUri)
+                DocumentsContract.moveDocument(
+                    mActivity.contentResolver,
+                    sourceUri.toUri(),
+                    sourceParentDocUri,
+                    targetParentDocUri)
             } catch (e: IllegalStateException) {
                 mBinding.toggleGroup.check(R.id.action_move)
                 Toast.makeText(mActivity, "File already exists", Toast.LENGTH_SHORT).show()
-                return false
+                return
             }
             mReceiver.setActionState("move","sourceUri", null)
             mReceiver.setActionState("move","sourceDocId", null)
             mReceiver.setActionState("move","sourceParentUri", null)
             mReceiver.setActionState("move","sourceParentDocId", null)
-            mFinish()
-            return true
+            mCallback()
+            return
         }
     }
 
@@ -73,18 +74,27 @@ class Move(fragment: FolderFragment) {
             if (mSelection.size() == 0) {
                 Utils.showPopup(mFragment, "Select a file to move") {
                     mBinding.toggleGroup.uncheck(R.id.action_move)
-                    mFinish()
+                    mCallback()
                 }
                 return false
             }
             if (mSelection.size() > 1) {
                 Utils.showPopup(mFragment, "Multi-file move is not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_move)
-                    mFinish()
+                    mCallback()
                 }
                 return false
             }
         }
         return true
+    }
+
+    fun finish() {
+        mFragment.currentAction = null
+        mBinding.toggleGroup.uncheck(R.id.action_move)
+        mBinding.close.setOnClickListener(null)
+        mReceiver.setActionState("move","sourceUri", null)
+        mReceiver.setActionState("move","sourceParentUri", null)
+        mReceiver.setActionState("move","sourceParentDocId", null)
     }
 }
