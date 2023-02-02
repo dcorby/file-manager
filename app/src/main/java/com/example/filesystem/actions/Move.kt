@@ -17,18 +17,22 @@ class Move(fragment: FolderFragment) {
     private lateinit var mReceiver : MainReceiver
     private lateinit var mBinding : FragmentFolderBinding
     private lateinit var mSelection : Selection<String>
+    private lateinit var mFinish : () -> Unit
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun handle(activity: FragmentActivity,
                binding: FragmentFolderBinding,
                selection: Selection<String>,
                fragmentUri: Uri,
-               fragmentDocId: String) : Boolean {
+               fragmentDocId: String,
+               finish: (() -> Unit)) : Boolean {
 
         mActivity = activity
         mReceiver = (activity as MainReceiver)
         mBinding = binding
         mSelection = selection
+        mFinish = finish
+
         if (!validate()) {
             return false
         }
@@ -37,6 +41,7 @@ class Move(fragment: FolderFragment) {
             val sourceDocId = selection.toList()[0]
             val sourceUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, sourceDocId)
             mReceiver.setActionState("move","sourceUri", sourceUri.toString())
+            mReceiver.setActionState("move","sourceDocId", sourceDocId)
             mReceiver.setActionState("move","sourceParentUri", fragmentUri.toString())
             mReceiver.setActionState("move","sourceParentDocId", fragmentDocId)
             return false
@@ -53,8 +58,10 @@ class Move(fragment: FolderFragment) {
                 return false
             }
             mReceiver.setActionState("move","sourceUri", null)
+            mReceiver.setActionState("move","sourceDocId", null)
             mReceiver.setActionState("move","sourceParentUri", null)
             mReceiver.setActionState("move","sourceParentDocId", null)
+            mFinish()
             return true
         }
     }
@@ -66,12 +73,14 @@ class Move(fragment: FolderFragment) {
             if (mSelection.size() == 0) {
                 Utils.showPopup(mFragment, "Select a file to move") {
                     mBinding.toggleGroup.uncheck(R.id.action_move)
+                    mFinish()
                 }
                 return false
             }
             if (mSelection.size() > 1) {
                 Utils.showPopup(mFragment, "Multi-file move is not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_move)
+                    mFinish()
                 }
                 return false
             }

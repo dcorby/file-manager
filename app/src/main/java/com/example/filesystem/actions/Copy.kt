@@ -60,24 +60,14 @@ class Copy(fragment: FolderFragment) {
                 return false
             }
             mReceiver.setActionState("copy", "sourceUri", sourceUri.toString())
-            mReceiver.setActionState("copy", "filename", Utils.getFilenameFromDocId(sourceDocId))
-            val close = Utils.showStatus(
-                mBinding.status,
-                "Copying",
-                Utils.getPathPartsFromDocId(fragmentDocId),
-                Utils.getFilenameFromDocId(sourceDocId))
-            close.setOnClickListener {
-                Utils.cleanStatus(mBinding.status)
-                mBinding.toggleGroup.uncheck(R.id.action_copy)
-                mFinish()
-            }
+            mReceiver.setActionState("copy", "sourceDocId", sourceDocId)
             return false
         } else {
             var targetUri: Uri? = null
             var isError = false
             try {
                 // Make the actual copy
-                val filename = mReceiver.getActionState("copy", "filename")!!
+                val filename = Utils.getFilenameFromDocId(mReceiver.getActionState("copy", "sourceDocId")!!)
                 val parentUri = DocumentsContract.buildDocumentUriUsingTree(fragmentUri, fragmentDocId)
                 val (_, ext) = Utils.explodeFilename(filename)
                 val mimeType = mReceiver.getMimeType(ext)
@@ -89,14 +79,14 @@ class Copy(fragment: FolderFragment) {
                 outputStream.write(bytes)
                 outputStream.close()
                 mReceiver.setActionState("copy", "sourceUri", null)
-                mReceiver.setActionState("copy", "filename", null)
+                mReceiver.setActionState("copy", "sourceDocId", null)
                 mFinish()
                 return true
             } catch(e: Exception) {
                 Utils.showPopup(mFragment, "Error copying file") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
                     mReceiver.setActionState("copy", "sourceUri", null)
-                    mReceiver.setActionState("copy", "filename", null)
+                    mReceiver.setActionState("copy", "sourceDocId", null)
                     mFinish()
                 }
                 isError = true

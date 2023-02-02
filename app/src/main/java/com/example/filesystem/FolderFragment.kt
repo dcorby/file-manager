@@ -165,19 +165,41 @@ class FolderFragment : Fragment(), DialogCallback {
             rename()
             currentAction = null
         }
+        // Copy/MoveFinish
+        fun copyFinish() {
+            currentAction = null
+            binding.toggleGroup.uncheck(R.id.action_copy)
+            binding.close.setOnClickListener(null)
+            receiver.setActionState("copy", "sourceUri", null)
+            receiver.setActionState("copy", "sourceDocId", null)
+        }
+        fun moveFinish() {
+            currentAction = null
+            binding.toggleGroup.uncheck(R.id.action_move)
+            binding.close.setOnClickListener(null)
+            receiver.setActionState("move","sourceUri", null)
+            receiver.setActionState("move","sourceParentUri", null)
+            receiver.setActionState("move","sourceParentDocId", null)
+        }
         // Copy
         fun copy() {
+            if (currentAction == "move") {
+                moveFinish()
+            }
             currentAction = "copy"
             val action = actions.get("copy") as Copy
-            val copied = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId,
-                fun() {
-                    currentAction = null
-                    binding.close.setOnClickListener(null)
-                    receiver.setActionState("copy", "sourceUri", null)
-                    receiver.setActionState("copy", "filename", null)
-                })
+            val copied = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId
+            ) { copyFinish() }
             if (copied) {
                 observeCurrent(fragmentDocId)
+            } else {
+                val close = Utils.showStatus(
+                    binding.status,
+                    "Copying",
+                    fragmentDocId,
+                    receiver.getActionState("copy", "sourceDocId")!!
+                )
+                close.setOnClickListener { copyFinish() }
             }
         }
         binding.actionCopy.setOnClickListener {
@@ -185,16 +207,29 @@ class FolderFragment : Fragment(), DialogCallback {
         }
         // Move
         fun move() {
+            if (currentAction == "copy") {
+                copyFinish()
+            }
+            currentAction = "move"
             val action = actions.get("move") as Move
-            val success = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId)
-            if (success) {
+            val moved = action.handle(requireActivity(), binding, tracker.selection, fragmentUri, fragmentDocId,
+                fun() {
+                    currentAction = null
+                })
+            if (moved) {
                 observeCurrent(fragmentDocId)
+            } else {
+                val close = Utils.showStatus(
+                    binding.status,
+                    "Moving",
+                    fragmentDocId,
+                    receiver.getActionState("move", "sourceDocId")!!
+                )
+                close.setOnClickListener { moveFinish() }
             }
         }
         binding.actionMove.setOnClickListener {
-            currentAction = "move"
             move()
-            currentAction = null
         }
         // Delete
         fun delete() {

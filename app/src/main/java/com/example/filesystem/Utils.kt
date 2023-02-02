@@ -164,8 +164,10 @@ class Utils {
             return Pair(base, ext)
         }
 
-        fun showStatus(layout: LinearLayout, prefix: String, pathParts: List<String>, filename: String) : View {
-            val status = "${prefix}: Home${pathParts.joinToString("/")}/${filename}"
+        fun showStatus(layout: LinearLayout, prefix: String, fragmentDocId: String, sourceDocId: String) : View {
+            val pathParts = getPathPartsFromDocId(fragmentDocId)
+            val filename = getFilenameFromDocId(sourceDocId)
+            val status = "${prefix}: ${(listOf("Home") + pathParts).joinToString("/")}/${filename}"
             val text = layout.findViewById(R.id.text) as TextView
             text.text = status
             layout.visibility = View.VISIBLE
