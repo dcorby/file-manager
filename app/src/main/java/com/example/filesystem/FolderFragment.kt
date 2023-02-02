@@ -218,9 +218,11 @@ class FolderFragment : Fragment(), DialogCallback {
         if (savedInstanceState != null) {
             if (savedInstanceState.getString("currentAction") != null) {
                 val currentAction = savedInstanceState.getString("currentAction")!!
-                val actionState = savedInstanceState.getSerializable(currentAction) as HashMap<String, String>
-                for ((key, value) in actionState) {
-                    receiver.setActionState(currentAction, key, value)
+                if (currentAction != "copy") {
+                    val actionState = savedInstanceState.getSerializable(currentAction) as HashMap<String, String>
+                    for ((key, value) in actionState) {
+                        receiver.setActionState(currentAction, key, value)
+                    }
                 }
                 actionFuncs[currentAction]?.invoke()
             }
@@ -326,10 +328,13 @@ class FolderFragment : Fragment(), DialogCallback {
         if (this::tracker.isInitialized) {
             tracker.onSaveInstanceState(outState)
         }
-        // save ActionState data
+        // Save ActionState data
         if (currentAction != null) {
             outState.putString("currentAction", currentAction)
-            outState.putSerializable(currentAction, receiver.getActionState(currentAction!!))
+            // Don't keep state for copy. It will be regained.
+            if (currentAction != "copy") {
+                outState.putSerializable(currentAction, receiver.getActionState(currentAction!!))
+            }
         }
     }
 
