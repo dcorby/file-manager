@@ -113,6 +113,8 @@ class Utils {
             }
         }
 
+        // https://stackoverflow.com/questions/18799216/how-to-make-a-edittext-box-in-a-dialog
+        // Possibly should just be using a Dialog rather than PopupWindow
         fun showPrompt(fragment: FolderFragment, onSubmit: (EditText) -> Unit, onDismiss : (() -> Unit)? = null) {
             Handler().post {
                 if (!fragment.requireActivity().isFinishing) {
