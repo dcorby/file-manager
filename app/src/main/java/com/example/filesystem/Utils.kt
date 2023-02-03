@@ -8,13 +8,18 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Handler
 import android.provider.DocumentsContract
+import android.util.Log
 import android.view.View
+import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import androidx.core.view.get
+import androidx.core.content.ContextCompat.getSystemService
 import java.io.Closeable
 import java.net.URLDecoder
 import java.util.*
+
 
 class Utils {
     companion object {
@@ -115,6 +120,17 @@ class Utils {
                     val contentView = window.contentView
                     val prompt = contentView.findViewById<ViewGroup>(R.id.prompt)
                     val editText = contentView.findViewById<EditText>(R.id.edit_text)
+
+                    editText.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
+                        if (hasFocus) {
+                            val imm = fragment.requireActivity()
+                                .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0)
+                            // ^ This is deprecated but the direct methods do not work on the Fire tablet
+                        }
+                        // Hide it in MainActivity OnDestroy()
+                    }
+
                     val submitText = contentView.findViewById<Button>(R.id.submit_text)
                     prompt.setOnClickListener {
                         window.dismiss()

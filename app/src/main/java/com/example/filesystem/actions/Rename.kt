@@ -32,21 +32,23 @@ class Rename(fragment: FolderFragment,
             return
         }
 
-        Utils.showPrompt(mFragment, fun(editText) {
-            // onSubmit()
-            val filename = editText.text.trim().toString()
-            val docId = mSelection.toList()[0]
-            val parentUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(parentUri, docId)
-            DocumentsContract.renameDocument(mFragment.requireActivity().contentResolver, docUri, filename)
+        Utils.showPrompt(mFragment,
+            fun(editText) {
+                // onSubmit()
+                val filename = editText.text.trim().toString()
+                val docId = mSelection.toList()[0]
+                val parentUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)
+                val docUri = DocumentsContract.buildDocumentUriUsingTree(parentUri, docId)
+                DocumentsContract.renameDocument(mFragment.requireActivity().contentResolver, docUri, filename)
 
-            Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_rename) })
-            editText.text.clear()
-            mCallback()
-        }, fun() {
-            // onDismiss()
-            Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_rename) })
-        })
+                Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_rename) })
+                editText.text.clear()
+                mCallback()
+            },
+            fun() {
+                // onDismiss()
+                Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_rename) })
+            })
     }
 
     private fun validate() : Boolean {
@@ -63,5 +65,9 @@ class Rename(fragment: FolderFragment,
             return false
         }
         return true
+    }
+
+    override fun finish() {
+
     }
 }

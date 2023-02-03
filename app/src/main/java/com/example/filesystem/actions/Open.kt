@@ -75,4 +75,8 @@ class Open(fragment: FolderFragment,
         }
         return true
     }
+
+    override fun finish() {
+
+    }
 }

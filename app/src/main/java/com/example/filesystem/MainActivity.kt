@@ -3,12 +3,15 @@ package com.example.filesystem
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import com.example.filesystem.databinding.ActivityMainBinding
 import org.json.JSONObject
+
 
 class MainActivity : AppCompatActivity(), MainReceiver {
 
@@ -49,6 +52,15 @@ class MainActivity : AppCompatActivity(), MainReceiver {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        // Make sure the keyboard is always closed on activity recycle, otherwise popup opens over top
+        // https://stackoverflow.com/questions/1109022/how-to-close-hide-the-android-soft-keyboard-programmatically
+        val imm: InputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        var view: View? = getCurrentFocus()
+        if (view == null) {
+            view = View(this)
+        }
+        imm.hideSoftInputFromWindow(view!!.getWindowToken(), 0)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -89,7 +89,7 @@ class Move(fragment: FolderFragment,
         return true
     }
 
-    fun finish() {
+    override fun finish() {
         mFragment.currentAction = null
         mBinding.toggleGroup.uncheck(R.id.action_move)
         mBinding.close.setOnClickListener(null)

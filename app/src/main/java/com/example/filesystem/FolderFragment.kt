@@ -2,6 +2,7 @@ package com.example.filesystem
 
 import android.app.ActionBar
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
@@ -12,6 +13,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
@@ -58,8 +60,10 @@ class FolderFragment : Fragment(), DialogCallback {
     var currentAction: String? = null
 
     // popup and alert windows
-    lateinit var popup: PopupWindow
-    lateinit var prompt: PopupWindow
+    //lateinit var popup: PopupWindow
+    //lateinit var prompt: PopupWindow
+    private var popup: PopupWindow? = null
+    private var prompt: PopupWindow? = null
     //lateinit var dialog: MyDialogFragment
 
     override fun onCreateView(
@@ -188,11 +192,13 @@ class FolderFragment : Fragment(), DialogCallback {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        if (this::prompt.isInitialized && prompt.isShowing) {
-            prompt.dismiss()
+        //if (this::prompt!!.isInitialized && prompt.isShowing) {
+        if (prompt != null && prompt!!.isShowing) {
+            prompt!!.dismiss()
         }
-        if (this::popup.isInitialized && popup.isShowing) {
-            popup.dismiss()
+        //if (this::popup.isInitialized && popup.isShowing) {
+        if (popup != null && popup!!.isShowing) {
+            popup!!.dismiss()
         }
     }
 
@@ -261,8 +267,8 @@ class FolderFragment : Fragment(), DialogCallback {
                 ActionBar.LayoutParams.MATCH_PARENT,
                 true
             )
-            popup.showAtLocation(layout, Gravity.CENTER, 0, 0)
-            return popup
+            popup!!.showAtLocation(layout, Gravity.CENTER, 0, 0)
+            return popup!!
         }
         // prompt
         if (type == "prompt") {
@@ -273,8 +279,8 @@ class FolderFragment : Fragment(), DialogCallback {
                 ActionBar.LayoutParams.MATCH_PARENT,
                 true
             )
-            prompt.showAtLocation(layout, Gravity.CENTER, 0, 0)
-            return prompt
+            prompt!!.showAtLocation(layout, Gravity.CENTER, 0, 0)
+            return prompt!!
         }
         throw Exception("Unknown popup type")
     }

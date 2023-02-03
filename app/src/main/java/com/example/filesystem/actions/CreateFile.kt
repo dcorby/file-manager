@@ -67,7 +67,7 @@ class CreateFile(fragment: FolderFragment,
         })
     }
 
-    private fun finish() {
+    override fun finish() {
         mFragment.currentAction = null
     }
 }

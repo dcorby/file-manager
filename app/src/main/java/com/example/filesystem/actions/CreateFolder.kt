@@ -25,28 +25,34 @@ class CreateFolder(fragment: FolderFragment,
     override fun handle() {
         mFragment.currentAction = "createFolder"
 
-        Utils.showPrompt(mFragment, fun(editText) {
-            // onSubmit()
-            val filename = editText.text.trim().toString()
-            if (filename == "") {
-                Utils.showPopup(mFragment, "Folder name is empty") {
-                    Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })
+        Utils.showPrompt(mFragment,
+            fun(editText) {
+                // onSubmit()
+                val filename = editText.text.trim().toString()
+                if (filename == "") {
+                    Utils.showPopup(mFragment, "Folder name is empty") {
+                        Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })
+                    }
+                    return
                 }
-                return
-            }
 
-            val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, mFragmentDocId)
-            DocumentsContract.createDocument(
-                mFragment.requireActivity().contentResolver,
-                docUri,
-                DocumentsContract.Document.MIME_TYPE_DIR,
-                filename)
-            Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })
-            editText.text.clear()
-            mCallback()
-        }, fun() {
-            // onDismiss()
-            Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })
-        })
+                val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, mFragmentDocId)
+                DocumentsContract.createDocument(
+                    mFragment.requireActivity().contentResolver,
+                    docUri,
+                    DocumentsContract.Document.MIME_TYPE_DIR,
+                    filename)
+                Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })
+                editText.text.clear()
+                mCallback()
+            },
+            fun() {
+                // onDismiss()
+                Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })
+            })
+    }
+
+    override fun finish() {
+
     }
 }

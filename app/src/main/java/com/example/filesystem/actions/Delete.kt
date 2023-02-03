@@ -68,4 +68,8 @@ class Delete(fragment: FolderFragment,
         }
         return true
     }
+
+    override fun finish() {
+
+    }
 }
