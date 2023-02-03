@@ -10,11 +10,13 @@ import android.os.Handler
 import android.provider.DocumentsContract
 import android.util.Log
 import android.view.View
-import android.view.View.OnFocusChangeListener
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.content.ContextCompat.getSystemService
 import java.io.Closeable
 import java.net.URLDecoder
@@ -123,12 +125,13 @@ class Utils {
                     val prompt = contentView.findViewById<ViewGroup>(R.id.prompt)
                     val editText = contentView.findViewById<EditText>(R.id.edit_text)
 
-                    editText.onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
+                    // As user types, save result in fragment.receiver and then use onSaveInstanceState
+                    editText.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
                         if (hasFocus) {
                             val imm = fragment.requireActivity()
                                 .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                             imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0)
-                            // ^ This is deprecated but the direct methods do not work on the Fire tablet
+                            // ^ This is deprecated but the direct methods (showSoftInput, e.g.) do not work on the Fire tablet
                         }
                         // Hide it in MainActivity OnDestroy()
                     }

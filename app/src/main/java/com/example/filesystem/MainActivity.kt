@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), MainReceiver {
         if (view == null) {
             view = View(this)
         }
-        imm.hideSoftInputFromWindow(view!!.getWindowToken(), 0)
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
