@@ -40,14 +40,16 @@ class Rename(fragment: FolderFragment,
                 val parentUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)
                 val docUri = DocumentsContract.buildDocumentUriUsingTree(parentUri, docId)
                 DocumentsContract.renameDocument(mFragment.requireActivity().contentResolver, docUri, filename)
-
                 Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_rename) })
                 editText.text.clear()
-                mCallback()
+                mFragment.observeCurrent(mFragmentDocId)
+                finish()
             },
             fun() {
                 // onDismiss()
-                Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_rename) })
+                Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_rename) }) {
+                    finish()
+                }
             })
     }
 
@@ -68,6 +70,6 @@ class Rename(fragment: FolderFragment,
     }
 
     override fun finish() {
-
+        mFragment.currentAction = null
     }
 }

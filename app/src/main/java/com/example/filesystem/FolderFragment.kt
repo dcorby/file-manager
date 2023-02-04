@@ -100,12 +100,12 @@ class FolderFragment : Fragment(), DialogCallback {
             tracker.onRestoreInstanceState(savedInstanceState)
         }
 
-        // Check whether we have an active copy or move
+        // Check for an active copy or move
         if (receiver.getActionState("copy", "sourceUri") != null) {
-            binding.toggleGroup.check(R.id.action_copy)
+            UI.handleActiveCopy(receiver, binding)
         }
         if (receiver.getActionState("move", "sourceUri") != null) {
-            binding.toggleGroup.check(R.id.action_move)
+            UI.handleActiveMove(receiver, binding)
         }
 
         // Set the path parts
@@ -204,18 +204,9 @@ class FolderFragment : Fragment(), DialogCallback {
 
     override fun onResume() {
         super.onResume()
-        // Check for active copy
-        if (receiver.getActionState("copy", "sourceUri") != null) {
-            binding.toggleGroup.check(R.id.action_copy)
-        } else {
-            binding.toggleGroup.uncheck(R.id.action_copy)
-        }
-        // Check for active move
-        if (receiver.getActionState("move", "sourceUri") != null) {
-            binding.toggleGroup.check(R.id.action_move)
-        } else {
-            binding.toggleGroup.uncheck(R.id.action_move)
-        }
+        // Check for an active copy or move
+        UI.handleActiveCopy(receiver, binding)
+        UI.handleActiveMove(receiver, binding)
 
         // Dismiss the delete dialog fragment if necessary
         // Provides a smoother UI effect here

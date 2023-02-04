@@ -44,18 +44,21 @@ class Copy(fragment: FolderFragment,
 
         val sourceUri = mReceiver.getActionState("copy", "sourceUri")
         if (sourceUri == null) {
+            // Store data to begin copy, and show status
             val sourceDocId = mSelection.toList()[0]
             val sourceUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, sourceDocId)
             val mimeType = mActivity.contentResolver.getType(sourceUri)
             if (mimeType != null && Utils.isDirectory(mimeType)) {
                 Utils.showPopup(mFragment, "Folder copy not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
-                    mCallback()
                 }
                 return
             }
             mReceiver.setActionState("copy", "sourceUri", sourceUri.toString())
             mReceiver.setActionState("copy", "sourceDocId", sourceDocId)
+            mReceiver.setActionState("copy", "sourceFragmentDocId", mFragmentDocId)
+            Utils.showStatus(mBinding.status, "Copying", mFragmentDocId, sourceDocId)
+            mBinding.close.setOnClickListener { finish() }
             return
         } else {
             var targetUri: Uri? = null
@@ -73,16 +76,12 @@ class Copy(fragment: FolderFragment,
                 val outputStream = mActivity.contentResolver.openOutputStream(targetUri!!)!!
                 outputStream.write(bytes)
                 outputStream.close()
-                mReceiver.setActionState("copy", "sourceUri", null)
-                mReceiver.setActionState("copy", "sourceDocId", null)
-                mCallback()
+                finish()
+                mFragment.observeCurrent(mFragmentDocId)
                 return
             } catch(e: Exception) {
                 Utils.showPopup(mFragment, "Error copying file") {
-                    mBinding.toggleGroup.uncheck(R.id.action_copy)
-                    mReceiver.setActionState("copy", "sourceUri", null)
-                    mReceiver.setActionState("copy", "sourceDocId", null)
-                    mCallback()
+                    finish()
                 }
                 isError = true
             } finally {
@@ -90,7 +89,6 @@ class Copy(fragment: FolderFragment,
                     DocumentsContract.deleteDocument(mActivity.contentResolver, targetUri)
                 }
             }
-            return
         }
     }
 
@@ -120,7 +118,9 @@ class Copy(fragment: FolderFragment,
         mFragment.currentAction = null
         mBinding.toggleGroup.uncheck(R.id.action_copy)
         mBinding.close.setOnClickListener(null)
+        Utils.cleanStatus(mBinding.status)
         mReceiver.setActionState("copy", "sourceUri", null)
         mReceiver.setActionState("copy", "sourceDocId", null)
+        mReceiver.setActionState("copy", "sourceFragmentDocId", null)
     }
 }

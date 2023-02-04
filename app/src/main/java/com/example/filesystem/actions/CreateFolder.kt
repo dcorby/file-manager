@@ -44,15 +44,18 @@ class CreateFolder(fragment: FolderFragment,
                     filename)
                 Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })
                 editText.text.clear()
-                mCallback()
+                mFragment.observeCurrent(mFragmentDocId)
+                finish()
             },
             fun() {
                 // onDismiss()
-                Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })
+                Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) }) {
+                    finish()
+                }
             })
     }
 
     override fun finish() {
-
+        mFragment.currentAction = null
     }
 }
