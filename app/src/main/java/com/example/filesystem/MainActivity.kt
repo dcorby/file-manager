@@ -84,6 +84,12 @@ class MainActivity : AppCompatActivity(), MainReceiver {
                 || super.onSupportNavigateUp()
     }
 
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    + THIS INTERFACE NEEDS TO MANAGE ALL DATA INCL. CURRENTACTION, ETC.    +
+    + OR USE VIEW MODEL??                                                  +
+    + https://developer.android.com/reference/androidx/lifecycle/ViewModel +
+    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
     // Interface methods
     override fun getActionState(action: String): HashMap<String, String> {
         return actionStates[action]!! as HashMap<String, String>
