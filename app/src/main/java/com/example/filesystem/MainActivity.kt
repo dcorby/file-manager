@@ -86,6 +86,7 @@ class MainActivity : AppCompatActivity(), MainReceiver {
 
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     + THIS INTERFACE NEEDS TO MANAGE ALL DATA INCL. CURRENTACTION, ETC.    +
+    + add currentAction, and get/setCurrentAction                          +
     + OR USE VIEW MODEL??                                                  +
     + https://developer.android.com/reference/androidx/lifecycle/ViewModel +
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
