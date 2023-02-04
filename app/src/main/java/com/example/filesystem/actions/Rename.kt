@@ -22,11 +22,11 @@ class Rename(fragment: FolderFragment,
     private var mFragmentDocId = fragmentDocId
     private var mCallback = callback
 
-    override fun handle() {
-        mFragment.currentAction = "rename"
+    override fun handle(isClick: Boolean) {
         if (!validate()) {
             return
         }
+        mFragment.currentAction = "rename"
 
         UI.showPrompt(mFragment,
             fun(editText) {

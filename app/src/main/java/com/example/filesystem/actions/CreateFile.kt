@@ -30,7 +30,7 @@ class CreateFile(fragment: FolderFragment,
     private var mFragmentDocId = fragmentDocId
     private var mCallback = callback
 
-    override fun handle() {
+    override fun handle(isClick: Boolean) {
         mFragment.currentAction = "createFile"
 
         val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, mFragmentDocId)

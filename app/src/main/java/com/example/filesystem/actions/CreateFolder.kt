@@ -22,7 +22,7 @@ class CreateFolder(fragment: FolderFragment,
     private var mFragmentDocId = fragmentDocId
     private var mCallback = callback
 
-    override fun handle() {
+    override fun handle(isClick: Boolean) {
         mFragment.currentAction = "createFolder"
 
         UI.showPrompt(mFragment,

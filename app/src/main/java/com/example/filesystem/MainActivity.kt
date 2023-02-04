@@ -12,7 +12,6 @@ import androidx.navigation.ui.navigateUp
 import com.example.filesystem.databinding.ActivityMainBinding
 import org.json.JSONObject
 
-
 class MainActivity : AppCompatActivity(), MainReceiver {
 
     private lateinit var appBarConfiguration: AppBarConfiguration

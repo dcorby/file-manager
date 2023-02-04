@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -54,6 +55,7 @@ class FolderFragment : Fragment(), DialogCallback {
     lateinit var tracker: SelectionTracker<String>
     lateinit var liveData: LiveData<MutableList<SanFile>>
     lateinit var receiver: MainReceiver
+    lateinit var actions: kotlin.collections.HashMap<String, Action>
     var currentAction: String? = null
 
     // popup and alert windows
@@ -120,25 +122,23 @@ class FolderFragment : Fragment(), DialogCallback {
 
         // Actions
         fun callback() {}
-        val actions = Actions(this, binding, tracker.selection, fragmentUri, fragmentDocId, ::callback).map
-        binding.actionCopy.setOnClickListener { actions["copy"]?.handle() }
-        binding.actionCreateFile.setOnClickListener { actions["createFile"]?.handle() }
-        binding.actionCreateFolder.setOnClickListener { actions["createFolder"]?.handle() }
-        binding.actionDelete.setOnClickListener { actions["delete"]?.handle() }
-        binding.actionMove.setOnClickListener { actions["move"]?.handle() }
-        binding.actionOpen.setOnClickListener { actions["open"]?.handle() }
-        binding.actionRename.setOnClickListener { actions["rename"]?.handle() }
+        actions = Actions(this, binding, tracker.selection, fragmentUri, fragmentDocId, ::callback).map
+        binding.actionCreateFile.setOnClickListener { actions["createFile"]?.handle(true) }
+        binding.actionCreateFolder.setOnClickListener { actions["createFolder"]?.handle(true) }
+        binding.actionOpen.setOnClickListener { actions["open"]?.handle(true) }
+        binding.actionRename.setOnClickListener { actions["rename"]?.handle(true) }
+        binding.actionCopy.setOnClickListener { actions["copy"]?.handle(true) }
+        binding.actionMove.setOnClickListener { actions["move"]?.handle(true) }
+        binding.actionDelete.setOnClickListener { actions["delete"]?.handle(true) }
 
         if (savedInstanceState != null) {
             if (savedInstanceState.getString("currentAction") != null) {
                 currentAction = savedInstanceState.getString("currentAction")!!
-                if (currentAction != "copy") {
-                    val actionState = savedInstanceState.getSerializable(currentAction) as HashMap<String, String>
-                    for ((key, value) in actionState) {
-                        receiver.setActionState(currentAction!!, key, value)
-                    }
+                val actionState = savedInstanceState.getSerializable(currentAction) as HashMap<String, String>
+                for ((key, value) in actionState) {
+                    receiver.setActionState(currentAction!!, key, value)
                 }
-                actions[currentAction]?.handle()
+                actions[currentAction]?.handle(false)
             }
         }
     }
@@ -201,6 +201,7 @@ class FolderFragment : Fragment(), DialogCallback {
 
     override fun onResume() {
         super.onResume()
+
         // Check for an active copy or move
         UI.handleActiveCopy(receiver, binding)
         UI.handleActiveMove(receiver, binding)
@@ -238,10 +239,7 @@ class FolderFragment : Fragment(), DialogCallback {
         // Save ActionState data
         if (currentAction != null) {
             outState.putString("currentAction", currentAction)
-            // Don't keep state for copy. It will be regained.
-            if (currentAction != "copy") {
-                outState.putSerializable(currentAction, receiver.getActionState(currentAction!!))
-            }
+            outState.putSerializable(currentAction, receiver.getActionState(currentAction!!))
         }
     }
 

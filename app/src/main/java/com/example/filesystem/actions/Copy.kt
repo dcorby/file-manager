@@ -2,6 +2,7 @@ package com.example.filesystem.actions
 
 import android.net.Uri
 import android.provider.DocumentsContract
+import android.util.Log
 import androidx.core.net.toUri
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.*
@@ -35,11 +36,12 @@ class Copy(fragment: FolderFragment,
     private var mFragmentDocId = fragmentDocId
     private var mCallback = callback
 
-    override fun handle() {
-        mFragment.currentAction = "copy"
+    override fun handle(isClick: Boolean) {
         if (!validate()) {
             return
         }
+        mFragment.actions["move"]?.finish()
+        mFragment.currentAction = "copy"
 
         val sourceUri = mReceiver.getActionState("copy", "sourceUri")
         if (sourceUri == null) {
@@ -58,12 +60,14 @@ class Copy(fragment: FolderFragment,
             mReceiver.setActionState("copy", "sourceFragmentDocId", mFragmentDocId)
             UI.showStatus(mBinding.status, "Copying", mFragmentDocId, sourceDocId)
             mBinding.close.setOnClickListener { finish() }
-            return
         } else {
+            if (!isClick) {
+                return
+            }
             var targetUri: Uri? = null
             var isError = false
             try {
-                // Make the actual copy
+                // Perform the actual copy
                 val filename = Utils.getFilenameFromDocId(mReceiver.getActionState("copy", "sourceDocId")!!)
                 val parentUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, mFragmentDocId)
                 val (_, ext) = Utils.explodeFilename(filename)
@@ -112,12 +116,14 @@ class Copy(fragment: FolderFragment,
     }
 
     override fun finish() {
-        mFragment.currentAction = null
-        mBinding.toggleGroup.uncheck(R.id.action_copy)
-        mBinding.close.setOnClickListener(null)
-        UI.cleanStatus(mBinding.status)
-        mReceiver.setActionState("copy", "sourceUri", null)
-        mReceiver.setActionState("copy", "sourceDocId", null)
-        mReceiver.setActionState("copy", "sourceFragmentDocId", null)
+        if (mFragment.currentAction == "copy") {
+            mFragment.currentAction = null
+            mBinding.toggleGroup.uncheck(R.id.action_copy)
+            mBinding.close.setOnClickListener(null)
+            UI.cleanStatus(mBinding.status)
+            mReceiver.setActionState("copy", "sourceUri", null)
+            mReceiver.setActionState("copy", "sourceDocId", null)
+            mReceiver.setActionState("copy", "sourceFragmentDocId", null)
+        }
     }
 }

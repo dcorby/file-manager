@@ -24,11 +24,11 @@ class Delete(fragment: FolderFragment,
     private var mFragmentDocId = fragmentDocId
     private var mCallback = callback
 
-    override fun handle() {
-        mFragment.currentAction = "delete"
+    override fun handle(isClick: Boolean) {
         if (!validate()) {
             return
         }
+        mFragment.currentAction = "delete"
 
         val docId = mSelection.toList()[0]
         val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)

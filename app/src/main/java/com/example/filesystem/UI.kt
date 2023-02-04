@@ -2,6 +2,7 @@ package com.example.filesystem
 
 import android.content.Context
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
