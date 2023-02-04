@@ -2,7 +2,6 @@ package com.example.filesystem.actions
 
 import android.net.Uri
 import android.provider.DocumentsContract
-import android.util.Log
 import androidx.core.net.toUri
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.*
@@ -49,7 +48,7 @@ class Copy(fragment: FolderFragment,
             val sourceUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, sourceDocId)
             val mimeType = mActivity.contentResolver.getType(sourceUri)
             if (mimeType != null && Utils.isDirectory(mimeType)) {
-                Utils.showPopup(mFragment, "Folder copy not supported") {
+                UI.showPopup(mFragment, "Folder copy not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
                 }
                 return
@@ -57,7 +56,7 @@ class Copy(fragment: FolderFragment,
             mReceiver.setActionState("copy", "sourceUri", sourceUri.toString())
             mReceiver.setActionState("copy", "sourceDocId", sourceDocId)
             mReceiver.setActionState("copy", "sourceFragmentDocId", mFragmentDocId)
-            Utils.showStatus(mBinding.status, "Copying", mFragmentDocId, sourceDocId)
+            UI.showStatus(mBinding.status, "Copying", mFragmentDocId, sourceDocId)
             mBinding.close.setOnClickListener { finish() }
             return
         } else {
@@ -80,7 +79,7 @@ class Copy(fragment: FolderFragment,
                 mFragment.observeCurrent(mFragmentDocId)
                 return
             } catch(e: Exception) {
-                Utils.showPopup(mFragment, "Error copying file") {
+                UI.showPopup(mFragment, "Error copying file") {
                     finish()
                 }
                 isError = true
@@ -97,16 +96,14 @@ class Copy(fragment: FolderFragment,
         // Only need to validate if user hasn't yet selected a file to copy
         if (sourceUri == null) {
             if (mSelection.size() == 0) {
-                Utils.showPopup(mFragment, "Select a file to copy") {
+                UI.showPopup(mFragment, "Select a file to copy") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
-                    mCallback()
                 }
                 return false
             }
             if (mSelection.size() > 1) {
-                Utils.showPopup(mFragment, "Multi-file copy is not supported") {
+                UI.showPopup(mFragment, "Multi-file copy is not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_copy)
-                    mCallback()
                 }
                 return false
             }
@@ -118,7 +115,7 @@ class Copy(fragment: FolderFragment,
         mFragment.currentAction = null
         mBinding.toggleGroup.uncheck(R.id.action_copy)
         mBinding.close.setOnClickListener(null)
-        Utils.cleanStatus(mBinding.status)
+        UI.cleanStatus(mBinding.status)
         mReceiver.setActionState("copy", "sourceUri", null)
         mReceiver.setActionState("copy", "sourceDocId", null)
         mReceiver.setActionState("copy", "sourceFragmentDocId", null)

@@ -34,12 +34,12 @@ class CreateFile(fragment: FolderFragment,
         mFragment.currentAction = "createFile"
 
         val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, mFragmentDocId)
-        Utils.showPrompt(mFragment,
+        UI.showPrompt(mFragment,
             // onSubmit()
             fun(editText) {
                 val filename = editText.text.trim().toString()
                 if (filename == "") {
-                    Utils.showPopup(mFragment, "Filename is empty") {
+                    UI.showPopup(mFragment, "Filename is empty") {
                         Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_file) })
                     }
                     finish()

@@ -62,7 +62,6 @@ class Move(fragment: FolderFragment,
             mReceiver.setActionState("move","sourceDocId", null)
             mReceiver.setActionState("move","sourceParentUri", null)
             mReceiver.setActionState("move","sourceParentDocId", null)
-            mCallback()
             return
         }
     }
@@ -72,16 +71,14 @@ class Move(fragment: FolderFragment,
         // Only need to validate if user hasn't yet selected a file to move
         if (sourceUri == null) {
             if (mSelection.size() == 0) {
-                Utils.showPopup(mFragment, "Select a file to move") {
+                UI.showPopup(mFragment, "Select a file to move") {
                     mBinding.toggleGroup.uncheck(R.id.action_move)
-                    mCallback()
                 }
                 return false
             }
             if (mSelection.size() > 1) {
-                Utils.showPopup(mFragment, "Multi-file move is not supported") {
+                UI.showPopup(mFragment, "Multi-file move is not supported") {
                     mBinding.toggleGroup.uncheck(R.id.action_move)
-                    mCallback()
                 }
                 return false
             }

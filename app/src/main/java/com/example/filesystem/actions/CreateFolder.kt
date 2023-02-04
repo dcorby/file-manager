@@ -25,12 +25,12 @@ class CreateFolder(fragment: FolderFragment,
     override fun handle() {
         mFragment.currentAction = "createFolder"
 
-        Utils.showPrompt(mFragment,
+        UI.showPrompt(mFragment,
             fun(editText) {
                 // onSubmit()
                 val filename = editText.text.trim().toString()
                 if (filename == "") {
-                    Utils.showPopup(mFragment, "Folder name is empty") {
+                    UI.showPopup(mFragment, "Folder name is empty") {
                         Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_create_folder) })
                     }
                     return

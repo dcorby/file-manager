@@ -53,16 +53,14 @@ class Delete(fragment: FolderFragment,
 
     private fun validate() : Boolean {
         if (mSelection.size() == 0) {
-            Utils.showPopup(mFragment, "Select a file to delete") {
+            UI.showPopup(mFragment, "Select a file to delete") {
                 mBinding.toggleGroup.uncheck(R.id.action_delete)
-                mCallback()
             }
             return false
         }
         if (mSelection.size() > 1) {
-            Utils.showPopup(mFragment, "Multi-file delete is not supported") {
+            UI.showPopup(mFragment, "Multi-file delete is not supported") {
                 mBinding.toggleGroup.uncheck(R.id.action_delete)
-                mCallback()
             }
             return false
         }
