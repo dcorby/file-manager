@@ -1,6 +1,8 @@
 package com.example.filesystem
 
 import android.os.Bundle
+import android.os.PersistableBundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -17,6 +19,7 @@ class MainActivity : AppCompatActivity(), MainReceiver {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var mimeTypes: Map<String, *>
+    private var currentAction: String? = null
     private var actionStates: HashMap<String, HashMap<String, String?>> = hashMapOf(
         "copy" to HashMap(),
         "createFile" to HashMap(),
@@ -84,20 +87,26 @@ class MainActivity : AppCompatActivity(), MainReceiver {
                 || super.onSupportNavigateUp()
     }
 
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    + THIS INTERFACE NEEDS TO MANAGE ALL DATA INCL. CURRENTACTION, ETC.    +
-    + add currentAction, and get/setCurrentAction                          +
-    + OR USE VIEW MODEL??                                                  +
-    + https://developer.android.com/reference/androidx/lifecycle/ViewModel +
-    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //+ THIS INTERFACE NEEDS TO MANAGE ALL DATA INCL. CURRENTACTION, ETC.    +
+    //+ add currentAction, and get/setCurrentAction                          +
+    //+ OR USE VIEW MODEL??                                                  +
+    //+ https://developer.android.com/reference/androidx/lifecycle/ViewModel +
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     // Interface methods
+    override fun getCurrentAction(): String? {
+        return currentAction
+    }
     override fun getActionState(action: String): HashMap<String, String> {
         return actionStates[action]!! as HashMap<String, String>
         // ^ fix for kotlin.collections/java.util issue
     }
     override fun getActionState(action: String, key: String): String? {
         return actionStates[action]!![key]
+    }
+    override fun setCurrentAction(action: String?) {
+        currentAction = action
     }
     override fun setActionState(action: String, key: String, value: String?) {
         actionStates[action]!![key] = value
@@ -107,6 +116,25 @@ class MainActivity : AppCompatActivity(), MainReceiver {
             return mimeTypes[key] as String
         }
         return "application/octet-stream"
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        if (savedInstanceState.getString("currentAction") != null) {
+            currentAction = savedInstanceState.getString("currentAction")!!
+            val actionState = savedInstanceState.getSerializable(currentAction) as HashMap<String, String>
+            for ((key, value) in actionState) {
+                setActionState(currentAction!!, key, value)
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (currentAction != null) {
+            outState.putString("currentAction", currentAction)
+            outState.putSerializable(currentAction, getActionState(currentAction!!))
+        }
     }
 }
 

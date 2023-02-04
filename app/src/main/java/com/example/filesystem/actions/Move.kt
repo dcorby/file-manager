@@ -34,7 +34,8 @@ class Move(fragment: FolderFragment,
             return
         }
         mFragment.actions["copy"]?.finish()
-        mFragment.currentAction = "move"
+        //mFragment.currentAction = "move"
+        mReceiver.setCurrentAction("move")
 
         val sourceUri = mReceiver.getActionState("move", "sourceUri")
         if (sourceUri == null) {
@@ -103,8 +104,12 @@ class Move(fragment: FolderFragment,
     }
 
     override fun finish() {
-        if (mFragment.currentAction == "move") {
-            mFragment.currentAction = null
+        //if (mFragment.currentAction == "move") {
+        //    mFragment.currentAction = null
+
+        if (mReceiver.getCurrentAction() == "move") {
+            mReceiver.setCurrentAction(null)
+
             mBinding.toggleGroup.uncheck(R.id.action_move)
             mBinding.close.setOnClickListener(null)
             UI.cleanStatus(mBinding.status)

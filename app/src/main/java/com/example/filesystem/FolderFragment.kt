@@ -56,7 +56,7 @@ class FolderFragment : Fragment(), DialogCallback {
     lateinit var liveData: LiveData<MutableList<SanFile>>
     lateinit var receiver: MainReceiver
     lateinit var actions: kotlin.collections.HashMap<String, Action>
-    var currentAction: String? = null
+    //var currentAction: String? = null
 
     // popup and alert windows
     //lateinit var popup: PopupWindow
@@ -131,15 +131,8 @@ class FolderFragment : Fragment(), DialogCallback {
         binding.actionMove.setOnClickListener { actions["move"]?.handle(true) }
         binding.actionDelete.setOnClickListener { actions["delete"]?.handle(true) }
 
-        if (savedInstanceState != null) {
-            if (savedInstanceState.getString("currentAction") != null) {
-                currentAction = savedInstanceState.getString("currentAction")!!
-                val actionState = savedInstanceState.getSerializable(currentAction) as HashMap<String, String>
-                for ((key, value) in actionState) {
-                    receiver.setActionState(currentAction!!, key, value)
-                }
-                actions[currentAction]?.handle(false)
-            }
+        if (receiver.getCurrentAction() != null) {
+            actions[receiver.getCurrentAction()]?.handle(false)
         }
     }
 
@@ -237,10 +230,10 @@ class FolderFragment : Fragment(), DialogCallback {
             tracker.onSaveInstanceState(outState)
         }
         // Save ActionState data
-        if (currentAction != null) {
-            outState.putString("currentAction", currentAction)
-            outState.putSerializable(currentAction, receiver.getActionState(currentAction!!))
-        }
+        //if (currentAction != null) {
+        //    outState.putString("currentAction", currentAction)
+        //    outState.putSerializable(currentAction, receiver.getActionState(currentAction!!))
+        //}
     }
 
     fun getPopupWindow(type: String) : PopupWindow {
@@ -275,15 +268,18 @@ class FolderFragment : Fragment(), DialogCallback {
     override fun onDialogClickYes(uri: Uri) {
         DocumentsContract.deleteDocument(this.requireActivity().contentResolver, uri)
         Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-        currentAction = null
+        //currentAction = null
+        receiver.setCurrentAction(null)
         observeCurrent(fragmentDocId)
     }
     override fun onDialogClickNo() {
         Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-        currentAction = null
+        //currentAction = null
+        receiver.setCurrentAction(null)
     }
     override fun onDismiss() {
         Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-        currentAction = null
+        //currentAction = null
+        receiver.setCurrentAction(null)
     }
 }

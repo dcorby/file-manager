@@ -34,8 +34,10 @@ class Open(fragment: FolderFragment,
         if (!validate()) {
             return
         }
-        mPreviousAction = mFragment.currentAction
-        mFragment.currentAction = "open"
+        //mPreviousAction = mFragment.currentAction
+        //mFragment.currentAction = "open"
+        mPreviousAction = mReceiver.getCurrentAction()
+        mReceiver.setCurrentAction("open")
 
         val docId = mSelection.toList()[0]
         val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)
@@ -47,9 +49,9 @@ class Open(fragment: FolderFragment,
             val bundle = Bundle()
             bundle.putString("fragmentUri", Utils.decode(docTreeUri.toString()))
             bundle.putString("fragmentDocId", docId)
-            +++++++++++++++++++++++++++++++++++
-            + NEED TO SEND CURRENTACTION HERE +
-            +++++++++++++++++++++++++++++++++++
+            //+++++++++++++++++++++++++++++++++++
+            //+ NEED TO SEND CURRENTACTION HERE +
+            //+++++++++++++++++++++++++++++++++++
             navController.navigate(R.id.action_FolderFragment_to_FolderFragment, bundle)
         } else {
             // File
@@ -82,6 +84,7 @@ class Open(fragment: FolderFragment,
 
     override fun finish() {
         mBinding.toggleGroup.uncheck(R.id.action_open)
-        mFragment.currentAction = mPreviousAction
+        //mFragment.currentAction = mPreviousAction
+        mReceiver.setCurrentAction(mPreviousAction)
     }
 }

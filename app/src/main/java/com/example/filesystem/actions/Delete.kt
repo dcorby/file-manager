@@ -28,7 +28,8 @@ class Delete(fragment: FolderFragment,
         if (!validate()) {
             return
         }
-        mFragment.currentAction = "delete"
+        //mFragment.currentAction = "delete"
+        mReceiver.setCurrentAction("delete")
 
         val docId = mSelection.toList()[0]
         val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)

@@ -26,7 +26,8 @@ class Rename(fragment: FolderFragment,
         if (!validate()) {
             return
         }
-        mFragment.currentAction = "rename"
+        //mFragment.currentAction = "rename"
+        mReceiver.setCurrentAction("rename")
 
         UI.showPrompt(mFragment,
             fun(editText) {
@@ -66,6 +67,7 @@ class Rename(fragment: FolderFragment,
     }
 
     override fun finish() {
-        mFragment.currentAction = null
+        //mFragment.currentAction = null
+        mReceiver.setCurrentAction(null)
     }
 }
