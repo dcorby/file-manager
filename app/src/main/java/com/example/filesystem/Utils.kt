@@ -45,7 +45,7 @@ class Utils {
                             if (name.contains(".")) {
                                 ext = name.substring(name.lastIndexOf(".") + 1)    
                             }
-                            val sanFile: SanFile = SanFile(docId=docId, directory=uri.toString(), name=name, isDir=isDir, ext=ext)
+                            val sanFile = SanFile(docId=docId, directory=uri.toString(), name=name, isDir=isDir, ext=ext)
                             children.add(sanFile)
                         }
                     } finally {
@@ -53,7 +53,7 @@ class Utils {
                     }
                 }
             }
-            return children.toMutableList()
+            return children.sortedBy { it.name }.toMutableList()
         }
 
         // Check if the mime type is a directory

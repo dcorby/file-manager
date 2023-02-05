@@ -117,11 +117,8 @@ class Copy(fragment: FolderFragment,
     }
 
     override fun finish() {
-        //if (mFragment.currentAction == "copy") {
-            //mFragment.currentAction = null
         if (mReceiver.getCurrentAction() == "copy") {
             mReceiver.setCurrentAction(null)
-
             mBinding.toggleGroup.uncheck(R.id.action_copy)
             mBinding.close.setOnClickListener(null)
             UI.cleanStatus(mBinding.status)

@@ -1,7 +1,7 @@
 package com.example.filesystem
 
+import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -13,6 +13,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import com.example.filesystem.databinding.ActivityMainBinding
 import org.json.JSONObject
+
 
 class MainActivity : AppCompatActivity(), MainReceiver {
 
@@ -106,6 +107,7 @@ class MainActivity : AppCompatActivity(), MainReceiver {
         return actionStates[action]!![key]
     }
     override fun setCurrentAction(action: String?) {
+        Log.v("TEST", "setting currentAction=$action")
         currentAction = action
     }
     override fun setActionState(action: String, key: String, value: String?) {
@@ -118,21 +120,35 @@ class MainActivity : AppCompatActivity(), MainReceiver {
         return "application/octet-stream"
     }
 
+
+    // https://stackoverflow.com/questions/40237415/how-to-get-callback-from-activity-back-to-fragment-using-interface
+    // In FolderFragment, we need to wait for activity onSaveInstanceState. Create a listener.
+    private var listener: StateRestoredListener? = null
+    interface StateRestoredListener {
+        fun onStateRestored()
+    }
+
+    fun setStateRestoredListener(listener: StateRestoredListener) {
+        this.listener = listener
+    }
+
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        if (savedInstanceState.getString("currentAction") != null) {
-            currentAction = savedInstanceState.getString("currentAction")!!
+        currentAction = savedInstanceState.getString("currentAction", null)
+        if (currentAction != null) {
             val actionState = savedInstanceState.getSerializable(currentAction) as HashMap<String, String>
             for ((key, value) in actionState) {
                 setActionState(currentAction!!, key, value)
             }
         }
+        listener?.onStateRestored()
     }
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        outState.putString("currentAction", currentAction)
         if (currentAction != null) {
-            outState.putString("currentAction", currentAction)
             outState.putSerializable(currentAction, getActionState(currentAction!!))
         }
     }

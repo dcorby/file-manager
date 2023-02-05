@@ -28,7 +28,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.actions.*
 import com.example.filesystem.databinding.FragmentFolderBinding
 import java.util.*
-import kotlin.collections.HashMap
 
 const val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
 const val AUTHORITY = "com.android.externalstorage.documents"
@@ -43,7 +42,7 @@ interface DialogCallback {
     fun onDismiss()
 }
 
-class FolderFragment : Fragment(), DialogCallback {
+class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredListener {
 
     private var _binding: FragmentFolderBinding? = null
     private val binding get() = _binding!!
@@ -56,14 +55,11 @@ class FolderFragment : Fragment(), DialogCallback {
     lateinit var liveData: LiveData<MutableList<SanFile>>
     lateinit var receiver: MainReceiver
     lateinit var actions: kotlin.collections.HashMap<String, Action>
-    //var currentAction: String? = null
+    private var stateRestored = false
 
-    // popup and alert windows
-    //lateinit var popup: PopupWindow
-    //lateinit var prompt: PopupWindow
+    // popup windows
     private var popup: PopupWindow? = null
     private var prompt: PopupWindow? = null
-    //lateinit var dialog: MyDialogFragment
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,6 +72,8 @@ class FolderFragment : Fragment(), DialogCallback {
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        (requireActivity() as MainActivity).setStateRestoredListener(this)
 
         sanFilesAdapter = SanFilesAdapter { sanFile -> adapterOnClick(sanFile) }
         val recyclerView: RecyclerView = binding.recyclerView
@@ -130,10 +128,20 @@ class FolderFragment : Fragment(), DialogCallback {
         binding.actionCopy.setOnClickListener { actions["copy"]?.handle(true) }
         binding.actionMove.setOnClickListener { actions["move"]?.handle(true) }
         binding.actionDelete.setOnClickListener { actions["delete"]?.handle(true) }
+        restoreState()
+    }
 
-        if (receiver.getCurrentAction() != null) {
-            actions[receiver.getCurrentAction()]?.handle(false)
+    private fun restoreState() {
+        if (!stateRestored) {
+            if (receiver.getCurrentAction() != null) {
+                stateRestored = true
+                actions[receiver.getCurrentAction()]?.handle(false)
+            }
         }
+    }
+
+    override fun onStateRestored() {
+        restoreState()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -182,11 +190,9 @@ class FolderFragment : Fragment(), DialogCallback {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        //if (this::prompt!!.isInitialized && prompt.isShowing) {
         if (prompt != null && prompt!!.isShowing) {
             prompt!!.dismiss()
         }
-        //if (this::popup.isInitialized && popup.isShowing) {
         if (popup != null && popup!!.isShowing) {
             popup!!.dismiss()
         }
@@ -229,11 +235,6 @@ class FolderFragment : Fragment(), DialogCallback {
         if (this::tracker.isInitialized) {
             tracker.onSaveInstanceState(outState)
         }
-        // Save ActionState data
-        //if (currentAction != null) {
-        //    outState.putString("currentAction", currentAction)
-        //    outState.putSerializable(currentAction, receiver.getActionState(currentAction!!))
-        //}
     }
 
     fun getPopupWindow(type: String) : PopupWindow {

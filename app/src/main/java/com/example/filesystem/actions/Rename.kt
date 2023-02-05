@@ -2,6 +2,7 @@ package com.example.filesystem.actions
 
 import android.net.Uri
 import android.provider.DocumentsContract
+import android.util.Log
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.*
 import com.example.filesystem.databinding.FragmentFolderBinding
@@ -23,11 +24,13 @@ class Rename(fragment: FolderFragment,
     private var mCallback = callback
 
     override fun handle(isClick: Boolean) {
+        Log.v("TEST", "called Rename.handle(), pre-validation")
         if (!validate()) {
             return
         }
-        //mFragment.currentAction = "rename"
         mReceiver.setCurrentAction("rename")
+
+        Log.v("TEST", "called Rename.handle(), validated")
 
         UI.showPrompt(mFragment,
             fun(editText) {
@@ -67,7 +70,6 @@ class Rename(fragment: FolderFragment,
     }
 
     override fun finish() {
-        //mFragment.currentAction = null
         mReceiver.setCurrentAction(null)
     }
 }

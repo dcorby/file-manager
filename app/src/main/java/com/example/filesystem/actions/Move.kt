@@ -104,12 +104,8 @@ class Move(fragment: FolderFragment,
     }
 
     override fun finish() {
-        //if (mFragment.currentAction == "move") {
-        //    mFragment.currentAction = null
-
         if (mReceiver.getCurrentAction() == "move") {
             mReceiver.setCurrentAction(null)
-
             mBinding.toggleGroup.uncheck(R.id.action_move)
             mBinding.close.setOnClickListener(null)
             UI.cleanStatus(mBinding.status)
