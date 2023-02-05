@@ -5,12 +5,12 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.DialogFragment
 
 // https://lukeneedham.medium.com/listeners-in-dialogfragments-be636bd7f480
 // https://stackoverflow.com/questions/64869501/how-to-replace-settargetfragment-now-that-it-is-deprecated
 class MyDialogFragment : DialogFragment() {
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         val uriStr = requireArguments().getString("uri")
@@ -27,7 +27,14 @@ class MyDialogFragment : DialogFragment() {
             val callback = targetFragment as? DialogCallback
             callback?.onDialogClickNo()
         })
+
         return builder.create()
+    }
+
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
+        val callback = targetFragment as? DialogCallback
+        callback?.onCancel()
     }
 
     override fun onDismiss(dialog: DialogInterface) {

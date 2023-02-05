@@ -3,6 +3,7 @@ package com.example.filesystem
 import android.content.Context
 import android.os.Handler
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -10,6 +11,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.children
 import com.example.filesystem.databinding.FragmentFolderBinding
 
 class UI {
@@ -113,6 +115,31 @@ class UI {
                 val text = layout.findViewById(R.id.text) as TextView
                 text.text = ""
                 layout.visibility = View.GONE
+            }
+        }
+
+        fun setPath(binding: FragmentFolderBinding, layoutInflater: LayoutInflater, fragmentDocId: String) {
+            val pathParts = Utils.getPathPartsFromDocId(fragmentDocId)
+            binding.pathParts.removeAllViews()
+            for (pathPart in pathParts) {
+                val textView = layoutInflater.inflate(R.layout.path_part, null) as TextView
+                textView.text = pathPart
+                val params: LinearLayout.LayoutParams = LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT)
+                textView.setLayoutParams(params)
+                binding.pathParts.addView(textView)
+            }
+        }
+
+        fun setPathOnClick(binding: FragmentFolderBinding, receiver: MainReceiver, callback: (() -> Unit)) {
+            val pathParts = listOf(binding.home) + binding.pathParts.children
+            for ((index, view) in pathParts.withIndex()) {
+                view.tag = index
+                view.setOnClickListener {
+                    receiver.setBackStackPopCount(pathParts.size - 1 - it.tag as Int)
+                    callback()
+                }
             }
         }
     }

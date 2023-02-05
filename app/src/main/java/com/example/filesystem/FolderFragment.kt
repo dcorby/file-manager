@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
+import androidx.core.view.children
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -27,6 +28,7 @@ import androidx.recyclerview.selection.StorageStrategy
 import androidx.recyclerview.widget.RecyclerView
 import com.example.filesystem.actions.*
 import com.example.filesystem.databinding.FragmentFolderBinding
+import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
 
 const val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
@@ -39,6 +41,7 @@ const val AUTHORITY = "com.android.externalstorage.documents"
 interface DialogCallback {
     fun onDialogClickYes(uri: Uri)
     fun onDialogClickNo()
+    fun onCancel()
     fun onDismiss()
 }
 
@@ -55,11 +58,14 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
     lateinit var liveData: LiveData<MutableList<SanFile>>
     lateinit var receiver: MainReceiver
     lateinit var actions: kotlin.collections.HashMap<String, Action>
+
+    private var viewCreated = false
     private var stateRestored = false
 
     // popup windows
     private var popup: PopupWindow? = null
     private var prompt: PopupWindow? = null
+    private var dialogCancelled: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -72,6 +78,8 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        checkBackStackToPop()
 
         (requireActivity() as MainActivity).setStateRestoredListener(this)
 
@@ -105,18 +113,8 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
             UI.handleActiveMove(receiver, binding)
         }
 
-        // Set the path parts
-        val pathParts = Utils.getPathPartsFromDocId(fragmentDocId)
-        binding.pathParts.removeAllViews()
-        for (pathPart in pathParts) {
-            val textView = layoutInflater.inflate(R.layout.path_part, null) as TextView
-            textView.text = pathPart
-            val params: LinearLayout.LayoutParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.MATCH_PARENT)
-            textView.setLayoutParams(params)
-            binding.pathParts.addView(textView)
-        }
+        UI.setPath(binding, layoutInflater, fragmentDocId)
+        UI.setPathOnClick(binding, receiver) { checkBackStackToPop() }
 
         // Actions
         fun callback() {}
@@ -128,20 +126,28 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
         binding.actionCopy.setOnClickListener { actions["copy"]?.handle(true) }
         binding.actionMove.setOnClickListener { actions["move"]?.handle(true) }
         binding.actionDelete.setOnClickListener { actions["delete"]?.handle(true) }
-        restoreState()
+        viewCreated = true
+        callAction()
     }
 
-    private fun restoreState() {
-        if (!stateRestored) {
+    private fun checkBackStackToPop() {
+        if (receiver.getBackStackPopCount() > 0) {
+            receiver.setBackStackPopCount(receiver.getBackStackPopCount() - 1)
+            this.parentFragmentManager.popBackStack()
+        }
+    }
+
+    private fun callAction() {
+        if (viewCreated && stateRestored) {
             if (receiver.getCurrentAction() != null) {
-                stateRestored = true
                 actions[receiver.getCurrentAction()]?.handle(false)
             }
         }
     }
 
     override fun onStateRestored() {
-        restoreState()
+        stateRestored = true
+        callAction()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -274,8 +280,15 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
     override fun onDialogClickNo() {
         actions["delete"]?.finish()
     }
+    // Need to know whether the dialog has been dismissed by click (which will cancel first), or activity destroy
+    override fun onCancel() {
+        dialogCancelled = true
+    }
     override fun onDismiss() {
-        Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-        receiver.setCurrentAction(null)
+        if (dialogCancelled) {
+            Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
+            receiver.setCurrentAction(null)
+        }
+        dialogCancelled = false
     }
 }

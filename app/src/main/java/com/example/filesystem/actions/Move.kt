@@ -114,9 +114,5 @@ class Move(fragment: FolderFragment,
         mReceiver.setActionState("move", "sourceDocId", null)
         mReceiver.setActionState("move", "sourceParentUri", null)
         mReceiver.setActionState("move", "sourceParentDocId", null)
-
-        //if (mReceiver.getActionState("copy", "sourceUri") != null) {
-        //    mReceiver.setCurrentAction("copy")
-        //}
     }
 }

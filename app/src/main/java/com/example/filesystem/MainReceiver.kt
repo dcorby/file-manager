@@ -7,4 +7,6 @@ interface MainReceiver {
     fun setCurrentAction(action: String?)
     fun setActionState(action: String, key: String, value: String?)
     fun getMimeType(key: String): String
+    fun getBackStackPopCount(): Int
+    fun setBackStackPopCount(count: Int)
 }

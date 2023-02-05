@@ -43,6 +43,7 @@
                     android:background="@drawable/ic_baseline_home_24">
                 </ImageView>
                 <TextView
+                    android:id="@+id/home"
                     android:paddingLeft="5dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.DocumentsContract
+import android.util.Log
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.*
 import com.example.filesystem.databinding.FragmentFolderBinding

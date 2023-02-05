@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity(), MainReceiver {
         "open" to HashMap(),
         "rename" to HashMap()
     )
+    private var backStackPopCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,6 +109,13 @@ class MainActivity : AppCompatActivity(), MainReceiver {
             return mimeTypes[key] as String
         }
         return "application/octet-stream"
+    }
+
+    override fun getBackStackPopCount(): Int {
+        return backStackPopCount
+    }
+    override fun setBackStackPopCount(count: Int) {
+        backStackPopCount = count
     }
 
     // https://stackoverflow.com/questions/40237415/how-to-get-callback-from-activity-back-to-fragment-using-interface
