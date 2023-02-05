@@ -23,7 +23,6 @@ class CreateFolder(fragment: FolderFragment,
     private var mCallback = callback
 
     override fun handle(isClick: Boolean) {
-        //mFragment.currentAction = "createFolder"
         mReceiver.setCurrentAction("createFolder")
 
         UI.showPrompt(mFragment,
@@ -57,7 +56,6 @@ class CreateFolder(fragment: FolderFragment,
     }
 
     override fun finish() {
-        //mFragment.currentAction = null
         mReceiver.setCurrentAction(null)
     }
 }

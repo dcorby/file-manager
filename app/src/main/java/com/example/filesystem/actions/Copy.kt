@@ -37,11 +37,11 @@ class Copy(fragment: FolderFragment,
     private var mCallback = callback
 
     override fun handle(isClick: Boolean) {
+        mReceiver.setCurrentAction("copy")
         if (!validate()) {
             return
         }
         mFragment.actions["move"]?.finish()
-        //mFragment.currentAction = "copy"
         mReceiver.setCurrentAction("copy")
 
         val sourceUri = mReceiver.getActionState("copy", "sourceUri")
@@ -59,7 +59,7 @@ class Copy(fragment: FolderFragment,
             mReceiver.setActionState("copy", "sourceUri", sourceUri.toString())
             mReceiver.setActionState("copy", "sourceDocId", sourceDocId)
             mReceiver.setActionState("copy", "sourceFragmentDocId", mFragmentDocId)
-            UI.showStatus(mBinding.status, "Copying", mFragmentDocId, sourceDocId)
+            UI.showStatus(mBinding.status, "Copying", mFragmentDocId, sourceDocId, "copy")
             mBinding.close.setOnClickListener { finish() }
         } else {
             if (!isClick) {
@@ -102,13 +102,13 @@ class Copy(fragment: FolderFragment,
         if (sourceUri == null) {
             if (mSelection.size() == 0) {
                 UI.showPopup(mFragment, "Select a file to copy") {
-                    mBinding.toggleGroup.uncheck(R.id.action_copy)
+                    finish()
                 }
                 return false
             }
             if (mSelection.size() > 1) {
                 UI.showPopup(mFragment, "Multi-file copy is not supported") {
-                    mBinding.toggleGroup.uncheck(R.id.action_copy)
+                    finish()
                 }
                 return false
             }
@@ -117,14 +117,18 @@ class Copy(fragment: FolderFragment,
     }
 
     override fun finish() {
-        if (mReceiver.getCurrentAction() == "copy") {
-            mReceiver.setCurrentAction(null)
-            mBinding.toggleGroup.uncheck(R.id.action_copy)
+        mReceiver.setCurrentAction(null)
+        mBinding.toggleGroup.uncheck(R.id.action_copy)
+        if (mBinding.status.tag == "copy") {
             mBinding.close.setOnClickListener(null)
-            UI.cleanStatus(mBinding.status)
-            mReceiver.setActionState("copy", "sourceUri", null)
-            mReceiver.setActionState("copy", "sourceDocId", null)
-            mReceiver.setActionState("copy", "sourceFragmentDocId", null)
         }
+        UI.cleanStatus(mBinding.status, "copy")
+        mReceiver.setActionState("copy", "sourceUri", null)
+        mReceiver.setActionState("copy", "sourceDocId", null)
+        mReceiver.setActionState("copy", "sourceFragmentDocId", null)
+
+        //if (mReceiver.getActionState("move", "sourceUri") != null) {
+        //    mReceiver.setCurrentAction("move")
+        //}
     }
 }

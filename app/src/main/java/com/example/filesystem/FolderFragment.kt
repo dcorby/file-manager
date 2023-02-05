@@ -268,19 +268,14 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
     // Delete callbacks
     override fun onDialogClickYes(uri: Uri) {
         DocumentsContract.deleteDocument(this.requireActivity().contentResolver, uri)
-        Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-        //currentAction = null
-        receiver.setCurrentAction(null)
+        actions["delete"]?.finish()
         observeCurrent(fragmentDocId)
     }
     override fun onDialogClickNo() {
-        Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-        //currentAction = null
-        receiver.setCurrentAction(null)
+        actions["delete"]?.finish()
     }
     override fun onDismiss() {
         Utils.withDelay({ binding.toggleGroup.uncheck(R.id.action_delete) })
-        //currentAction = null
         receiver.setCurrentAction(null)
     }
 }

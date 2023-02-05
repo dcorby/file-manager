@@ -19,9 +19,9 @@ class UI {
                 binding.toggleGroup.check(R.id.action_copy)
                 val sourceFragmentDocId = receiver.getActionState("copy", "sourceFragmentDocId")!!
                 val sourceDocId = receiver.getActionState("copy", "sourceDocId")!!
-                showStatus(binding.status, "Copying", sourceFragmentDocId, sourceDocId)
+                showStatus(binding.status, "Copying", sourceFragmentDocId, sourceDocId, "copy")
             } else {
-                binding.toggleGroup.uncheck(R.id.action_copy)
+                //binding.toggleGroup.uncheck(R.id.action_copy)
             }
         }
 
@@ -30,9 +30,9 @@ class UI {
                 binding.toggleGroup.check(R.id.action_move)
                 val sourceFragmentDocId = receiver.getActionState("move", "sourceFragmentDocId")!!
                 val sourceDocId = receiver.getActionState("move", "sourceDocId")!!
-                showStatus(binding.status, "Moving", sourceFragmentDocId, sourceDocId)
+                showStatus(binding.status, "Moving", sourceFragmentDocId, sourceDocId, "move")
             } else {
-                binding.toggleGroup.uncheck(R.id.action_move)
+                //binding.toggleGroup.uncheck(R.id.action_move)
             }
         }
 
@@ -97,20 +97,23 @@ class UI {
             }
         }
 
-        fun showStatus(layout: LinearLayout, prefix: String, fragmentDocId: String, sourceDocId: String) {
-            cleanStatus(layout)
+        fun showStatus(layout: LinearLayout, prefix: String, fragmentDocId: String, sourceDocId: String, tag: String) {
+            cleanStatus(layout, tag)
             val pathParts = Utils.getPathPartsFromDocId(fragmentDocId)
             val filename = Utils.getFilenameFromDocId(sourceDocId)
             val status = "${prefix}: ${(listOf("Home") + pathParts).joinToString("/")}/${filename}"
             val text = layout.findViewById(R.id.text) as TextView
             text.text = status
             layout.visibility = View.VISIBLE
+            layout.tag = tag
         }
 
-        fun cleanStatus(layout: LinearLayout) {
-            val text = layout.findViewById(R.id.text) as TextView
-            text.text = ""
-            layout.visibility = View.GONE
+        fun cleanStatus(layout: LinearLayout, tag: String?) {
+            if (tag == null || layout.tag == tag) {
+                val text = layout.findViewById(R.id.text) as TextView
+                text.text = ""
+                layout.visibility = View.GONE
+            }
         }
     }
 }

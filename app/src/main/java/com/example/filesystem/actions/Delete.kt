@@ -25,11 +25,10 @@ class Delete(fragment: FolderFragment,
     private var mCallback = callback
 
     override fun handle(isClick: Boolean) {
+        mReceiver.setCurrentAction("delete")
         if (!validate()) {
             return
         }
-        //mFragment.currentAction = "delete"
-        mReceiver.setCurrentAction("delete")
 
         val docId = mSelection.toList()[0]
         val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)
@@ -55,13 +54,13 @@ class Delete(fragment: FolderFragment,
     private fun validate() : Boolean {
         if (mSelection.size() == 0) {
             UI.showPopup(mFragment, "Select a file to delete") {
-                mBinding.toggleGroup.uncheck(R.id.action_delete)
+                finish()
             }
             return false
         }
         if (mSelection.size() > 1) {
             UI.showPopup(mFragment, "Multi-file delete is not supported") {
-                mBinding.toggleGroup.uncheck(R.id.action_delete)
+                finish()
             }
             return false
         }
@@ -69,6 +68,7 @@ class Delete(fragment: FolderFragment,
     }
 
     override fun finish() {
-
+        mBinding.toggleGroup.uncheck(R.id.action_delete)
+        mReceiver.setCurrentAction(null)
     }
 }

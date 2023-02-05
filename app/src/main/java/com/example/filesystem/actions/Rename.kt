@@ -24,13 +24,10 @@ class Rename(fragment: FolderFragment,
     private var mCallback = callback
 
     override fun handle(isClick: Boolean) {
-        Log.v("TEST", "called Rename.handle(), pre-validation")
+        mReceiver.setCurrentAction("rename")
         if (!validate()) {
             return
         }
-        mReceiver.setCurrentAction("rename")
-
-        Log.v("TEST", "called Rename.handle(), validated")
 
         UI.showPrompt(mFragment,
             fun(editText) {
@@ -56,13 +53,13 @@ class Rename(fragment: FolderFragment,
     private fun validate() : Boolean {
         if (mSelection.size() == 0) {
             UI.showPopup(mFragment, "Select a file to rename") {
-                mBinding.toggleGroup.uncheck(R.id.action_rename)
+                finish()
             }
             return false
         }
         if (mSelection.size() > 1) {
             UI.showPopup(mFragment, "Only one file may be selected for rename") {
-                mBinding.toggleGroup.uncheck(R.id.action_rename)
+                finish()
             }
             return false
         }
@@ -70,6 +67,7 @@ class Rename(fragment: FolderFragment,
     }
 
     override fun finish() {
+        mBinding.toggleGroup.uncheck(R.id.action_rename)
         mReceiver.setCurrentAction(null)
     }
 }

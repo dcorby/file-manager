@@ -1,6 +1,5 @@
 package com.example.filesystem
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -13,7 +12,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import com.example.filesystem.databinding.ActivityMainBinding
 import org.json.JSONObject
-
 
 class MainActivity : AppCompatActivity(), MainReceiver {
 
@@ -88,30 +86,22 @@ class MainActivity : AppCompatActivity(), MainReceiver {
                 || super.onSupportNavigateUp()
     }
 
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    //+ THIS INTERFACE NEEDS TO MANAGE ALL DATA INCL. CURRENTACTION, ETC.    +
-    //+ add currentAction, and get/setCurrentAction                          +
-    //+ OR USE VIEW MODEL??                                                  +
-    //+ https://developer.android.com/reference/androidx/lifecycle/ViewModel +
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
     // Interface methods
     override fun getCurrentAction(): String? {
         return currentAction
     }
     override fun getActionState(action: String): HashMap<String, String> {
-        return actionStates[action]!! as HashMap<String, String>
+        return actionStates[action] as HashMap<String, String>
         // ^ fix for kotlin.collections/java.util issue
     }
     override fun getActionState(action: String, key: String): String? {
-        return actionStates[action]!![key]
+        return actionStates[action]?.get(key)
     }
     override fun setCurrentAction(action: String?) {
-        Log.v("TEST", "setting currentAction=$action")
         currentAction = action
     }
     override fun setActionState(action: String, key: String, value: String?) {
-        actionStates[action]!![key] = value
+        actionStates[action]?.set(key, value)
     }
     override fun getMimeType(key: String): String {
         if (mimeTypes.containsKey(key)) {
@@ -120,9 +110,9 @@ class MainActivity : AppCompatActivity(), MainReceiver {
         return "application/octet-stream"
     }
 
-
     // https://stackoverflow.com/questions/40237415/how-to-get-callback-from-activity-back-to-fragment-using-interface
     // In FolderFragment, we need to wait for activity onSaveInstanceState. Create a listener.
+    // Alternately, maybe explore using a ViewModel? https://developer.android.com/reference/androidx/lifecycle/ViewModel
     private var listener: StateRestoredListener? = null
     interface StateRestoredListener {
         fun onStateRestored()
@@ -143,7 +133,6 @@ class MainActivity : AppCompatActivity(), MainReceiver {
         }
         listener?.onStateRestored()
     }
-
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)

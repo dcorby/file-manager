@@ -30,11 +30,11 @@ class Move(fragment: FolderFragment,
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun handle(isClick: Boolean) {
+        mReceiver.setCurrentAction("move")
         if (!validate()) {
             return
         }
         mFragment.actions["copy"]?.finish()
-        //mFragment.currentAction = "move"
         mReceiver.setCurrentAction("move")
 
         val sourceUri = mReceiver.getActionState("move", "sourceUri")
@@ -46,7 +46,7 @@ class Move(fragment: FolderFragment,
             mReceiver.setActionState("move","sourceDocId", sourceDocId)
             mReceiver.setActionState("move","sourceFragmentUri", mFragmentUri.toString())
             mReceiver.setActionState("move","sourceFragmentDocId", mFragmentDocId)
-            UI.showStatus(mBinding.status, "Moving", mFragmentDocId, sourceDocId)
+            UI.showStatus(mBinding.status, "Moving", mFragmentDocId, sourceDocId, "move")
             mBinding.close.setOnClickListener { finish() }
         } else {
             if (!isClick) {
@@ -89,13 +89,13 @@ class Move(fragment: FolderFragment,
         if (sourceUri == null) {
             if (mSelection.size() == 0) {
                 UI.showPopup(mFragment, "Select a file to move") {
-                    mBinding.toggleGroup.uncheck(R.id.action_move)
+                    finish()
                 }
                 return false
             }
             if (mSelection.size() > 1) {
                 UI.showPopup(mFragment, "Multi-file move is not supported") {
-                    mBinding.toggleGroup.uncheck(R.id.action_move)
+                    finish()
                 }
                 return false
             }
@@ -104,15 +104,19 @@ class Move(fragment: FolderFragment,
     }
 
     override fun finish() {
-        if (mReceiver.getCurrentAction() == "move") {
-            mReceiver.setCurrentAction(null)
-            mBinding.toggleGroup.uncheck(R.id.action_move)
+        mReceiver.setCurrentAction(null)
+        mBinding.toggleGroup.uncheck(R.id.action_move)
+        if (mBinding.status.tag == "move") {
             mBinding.close.setOnClickListener(null)
-            UI.cleanStatus(mBinding.status)
-            mReceiver.setActionState("move", "sourceUri", null)
-            mReceiver.setActionState("move", "sourceDocId", null)
-            mReceiver.setActionState("move", "sourceParentUri", null)
-            mReceiver.setActionState("move", "sourceParentDocId", null)
         }
+        UI.cleanStatus(mBinding.status, "move")
+        mReceiver.setActionState("move", "sourceUri", null)
+        mReceiver.setActionState("move", "sourceDocId", null)
+        mReceiver.setActionState("move", "sourceParentUri", null)
+        mReceiver.setActionState("move", "sourceParentDocId", null)
+
+        //if (mReceiver.getActionState("copy", "sourceUri") != null) {
+        //    mReceiver.setCurrentAction("copy")
+        //}
     }
 }

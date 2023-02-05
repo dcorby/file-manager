@@ -4,8 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
+import android.util.Log
 import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.Navigation
 import androidx.recyclerview.selection.Selection
 import com.example.filesystem.*
@@ -27,17 +27,11 @@ class Open(fragment: FolderFragment,
     private var mFragmentDocId = fragmentDocId
     private var mCallback = callback
 
-    // Support persistent copy and move actions
-    private var mPreviousAction: String? = null
-
     override fun handle(isClick: Boolean) {
+        mReceiver.setCurrentAction("open")
         if (!validate()) {
             return
         }
-        //mPreviousAction = mFragment.currentAction
-        //mFragment.currentAction = "open"
-        mPreviousAction = mReceiver.getCurrentAction()
-        mReceiver.setCurrentAction("open")
 
         val docId = mSelection.toList()[0]
         val docUri = DocumentsContract.buildDocumentUriUsingTree(mFragmentUri, docId)
@@ -49,10 +43,10 @@ class Open(fragment: FolderFragment,
             val bundle = Bundle()
             bundle.putString("fragmentUri", Utils.decode(docTreeUri.toString()))
             bundle.putString("fragmentDocId", docId)
-            //+++++++++++++++++++++++++++++++++++
-            //+ NEED TO SEND CURRENTACTION HERE +
-            //+++++++++++++++++++++++++++++++++++
-            navController.navigate(R.id.action_FolderFragment_to_FolderFragment, bundle)
+            Utils.withDelay({ mBinding.toggleGroup.uncheck(R.id.action_open) }) {
+                finish()
+                navController.navigate(R.id.action_FolderFragment_to_FolderFragment, bundle)
+            }
         } else {
             // File
             val intent: Intent = Intent().apply {
@@ -69,13 +63,13 @@ class Open(fragment: FolderFragment,
     private fun validate() : Boolean {
         if (mSelection.size() == 0) {
             UI.showPopup(mFragment, "Select a file to open") {
-                mBinding.toggleGroup.uncheck(R.id.action_open)
+                finish()
             }
             return false
         }
         if (mSelection.size() > 1) {
             UI.showPopup(mFragment, "Only one file may be selected for open") {
-                mBinding.toggleGroup.uncheck(R.id.action_open)
+                finish()
             }
             return false
         }
@@ -83,8 +77,10 @@ class Open(fragment: FolderFragment,
     }
 
     override fun finish() {
-        mBinding.toggleGroup.uncheck(R.id.action_open)
-        //mFragment.currentAction = mPreviousAction
-        mReceiver.setCurrentAction(mPreviousAction)
+        mReceiver.setCurrentAction(null)
+        when {
+            mReceiver.getActionState("copy", "sourceUri") != null -> mReceiver.setCurrentAction("copy")
+            mReceiver.getActionState("move", "sourceUri") != null -> mReceiver.setCurrentAction("move")
+        }
     }
 }
