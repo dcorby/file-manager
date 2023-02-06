@@ -22,6 +22,9 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.navigation.Navigation
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.findNavController
 import androidx.recyclerview.selection.SelectionPredicates
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.selection.StorageStrategy
@@ -30,9 +33,6 @@ import com.example.filesystem.actions.*
 import com.example.filesystem.databinding.FragmentFolderBinding
 import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
-
-const val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
-const val AUTHORITY = "com.android.externalstorage.documents"
 
 /*
   https://github.com/material-components/material-components-android/issues/2291
@@ -46,6 +46,10 @@ interface DialogCallback {
 }
 
 class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredListener {
+
+    val OPEN_DOCUMENT_TREE_REQUEST_CODE = 1
+    val OPEN_DOCUMENT_REQUEST_CODE = 2
+    val AUTHORITY = "com.android.externalstorage.documents"
 
     private var _binding: FragmentFolderBinding? = null
     private val binding get() = _binding!!
@@ -80,7 +84,6 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
         super.onViewCreated(view, savedInstanceState)
 
         checkBackStackToPop()
-
         (requireActivity() as MainActivity).setStateRestoredListener(this)
 
         sanFilesAdapter = SanFilesAdapter { sanFile -> adapterOnClick(sanFile) }
@@ -130,6 +133,11 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
         callAction()
     }
 
+    override fun onStop() {
+        super.onStop()
+        binding.toggleGroup.uncheck(R.id.action_open)
+    }
+
     private fun checkBackStackToPop() {
         if (receiver.getBackStackPopCount() > 0) {
             receiver.setBackStackPopCount(receiver.getBackStackPopCount() - 1)
@@ -141,6 +149,8 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
         if (viewCreated && stateRestored) {
             if (receiver.getCurrentAction() != null) {
                 actions[receiver.getCurrentAction()]?.handle(false)
+                viewCreated = false
+                stateRestored = false
             }
         }
     }
@@ -233,6 +243,12 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
             editor.putString("root", Utils.decode(uri.toString()))
             editor.commit()
             observeCurrent(null)
+        }
+
+        if (requestCode == OPEN_DOCUMENT_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+            }
+            binding.toggleGroup.uncheck(R.id.action_open)
         }
     }
 
