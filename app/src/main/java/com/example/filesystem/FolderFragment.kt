@@ -114,9 +114,11 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
         // Check for an active copy or move
         if (receiver.getActionState("copy", "sourceUri") != null) {
             UI.handleActiveCopy(receiver, binding)
+            binding.close.setOnClickListener { actions["copy"]?.finish() }
         }
         if (receiver.getActionState("move", "sourceUri") != null) {
             UI.handleActiveMove(receiver, binding)
+            binding.close.setOnClickListener { actions["move"]?.finish() }
         }
 
         UI.setPath(binding, layoutInflater, fragmentDocId)
