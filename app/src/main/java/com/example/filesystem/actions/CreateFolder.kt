@@ -57,5 +57,6 @@ class CreateFolder(fragment: FolderFragment,
 
     override fun finish() {
         mReceiver.setCurrentAction(null)
+        mFragment.savedText = ""
     }
 }

@@ -69,5 +69,6 @@ class Rename(fragment: FolderFragment,
     override fun finish() {
         mBinding.toggleGroup.uncheck(R.id.action_rename)
         mReceiver.setCurrentAction(null)
+        mFragment.savedText = ""
     }
 }

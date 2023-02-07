@@ -69,5 +69,6 @@ class CreateFile(fragment: FolderFragment,
 
     override fun finish() {
         mReceiver.setCurrentAction(null)
+        mFragment.savedText = ""
     }
 }

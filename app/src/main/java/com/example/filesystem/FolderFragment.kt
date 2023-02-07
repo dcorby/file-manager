@@ -62,6 +62,7 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
     lateinit var liveData: LiveData<MutableList<SanFile>>
     lateinit var receiver: MainReceiver
     lateinit var actions: kotlin.collections.HashMap<String, Action>
+    var savedText: String? = null
 
     private var viewCreated = false
     private var stateRestored = false
@@ -82,6 +83,8 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        savedText = savedInstanceState?.getString("savedText", "")
 
         checkBackStackToPop()
         (requireActivity() as MainActivity).setStateRestoredListener(this)
@@ -256,6 +259,11 @@ class FolderFragment : Fragment(), DialogCallback, MainActivity.StateRestoredLis
         super.onSaveInstanceState(outState)
         if (this::tracker.isInitialized) {
             tracker.onSaveInstanceState(outState)
+        }
+
+        if (prompt != null) {
+            val str = prompt?.contentView?.findViewById<EditText>(R.id.edit_text)?.text.toString()
+            outState.putString("savedText", str)
         }
     }
 

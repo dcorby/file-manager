@@ -67,8 +67,8 @@ class UI {
                     val contentView = window.contentView
                     val prompt = contentView.findViewById<ViewGroup>(R.id.prompt)
                     val editText = contentView.findViewById<EditText>(R.id.edit_text)
+                    editText.setText(fragment.savedText, TextView.BufferType.EDITABLE)
 
-                    // As user types, save result in fragment.receiver and then use onSaveInstanceState
                     editText.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
                         if (hasFocus) {
                             val imm = fragment.requireActivity()
