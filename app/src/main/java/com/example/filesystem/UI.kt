@@ -22,6 +22,8 @@ class UI {
                 val sourceFragmentDocId = receiver.getActionState("copy", "sourceFragmentDocId")!!
                 val sourceDocId = receiver.getActionState("copy", "sourceDocId")!!
                 showStatus(binding.status, "Copying", sourceFragmentDocId, sourceDocId, "copy")
+            } else {
+                binding.toggleGroup.uncheck(R.id.action_copy)
             }
         }
 
@@ -31,6 +33,8 @@ class UI {
                 val sourceFragmentDocId = receiver.getActionState("move", "sourceFragmentDocId")!!
                 val sourceDocId = receiver.getActionState("move", "sourceDocId")!!
                 showStatus(binding.status, "Moving", sourceFragmentDocId, sourceDocId, "move")
+            } else {
+                binding.toggleGroup.uncheck(R.id.action_move)
             }
         }
 
