@@ -13,7 +13,7 @@
         android:theme="@style/Theme.FileSystem"
         android:requestLegacyExternalStorage="true"
         android:grantUriPermissions="true"
-        tools:targetApi="31">
+        tools:targetApi="33">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -32,9 +32,5 @@
         </activity>
     </application>
 
-    <!--
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    -->
 
 </manifest>

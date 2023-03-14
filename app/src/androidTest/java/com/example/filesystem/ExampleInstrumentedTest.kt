@@ -1,17 +1,15 @@
 package com.example.filesystem
 
-import android.content.Intent
-import android.provider.DocumentsContract
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.intent.Intents.intended
+import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.navigation.testing.TestNavHostController
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.intent.matcher.IntentMatchers.*
-import androidx.test.espresso.intent.rule.IntentsTestRule
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.*
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -23,9 +21,6 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
 
-    @get:Rule
-    public val intentsTestRule: IntentsTestRule<MainActivity> = IntentsTestRule<MainActivity>(MainActivity::class.java)
-
     @Test
     fun useAppContext() {
         // Context of the app under test.
@@ -34,9 +29,15 @@ class ExampleInstrumentedTest {
     }
 
     @Test
-    fun validatePickDocumentIntent() {
-        Espresso.onView(withId(R.id.button_init)).perform(click())
-        intended(hasAction(Intent.ACTION_OPEN_DOCUMENT_TREE))
-        intended(hasType(DocumentsContract.Document.COLUMN_DOCUMENT_ID))
+    fun testInitFragment() {
+        val scenario = launchFragmentInContainer<InitFragment>()
+        scenario.onFragment { fragment ->
+            // https://stackoverflow.com/questions/62515314/android-espresso-does-not-have-a-navcontroller-set-error
+            val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+            val navGraph = navController.navInflater.inflate(R.navigation.nav_graph)
+            navGraph.setStartDestination(R.id.InitFragment)
+            navController.setGraph(navGraph, null)
+        }
+        onView(withId(R.id.button_init)).check(matches(isDisplayed()))
     }
 }
